@@ -112,6 +112,23 @@ const SkillsPage = () => {
   const { t, isDarkMode, user } = useAppContext();
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState('');
+  const [tutorLoading, setTutorLoading] = useState(false);
+  const [tutorData, setTutorData] = useState(null);
+
+  const generateTutorPlan = async () => {
+    try {
+        setTutorLoading(true);
+        const { default: api } = await import('../../api/axios');
+        const res = await api.get('/ai/personalized-tutor');
+        if (res.data.success) {
+            setTutorData(res.data.data);
+        }
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setTutorLoading(false);
+    }
+  };
 
   const generateAIAnalysis = async () => {
     try {
@@ -247,6 +264,54 @@ const SkillsPage = () => {
             <SkillGapCard key={skill.id} skill={skill} t={t} isDarkMode={isDarkMode} />
           ))}
         </div>
+      </div>
+
+      {/* AI PERSONALIZED DISCOVERY JOURNEY */}
+      <div className={`p-8 rounded-3xl border-2 border-amber-500/30 overflow-hidden relative shadow-2xl flex flex-col md:flex-row gap-8 items-start ${isDarkMode ? 'bg-amber-900/10' : 'bg-amber-50'}`}>
+         {/* Background Decoration */}
+         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 blur-[100px] pointer-events-none rounded-full"></div>
+         
+         <div className="bg-amber-600/20 p-6 rounded-3xl border border-amber-500/30">
+            <Target className="w-12 h-12 text-amber-500" />
+         </div>
+
+         <div className="flex-1">
+            <h3 className={`text-2xl font-black font-sora mb-2 ${t.textMain}`}>Personalized Study Journey <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-600 text-white ml-2">DATA-DRIVEN TUTOR</span></h3>
+            <p className={`${t.textMuted} mb-8 max-w-xl`}>Based on your recent project submissions and Current Skills Radar, our AI has designed a high-priority masterplan to help you graduate faster.</p>
+            
+            {!tutorData ? (
+                 <button 
+                 onClick={generateTutorPlan}
+                 disabled={tutorLoading}
+                 className="px-8 py-3 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold rounded-2xl transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2 mx-auto md:mx-0 group active:scale-95"
+               >
+                  {tutorLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Initiate Tutor Brain"}
+                  {!tutorLoading && <Zap className="w-4 h-4" /> }
+               </button>
+            ) : (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-black/20 border border-white/10">
+                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                         <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Focusing on {tutorData.growthEdge}</span>
+                    </div>
+
+                    <div className="grid gap-4">
+                        {tutorData.plan.map((step, i) => (
+                            <div key={i} className={`flex gap-4 items-start p-4 rounded-2xl border ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-gray-100'}`}>
+                                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 text-amber-500 font-bold text-sm">
+                                    {i + 1}
+                                </div>
+                                <p className={`text-sm leading-relaxed ${t.textMain}`}>{step}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-white/10 italic text-sm text-slate-400">
+                         "{tutorData.tutorMessage}"
+                    </div>
+                </div>
+            )}
+         </div>
       </div>
     </div>
   );

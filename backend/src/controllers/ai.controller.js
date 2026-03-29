@@ -231,3 +231,189 @@ export const generateAnalyticsInsight = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to generate strategic insight.' });
     }
 };
+
+// ─── GET /api/ai/personalized-tutor ───────────────────────────────
+export const generatePersonalizedTutorInsight = async (req, res) => {
+    const studentId = req.user.id;
+
+    try {
+        // 1. Fetch Skill Stats
+        const skillsResult = await pool.query(`
+            SELECT s.name, iss.current_level, ds.required_level
+            FROM intern_skills iss
+            JOIN skills s ON iss.skill_id = s.id
+            JOIN users u ON u.id = iss.intern_id
+            JOIN department_skills ds ON ds.department_id = u.department_id AND ds.skill_id = s.id
+            WHERE u.id = $1
+        `, [studentId]);
+
+        // 2. Fetch Recent Project Performance
+        const projectResult = await pool.query(`
+            SELECT p.title, pa.status, pa.submission_notes
+            FROM project_assignments pa
+            JOIN projects p ON pa.project_id = p.id
+            WHERE pa.intern_id = $1
+            ORDER BY pa.assigned_at DESC
+            LIMIT 3
+        `, [studentId]);
+
+        const skills = skillsResult.rows;
+        const projects = projectResult.rows;
+
+        // 3. Construct Prompt with real Context
+        const prompt = `
+            You are a Personal AI Learning Tutor for NRC INNOVATE-X. 
+            Student Data:
+            - Skill Levels (Current vs Target): ${JSON.stringify(skills)}
+            - Recent Projects: ${JSON.stringify(projects)}
+            
+            Identify the student's "Growth Edge" (the skill with the largest gap that is critical).
+            Provide a 3-step "Smart Action Plan" for this week:
+            - Step 1: A specific concept to master.
+            - Step 2: A practical task to try in their current projects.
+            - Step 3: A question they should ask their manager to show growth.
+            
+            Format the response as a JSON object: {"growthEdge": "Skill Name", "plan": ["Step 1", "Step 2", "Step 3"], "tutorMessage": "Encouraging voice message text"}
+        `;
+
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+        });
+
+        res.json({ success: true, data: JSON.parse(response.text) });
+    } catch (error) {
+        console.error('AI Tutor Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate personalized tutoring.' });
+    }
+};
+
+// ─── GET /api/ai/expert-lecture-advice ────────────────────────────
+export const generateExpertLectureAdvice = async (req, res) => {
+    const expertId = req.user.id;
+
+    try {
+        // Find Expert's Department
+        const userResult = await pool.query('SELECT department_id FROM users WHERE id = $1', [expertId]);
+        const deptId = userResult.rows[0].department_id;
+
+        // Fetch Avg Skill Gaps for the department
+        const skillGaps = await pool.query(`
+            SELECT s.name, AVG(iss.current_level) as avg_level
+            FROM intern_skills iss
+            JOIN skills s ON iss.skill_id = s.id
+            JOIN users u ON u.id = iss.intern_id
+            WHERE u.department_id = $1
+            GROUP BY s.name
+            ORDER BY avg_level ASC
+            LIMIT 5
+        `, [deptId]);
+
+        const gaps = skillGaps.rows;
+
+        const prompt = `
+            You are a Lecture Strategist for NRC INNOVATE-X. 
+            Department Statistics (Avg Skill Levels): ${JSON.stringify(gaps)}
+            
+            Based on these weaknesses, suggest 3 highly specialized lecture topics.
+            Also, provide a 1-sentence "Focus Recommendation" for the Expert to help the students.
+            Format: {"suggestions": ["Topic 1", "Topic 2", "Topic 3"], "tutorTip": "focus recommendation text"}
+        `;
+
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+        });
+
+        res.json({ success: true, data: JSON.parse(response.text) });
+    } catch (error) {
+        console.error('Expert Advice Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate lecture advice.' });
+    }
+};
+
+// ─── GET /api/ai/manager-team-sentiment ────────────────────────────
+export const generateManagerTeamSentiment = async (req, res) => {
+    const managerId = req.user.id;
+
+    try {
+        // Find Manager's Department
+        const userResult = await pool.query('SELECT department_id FROM users WHERE id = $1', [managerId]);
+        const deptId = userResult.rows[0].department_id;
+
+        // Fetch recent project submission notes from all interns in this department
+        const submissionNotes = await pool.query(`
+            SELECT pa.submission_notes 
+            FROM project_assignments pa
+            JOIN users u ON pa.intern_id = u.id
+            WHERE u.department_id = $1 AND pa.submission_notes IS NOT NULL
+            ORDER BY pa.assigned_at DESC
+            LIMIT 20
+        `, [deptId]);
+
+        const notes = submissionNotes.rows.map(r => r.submission_notes).join(' | ');
+
+        const prompt = `
+            You are a Team Performance Analyst for NRC INNOVATE-X. 
+            Analyze the following student submission notes (sentiments): "${notes}"
+            
+            Identify:
+            1. Collective Confidence Level (0-100).
+            2. Top 1 struggle or burnout factor.
+            3. A short "Manager Action" for next week.
+            
+            Format: {"confidence": 85, "mainStruggle": "text", "actionItem": "text"}
+        `;
+
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+        });
+
+        res.json({ success: true, data: JSON.parse(response.text) });
+    } catch (error) {
+        console.error('Manager Sentiment Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate team sentiment.' });
+    }
+};
+
+// ─── GET /api/ai/platform-health ──────────────────────────────────
+export const generatePlatformHealthInsight = async (req, res) => {
+    try {
+        const [totalUsers, pendingRequests, activeProjects] = await Promise.all([
+            pool.query(`SELECT COUNT(*) FROM users`),
+            pool.query(`SELECT COUNT(*) FROM role_requests WHERE status = 'pending'`),
+            pool.query(`SELECT COUNT(*) FROM project_assignments WHERE status = 'approved'`),
+        ]);
+
+        const stats = {
+            total: totalUsers.rows[0].count,
+            pending: pendingRequests.rows[0].count,
+            projects: activeProjects.rows[0].count
+        };
+
+        const prompt = `
+            Analyze the following platform health metrics: ${JSON.stringify(stats)}
+            Identify:
+            1. System Load Level (e.g., "Optimal", "Strained").
+            2. The biggest Administrative debt (e.g., pending requests).
+            3. A short "Super Admin Strategy" to increase platform efficiency.
+            
+            Format: {"load": "status", "bottleneck": "description", "strategy": "short text"}
+        `;
+
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+        });
+
+        res.json({ success: true, data: JSON.parse(response.text) });
+    } catch (error) {
+        console.error('Platform Health Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate platform health insight.' });
+    }
+};
