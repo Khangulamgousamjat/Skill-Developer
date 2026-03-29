@@ -1,151 +1,165 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../../context/AppContext';
-import api from '../../api/axios';
-import toast from 'react-hot-toast';
 import { 
-  ClipboardCheck, Search, Filter, User, 
-  CheckCircle2, Circle, Clock, Loader2,
-  ChevronRight, ArrowRight, Flag
+  CheckCircle2, Clock, ShieldAlert, ArrowRight, 
+  Loader2, ClipboardList, Target, UserCheck,
+  AlertTriangle, Filter, Building2, ExternalLink
 } from 'lucide-react';
+import api from '../../api/axios';
+import { toast } from 'react-hot-toast';
+import { useAppContext } from '../../context/AppContext';
 
-const OnboardingPage = () => {
+export const OnboardingPage = () => {
   const { t, isDarkMode } = useAppContext();
-  const [statusList, setStatusList] = useState([]);
+  const [onboardingData, setOnboardingData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState('All');
 
   useEffect(() => {
-    const fetchOnboarding = async () => {
-      try {
-        const res = await api.get('/hr/onboarding-status');
-        if (res.data.success) {
-          setStatusList(res.data.data);
-        }
-      } catch (err) {
-        toast.error('Failed to load onboarding status');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOnboarding();
+    fetchOnboardingStatus();
   }, []);
 
-  const getProgress = (item) => {
-    const steps = [
-      item.profile_completed,
-      item.department_confirmed,
-      item.skill_gap_viewed,
-      item.first_lecture_attended,
-      item.first_project_submitted
-    ];
-    const completed = steps.filter(Boolean).length;
-    return (completed / steps.length) * 100;
+  const fetchOnboardingStatus = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/hr/onboarding-status');
+      if (res.data.success) {
+        setOnboardingData(res.data.data);
+      }
+    } catch (err) {
+      toast.error('Failed to load onboarding tracking data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filtered = statusList.filter(item => 
-    item.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = onboardingData.filter(item => {
+    if (filter === 'Completed') return item.checklist_completed;
+    if (filter === 'Pending') return !item.checklist_completed;
+    return true;
+  });
+
+  const getProgress = (item) => {
+    let count = 0;
+    if (item.profile_completed) count++;
+    if (item.id_verified) count++;
+    if (item.bank_details_added) count++;
+    if (item.it_setup_requested) count++;
+    return (count / 4) * 100;
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 animate-fade-in pb-10">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className={`text-2xl font-bold font-sora ${t.textMain}`}>Onboarding Tracking</h2>
-          <p className={t.textMuted}>Verify completion of the 5-step onboarding journey for each intern.</p>
-        </div>
-      </div>
-
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: 'Completed', count: statusList.filter(i => i.checklist_completed).length, icon: CheckCircle2, color: 'text-green-500' },
-          { label: 'In Progress', count: statusList.filter(i => !i.checklist_completed).length, icon: Clock, color: 'text-amber-500' },
-          { label: 'Critical Delay', count: 0, icon: Flag, color: 'text-red-500' }
-        ].map((stat, idx) => (
-          <div key={idx} className={`p-5 rounded-2xl border ${t.card}`}>
-            <div className="flex items-center gap-3 mb-2">
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              <span className={`text-sm font-bold ${t.textMain}`}>{stat.label}</span>
+          <h2 className={`text-2xl font-bold font-sora flex items-center gap-3 ${t.textMain}`}>
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+              <ClipboardList className="w-5 h-5 text-amber-500" />
             </div>
-            <p className={`text-2xl font-black ${t.textMain}`}>{stat.count}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className={`p-4 rounded-2xl flex items-center gap-3 ${t.card}`}>
-        <Search className={`w-4 h-4 ${t.textMuted}`} />
-        <input 
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by intern name..."
-          className={`flex-1 bg-transparent outline-none text-sm ${t.textMain}`}
-        />
+            Onboarding Command Center
+          </h2>
+          <p className={`text-sm ${t.textMuted} mt-1`}>Monitor real-time onboarding progression and IT equipment fulfillment across the organization.</p>
+        </div>
+        <div className="flex items-center gap-2 p-1 rounded-2xl bg-white/5 border border-white/5 shadow-inner">
+          {['All', 'Pending', 'Completed'].map(f => (
+            <button 
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === f ? 'bg-amber-500 text-slate-900 shadow-md' : 'text-slate-500 hover:text-white'}`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-20">
-          <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+        <div className="py-20 flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
+          <p className={`text-xs font-black uppercase tracking-widest ${t.textMuted}`}>Syncing checklist data...</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filtered.map(item => {
-            const progress = getProgress(item);
-            return (
-              <div key={item.id} className={`p-5 rounded-3xl border group transition-all hover:scale-[1.01] ${t.card}`}>
-                <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-                  <div className="flex items-center gap-4 min-w-[250px]">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-amber-500 font-bold">
-                      {item.full_name.charAt(0)}
+        <div className="grid grid-cols-1 gap-4">
+          {filteredData.length === 0 ? (
+            <div className="py-20 text-center opacity-30">
+               <AlertTriangle className="w-12 h-12 mx-auto mb-2" />
+               <p className="font-bold">No matching onboarding records found.</p>
+            </div>
+          ) : filteredData.map(item => (
+            <div key={item.id} className={`p-8 rounded-[40px] border glare-hover transition-all ${t.card} ${t.borderSoft}`}>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                 {/* Intern Identity */}
+                 <div className="flex items-center gap-6 min-w-[250px]">
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center font-black text-amber-500 text-xl border border-white/10">
+                       {item.full_name?.charAt(0)}
                     </div>
                     <div>
-                      <h4 className={`font-bold ${t.textMain}`}>{item.full_name}</h4>
-                      <p className={`text-xs ${t.textMuted}`}>{item.email}</p>
+                      <h4 className={`text-lg font-bold font-sora ${t.textMain}`}>{item.full_name}</h4>
+                      <p className={`text-[11px] font-bold uppercase tracking-wider text-amber-500`}>{item.email}</p>
                     </div>
-                  </div>
+                 </div>
 
-                  <div className="flex-1 space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                      <span className={t.textMuted}>Journey Completion</span>
-                      <span className={t.textMain}>{Math.round(progress)}%</span>
+                 {/* Progress Metrics */}
+                 <div className="flex-1 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                       <span>Checkpoint Completion</span>
+                       <span className={item.checklist_completed ? 'text-emerald-500' : 'text-amber-500'}>{Math.round(getProgress(item))}%</span>
                     </div>
-                    <div className={`h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-white/5' : 'bg-gray-100'}`}>
-                      <div 
-                        className="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000" 
-                        style={{ width: `${progress}%` }}
-                      />
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                       <div 
+                          className={`h-full transition-all duration-1000 ${item.checklist_completed ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.3)]'}`} 
+                          style={{ width: `${getProgress(item)}%` }}
+                       />
                     </div>
-                  </div>
+                 </div>
 
-                  <div className="flex items-center gap-4 lg:gap-8 overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
+                 {/* Checkpoints Grid */}
+                 <div className="flex gap-4 items-center pl-6 lg:border-l border-white/5">
                     {[
-                      { label: 'Profile', val: item.profile_completed },
-                      { label: 'Dept', val: item.department_confirmed },
-                      { label: 'Skills', val: item.skill_gap_viewed },
-                      { label: 'Lecture', val: item.first_lecture_attended },
-                      { label: 'Project', val: item.first_project_submitted }
-                    ].map((step, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-1 min-w-[60px]">
-                        {step.val ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        ) : (
-                          <Circle className={`w-5 h-5 ${isDarkMode ? 'text-slate-700' : 'text-gray-200'}`} />
-                        )}
-                        <span className={`text-[9px] font-bold uppercase ${t.textMuted}`}>{step.label}</span>
+                      { icon: UserCheck, status: item.profile_completed, label: 'Profile' },
+                      { icon: ShieldAlert, status: item.id_verified, label: 'ID Verification' },
+                      { icon: Target, status: item.bank_details_added, label: 'Bank Info' },
+                      { icon: Building2, status: item.it_setup_requested, label: 'IT Setup' }
+                    ].map((step, i) => (
+                      <div key={i} className={`flex flex-col items-center gap-1.5 transition-all group cursor-help`} title={step.label}>
+                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${step.status ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : 'bg-white/5 border-white/10 text-slate-600 grayscale'}`}>
+                            <step.icon className="w-5 h-5" />
+                         </div>
+                         <div className={`w-1 h-1 rounded-full ${step.status ? 'bg-emerald-500' : 'bg-slate-700'}`} />
                       </div>
                     ))}
-                  </div>
+                 </div>
 
-                  <button className={`p-2 rounded-xl transition-all ${t.hoverCard}`}>
-                    <ChevronRight className={`w-5 h-5 ${t.textMuted}`} />
-                  </button>
-                </div>
+                 {/* Actions */}
+                 <div className="flex items-center gap-2">
+                    <button className="px-5 py-2.5 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-all shadow-lg active:scale-95">
+                      Notify Manager
+                    </button>
+                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
+
+      {/* Analytics Mini-Panel */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         {[
+           { label: 'Total Onboarding', value: onboardingData.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+           { label: 'Completion Rate', value: `${onboardingData.length ? Math.round((onboardingData.filter(i => i.checklist_completed).length / onboardingData.length) * 100) : 0}%`, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+           { label: 'Pending IT Assets', value: onboardingData.filter(i => !i.it_setup_requested).length, color: 'text-amber-500', bg: 'bg-amber-500/10' }
+         ].map((stat, i) => (
+           <div key={i} className={`p-6 rounded-[32px] border ${t.card} ${t.borderSoft} flex items-center justify-between`}>
+              <div>
+                 <p className={`text-[10px] font-black uppercase tracking-widest ${t.textMuted} mb-1 opacity-60`}>{stat.label}</p>
+                 <p className={`text-2xl font-black ${t.textMain}`}>{stat.value}</p>
+              </div>
+              <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center`}>
+                 <Target className={`w-6 h-6 ${stat.color}`} />
+              </div>
+           </div>
+         ))}
+      </div>
     </div>
   );
 };

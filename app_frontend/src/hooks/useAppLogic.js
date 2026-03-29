@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { callGemini } from '../services/geminiApi';
-import { skillGaps, activeProjects, internData } from '../data/mockData';
+import axios from '../api/axios';
+import { useSelector } from 'react-redux';
+import { io } from 'socket.io-client';
 
 export const useAppLogic = () => {
   const [activeTab, setActiveTab] = useState('skills');
@@ -10,6 +12,22 @@ export const useAppLogic = () => {
   const [standupPrep, setStandupPrep] = useState({ isOpen: false, loading: false, text: '', copied: false });
   const [oneOnOnePrep, setOneOnOnePrep] = useState({ isOpen: false, loading: false, text: '', copied: false });
   const [certificateModal, setCertificateModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Real Student Data State
+  const [studentSkills, setStudentSkills] = useState([]);
+  const [studentProjects, setStudentProjects] = useState([]);
+  const [studentLectures, setStudentLectures] = useState([]);
+  const [studentOverview, setStudentOverview] = useState({ 
+    xp: 0, 
+    level: 1,
+    streak: 0, 
+    levelProgress: 0,
+    activeProjectsCount: 0, 
+    nextLecture: null,
+    recentBadges: []
+  });
+  const [isDataLoading, setIsDataLoading] = useState(false);
   
   // Chatbot & Lecture Prep State
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -47,8 +65,66 @@ export const useAppLogic = () => {
     compactView: false,
     dataSaver: false
   });
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
 
+  const { user, role, isAuthenticated } = useSelector((state) => state.auth);
   const chatEndRef = useRef(null);
+  const socketRef = useRef(null);
+  const [notifications, setNotifications] = useState([]);
+
+  // ─── Socket Integration ──────────────────────────────────────────
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const socket = io(serverUrl, { withCredentials: true });
+      socketRef.current = socket;
+
+      socket.on('connect', () => {
+        console.log('Connected to socket server');
+        socket.emit('register', user.id);
+      });
+
+      socket.on('receive_notification', (notif) => {
+        setNotifications(prev => [{ ...notif, id: Date.now(), read: false }, ...prev]);
+        // Also show a toast
+        import('react-hot-toast').then(({ toast }) => {
+          toast(notif.message, { icon: '🔔', duration: 4000 });
+        });
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [isAuthenticated, user?.id]);
+
+  // ─── Data Fetching Logic ──────────────────────────────────────────
+  useEffect(() => {
+    if (isAuthenticated && role === 'student') {
+      fetchStudentDashboardData();
+    }
+  }, [isAuthenticated, role]);
+
+  const fetchStudentDashboardData = async () => {
+    try {
+      setIsDataLoading(true);
+      const [overview, skills, projects, lectures] = await Promise.all([
+        axios.get('/student/overview'),
+        axios.get('/student/skills'),
+        axios.get('/student/projects'),
+        axios.get('/student/lectures')
+      ]);
+
+      if (overview.data.success) setStudentOverview(overview.data.data);
+      if (skills.data.success)   setStudentSkills(skills.data.data);
+      if (projects.data.success) setStudentProjects(projects.data.data);
+      if (lectures.data.success)  setStudentLectures(lectures.data.data);
+    } catch (err) {
+      console.error('Error fetching student dashboard data:', err);
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -71,17 +147,17 @@ export const useAppLogic = () => {
   // AI Toolkit Handlers
   const handleCareerCoach = async () => {
     setCareerCoach({ isOpen: true, loading: true, text: '' });
-    const skillsList = skillGaps.map(s => s.name).join(', ');
-    const prompt = `Act as an encouraging tech career coach. I am ${internData.name}, a ${internData.role} in the ${internData.department}. My current learning areas are ${skillsList}. Give me a short, inspiring 2-sentence motivational tip and one concrete action item I can do today to advance my career. Keep it friendly and punchy.`;
+    const skillsList = studentSkills.map(s => s.name).join(', ');
+    const prompt = `Act as an encouraging tech career coach. I am ${user.full_name}, a student intern at Gous org. My current learning areas are ${skillsList}. Give me a short, inspiring 2-sentence motivational tip and one concrete action item I can do today to advance my career. Keep it friendly and punchy.`;
     const result = await callGemini(prompt);
     setCareerCoach({ isOpen: true, loading: false, text: result });
   };
 
   const handleGenerateBio = async () => {
     setProfileBio({ isOpen: true, loading: true, text: '', copied: false });
-    const strongSkills = skillGaps.filter(s => s.current >= 40).map(s => s.name).join(', ');
-    const projectNames = activeProjects.map(p => p.title).join(', ');
-    const prompt = `Act as an expert career strategist and resume writer. I am ${internData.name}, a ${internData.role} in the ${internData.department}. I have practical experience in ${strongSkills} and have been actively working on real-world projects like: ${projectNames}. Write a highly professional, engaging 3-sentence LinkedIn "About" section for my profile that highlights my growth and ambition. Keep it punchy and do not use cheesy buzzwords.`;
+    const strongSkills = studentSkills.filter(s => s.current >= 60).map(s => s.name).join(', ');
+    const projectNames = studentProjects.map(p => p.title).join(', ');
+    const prompt = `Act as an expert career strategist and resume writer. I am ${user.full_name}, an intern at Gous org. I have practical experience in ${strongSkills} and have been actively working on real-world projects like: ${projectNames}. Write a highly professional, engaging 3-sentence LinkedIn "About" section for my profile that highlights my growth and ambition. Keep it punchy and do not use cheesy buzzwords.`;
     const result = await callGemini(prompt);
     setProfileBio({ isOpen: true, loading: false, text: result, copied: false });
   };
@@ -99,9 +175,9 @@ export const useAppLogic = () => {
 
   const handleStandupPrep = async () => {
     setStandupPrep({ isOpen: true, loading: true, text: '', copied: false });
-    const projectNames = activeProjects.map(p => p.title).join(', ');
-    const skillsList = skillGaps.filter(s => s.current < s.required).map(s => s.name).join(', ');
-    const prompt = `Act as an agile coach for a junior developer. I am ${internData.name}, a ${internData.role}. My active projects are: ${projectNames}. I am also currently trying to level up my skills in ${skillsList}. Draft a very brief, professional daily standup update (Format: "Yesterday:", "Today:", "Blockers:") that I can copy-paste into my team's Slack channel. Make it sound realistic, proactive, and positive.`;
+    const projectNames = studentProjects.map(p => p.title).join(', ');
+    const skillsList = studentSkills.filter(s => s.current < s.required).map(s => s.name).join(', ');
+    const prompt = `Act as an agile coach for a junior developer. I am ${user.full_name}, a student intern at Gous org. My active projects are: ${projectNames}. I am also currently trying to level up my skills in ${skillsList}. Draft a very brief, professional daily standup update (Format: "Yesterday:", "Today:", "Blockers:") that I can copy-paste into my team's Slack channel. Make it sound realistic, proactive, and positive.`;
     const result = await callGemini(prompt);
     setStandupPrep({ isOpen: true, loading: false, text: result, copied: false });
   };
@@ -119,9 +195,9 @@ export const useAppLogic = () => {
 
   const handleOneOnOnePrep = async () => {
     setOneOnOnePrep({ isOpen: true, loading: true, text: '', copied: false });
-    const projectNames = activeProjects.map(p => p.title).join(', ');
-    const skillsList = skillGaps.filter(s => s.current < s.required).map(s => s.name).join(', ');
-    const prompt = `Act as an experienced engineering manager mentoring an intern. I am ${internData.name}, a ${internData.role}. My active projects are: ${projectNames}. I'm trying to improve in: ${skillsList}. Give me 3 smart, strategic questions or discussion topics I should bring up in my upcoming 1-on-1 with my manager to show initiative, get unblocked, or seek valuable feedback. Keep them concise, professional, and directly related to my current tasks.`;
+    const projectNames = studentProjects.map(p => p.title).join(', ');
+    const skillsList = studentSkills.filter(s => s.current < s.required).map(s => s.name).join(', ');
+    const prompt = `Act as an experienced engineering manager mentoring an intern. I am ${user.full_name}, an intern at Gous org. My active projects are: ${projectNames}. I'm trying to improve in: ${skillsList}. Give me 3 smart, strategic questions or discussion topics I should bring up in my upcoming 1-on-1 with my manager to show initiative, get unblocked, or seek valuable feedback. Keep them concise, professional, and directly related to my current tasks.`;
     const result = await callGemini(prompt);
     setOneOnOnePrep({ isOpen: true, loading: false, text: result, copied: false });
   };
@@ -139,9 +215,9 @@ export const useAppLogic = () => {
 
   const handleDraftProgressEmail = async () => {
     setProgressEmail({ isOpen: true, loading: true, text: '', copied: false });
-    const stats = "85% lecture attendance, 92% project performance, 65% overall skill completion.";
-    const skillsList = skillGaps.map(s => s.name).join(', ');
-    const prompt = `Act as a highly articulate software engineering intern (${internData.name}). Draft a short, professional end-of-week update email to my manager summarizing my recent progress on the Smart Skill & Live Learning Module. My current stats: ${stats}. Mention I've been focusing on ${skillsList}. Keep it concise, positive, and ready to send. Include a subject line.`;
+    const stats = `${studentOverview.streak} day streak, ${studentOverview.activeProjectsCount} active projects, ${studentOverview.xp} XP earned.`;
+    const skillsList = studentSkills.map(s => s.name).join(', ');
+    const prompt = `Act as a highly articulate software engineering intern (${user.full_name}). Draft a short, professional end-of-week update email to my manager summarizing my recent progress on the Smart Skill & Live Learning Module at Gous org. My current stats: ${stats}. Mention I've been focusing on ${skillsList}. Keep it concise, positive, and ready to send. Include a subject line.`;
     const result = await callGemini(prompt);
     setProgressEmail({ isOpen: true, loading: false, text: result, copied: false });
   };
@@ -158,9 +234,10 @@ export const useAppLogic = () => {
   };
 
   const handleGenerateDailyBriefing = async () => {
+    if (studentSkills.length === 0) return;
     setDailyBriefing({ loading: true, text: '' });
-    const lowestSkill = [...skillGaps].sort((a, b) => a.current - b.current)[0];
-    const prompt = `Act as an inspiring tech lead. I am ${internData.name}, a ${internData.role}. My biggest skill gap right now is ${lowestSkill.name} (${lowestSkill.current}%). Give me a punchy, 2-sentence "Daily Focus" to motivate me and give me a specific micro-goal for today related to improving this skill.`;
+    const lowestSkill = [...studentSkills].sort((a, b) => a.current - b.current)[0];
+    const prompt = `Act as an inspiring tech lead for Gous org. I am ${user.full_name}, a student intern here. My biggest skill gap right now is ${lowestSkill.name} (currently at ${lowestSkill.current}%). Give me a punchy, 2-sentence "Daily Focus" to motivate me and give me a specific micro-goal for today related to improving this skill.`;
     const result = await callGemini(prompt);
     setDailyBriefing({ loading: false, text: result });
   };
@@ -175,7 +252,29 @@ export const useAppLogic = () => {
     setIsChatLoading(true);
 
     const conversationHistory = chatMessages.map(m => `${m.role === 'user' ? 'Intern' : 'AI'}: ${m.text}`).join('\n');
-    const prompt = `You are an internal AI Mentor for Smart Skill & Live Learning Module at Gous org. You are helping ${internData.name}, a ${internData.role} in the ${internData.department}. Keep your responses concise, actionable, and encouraging. \n\nConversation History:\n${conversationHistory}\nIntern: ${userMsg}\nAI:`;
+    
+    // CONTEXT-AWARE MENTOR PROMPT
+    const context = `
+      User: ${user.full_name}
+      Current Level: ${studentOverview.level}
+      Experience Points: ${studentOverview.xp}
+      Learning Streak: ${studentOverview.streak} days
+      Next Lecture: ${studentOverview.nextLecture?.title || 'None scheduled'}
+    `.trim();
+
+    const prompt = `You are "SSLLM GPT", the hyper-intelligent AI Mentor for the Smart Skill & Live Learning Module at Gous org. 
+    You are mentoring an intern with the following current status:
+    ${context}
+
+    Your goal is to be helpful, encouraging, and technically sharp. 
+    Reference their current XP, streak, or upcoming lectures if relevant to their inquiry.
+    Keep responses concise (max 3-4 sentences), actionable, and professional. 
+    Use modern tech terminology correctly.
+
+    Conversation so far:
+    ${conversationHistory}
+    Intern asks: "${userMsg}"
+    Assistant response:`;
 
     const result = await callGemini(prompt);
     setChatMessages(prev => [...prev, { role: 'model', text: result }]);
@@ -194,7 +293,7 @@ export const useAppLogic = () => {
       return { ...prev, [skill.id]: { loading: true, messages: [...history, { role: 'user', text: userMsg }] } };
     });
 
-    const prompt = `Act as a helpful technical mentor explaining ${skill.name} to a software engineering intern (${internData.name}). Answer their doubt concisely and clearly in a friendly tone. Keep it short. Intern asks: "${userMsg}"`;
+    const prompt = `Act as a helpful technical mentor explaining ${skill.name} to a software engineering intern (${user.full_name}) at Gous org. Answer their doubt concisely and clearly in a friendly tone. Keep it short. Intern asks: "${userMsg}"`;
     const result = await callGemini(prompt);
 
     setSkillChats(prev => {
@@ -243,9 +342,9 @@ export const useAppLogic = () => {
 
   const handleProgressSummary = async () => {
     setProgressSummary({ loading: true, text: '' });
-    const skillsList = skillGaps.map(s => `${s.name}: ${s.current}% (Target: ${s.required}%)`).join(', ');
-    const projectNames = activeProjects.map(p => `${p.title} (${p.status})`).join(', ');
-    const prompt = `Act as a supportive engineering manager writing an end-of-month review. I am ${internData.name}, a ${internData.role}. My stats: 85% lecture attendance, 92% project performance, 65% overall skill completion. My current skills: ${skillsList}. Active projects: ${projectNames}. Write a glowing but constructive 1-paragraph progress summary highlighting my strengths and suggesting 1 focus area for next month.`;
+    const skillsList = studentSkills.map(s => `${s.name}: ${s.current}% (Target: ${s.required}%)`).join(', ');
+    const projectNames = studentProjects.map(p => `${p.title} (${p.status})`).join(', ');
+    const prompt = `Act as a supportive engineering manager writing an end-of-month review at Gous org. I am ${user.full_name}, an intern here. Stats: ${studentOverview.xp} XP, ${studentOverview.streak} day streak. My current skills: ${skillsList}. Active projects: ${projectNames}. Write a glowing but constructive 1-paragraph progress summary highlighting my strengths and suggesting 1 focus area for next month.`;
     const result = await callGemini(prompt);
     setProgressSummary({ loading: false, text: result });
   };
@@ -286,12 +385,18 @@ export const useAppLogic = () => {
     skillChats, setSkillChats,
     skillChatInputs, setSkillChatInputs, handleSkillChatSubmit,
     dailyBriefing, handleGenerateDailyBriefing,
+    studentSkills, studentProjects, studentLectures, studentOverview, isDataLoading,
+    fetchStudentDashboardData,
     isDarkMode, setIsDarkMode,
     isSettingsOpen, setIsSettingsOpen,
     appSettings, setAppSettings,
     isCommandPaletteOpen, setIsCommandPaletteOpen,
     t,
     handleSendMessage,
-    chatEndRef
+    chatEndRef,
+    notifications,
+    setNotifications,
+    isNotifOpen, 
+    setIsNotifOpen
   };
 };

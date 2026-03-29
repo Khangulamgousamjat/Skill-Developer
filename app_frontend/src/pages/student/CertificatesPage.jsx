@@ -42,7 +42,7 @@ const CertificateCard = ({ cert, t, isDarkMode, onDownload }) => (
               <QrCode className="w-3.5 h-3.5" /> View QR
             </button>
             <button
-              onClick={() => onDownload(cert.code)}
+              onClick={() => onDownload(cert.id)}
               className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl text-slate-900 transition-colors hover:opacity-90"
               style={{ background: cert.color }}
             >
@@ -72,9 +72,19 @@ const CertificatesPage = () => {
 
   const fetchCertificates = async () => {
     try {
-      const response = await axios.get('/certificates');
+      const response = await axios.get('/certificates/me'); // Changed from /certificates
       if (response.data.success) {
-        setCertificates(response.data.data);
+        // Map backend fields to UI-friendly fields
+        const mapped = response.data.data.map(c => ({
+          ...c,
+          title: c.skill_name || c.project_title || c.certificate_type,
+          type: c.certificate_type,
+          issued: new Date(c.issued_at).toLocaleDateString(),
+          code: c.verification_code,
+          color: c.certificate_type.toLowerCase().includes('skill') ? '#3B82F6' : '#F4A100',
+          earned: true
+        }));
+        setCertificates(mapped);
       }
     } catch (error) {
       toast.error('Failed to load certificates.');
@@ -83,24 +93,22 @@ const CertificatesPage = () => {
     }
   };
 
-  const handleDownload = async (code) => {
+  const handleDownload = async (id) => {
     try {
-      toast.loading('Generating PDF...', { id: 'download' });
-      const response = await axios.get(`/certificates/download/${code}`, {
-        responseType: 'blob'
-      });
+      toast.loading('Preparing download...', { id: 'download' });
+      // The backend now redirects to a Cloudinary PDF link
+      const response = await axios.get(`/certificates/download/${id}`);
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `NRC-CERTIFICATE-${code}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      
-      toast.success('Certificate downloaded!', { id: 'download' });
+      if (response.data.success && response.data.data.pdf_url) {
+        window.open(response.data.data.pdf_url, '_blank');
+        toast.success('Certificate opening in new tab!', { id: 'download' });
+      } else {
+        // Fallback or if it directly redirects
+         window.open(`${axios.defaults.baseURL}/certificates/download/${id}`, '_blank');
+         toast.success('Certificate download triggered!', { id: 'download' });
+      }
     } catch (error) {
-      toast.error('Failed to generate certificate.', { id: 'download' });
+      toast.error('Failed to retrieve certificate link.', { id: 'download' });
     }
   };
 

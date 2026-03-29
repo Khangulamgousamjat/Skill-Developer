@@ -40,7 +40,11 @@ import adminRoutes from './routes/admin.routes.js';
 import hrRoutes from './routes/hr.routes.js';
 import managerRoutes from './routes/manager.routes.js';
 import expertRoutes from './routes/expert.routes.js';
+import studentRoutes from './routes/student.routes.js';
+import skillsRoutes from './routes/skills.routes.js';
+import projectsRoutes from './routes/projects.routes.js';
 import certificateRoutes from './routes/certificate.routes.js';
+import evaluationRoutes from './routes/evaluation.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import cookieParser from 'cookie-parser';
 
@@ -50,7 +54,11 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/hr', hrRoutes);
 app.use('/api/manager', managerRoutes);
 app.use('/api/expert', expertRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/skills', skillsRoutes);
+app.use('/api/projects', projectsRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/ai', aiRoutes);
 
 import { sendEmailVerificationOTP } from './services/emailService.js';

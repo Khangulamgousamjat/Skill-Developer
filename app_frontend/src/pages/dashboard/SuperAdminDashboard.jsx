@@ -5,20 +5,24 @@ import api from '../../api/axios';
 
 export const SuperAdminDashboard = () => {
   const { t, isDarkMode } = useAppContext();
+  const [analytics, setAnalytics] = useState(null);
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchHealth();
+    fetchData();
   }, []);
 
-  const fetchHealth = async () => {
+  const fetchData = async () => {
     try {
         setLoading(true);
-        const res = await api.get('/ai/platform-health');
-        if (res.data.success) {
-            setHealth(res.data.data);
-        }
+        const [analyticRes, healthRes] = await Promise.all([
+          api.get('/admin/analytics'),
+          api.get('/ai/platform-health')
+        ]);
+        
+        if (analyticRes.data.success) setAnalytics(analyticRes.data.data);
+        if (healthRes.data.success)   setHealth(healthRes.data.data);
     } catch (err) {
         console.error(err);
     } finally {
@@ -26,6 +30,8 @@ export const SuperAdminDashboard = () => {
     }
   };
   
+  const totalUsers = analytics?.roleDistribution?.reduce((acc, curr) => acc + parseInt(curr.count), 0) || 0;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center mb-6">
@@ -46,7 +52,7 @@ export const SuperAdminDashboard = () => {
               <p className={`text-sm ${t.textMuted}`}>Staff Role Approval</p>
             </div>
           </div>
-          <div className="text-3xl font-black text-red-500">12</div>
+          <div className="text-3xl font-black text-red-500">{analytics?.pendingApprovals || 0}</div>
         </div>
         
         <div className={`p-6 rounded-2xl glare-hover transition-all ${t.card}`}>
@@ -59,7 +65,7 @@ export const SuperAdminDashboard = () => {
               <p className={`text-sm ${t.textMuted}`}>Across All Departments</p>
             </div>
           </div>
-          <div className="text-3xl font-black text-blue-500">2.4k</div>
+          <div className="text-3xl font-black text-blue-500">{totalUsers}</div>
         </div>
 
         <div className={`p-6 rounded-2xl glare-hover transition-all ${t.card}`}>

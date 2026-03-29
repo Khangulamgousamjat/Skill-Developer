@@ -5,7 +5,6 @@ import {
 } from 'recharts';
 import { useAppContext } from '../../context/AppContext';
 import { CheckCircle2, AlertTriangle, Target, Zap, MessageSquare, Loader2 } from 'lucide-react';
-import { skillGaps } from '../../data/mockData';
 
 // ─── Mini Skill Chat Panel ────────────────────────────────────────
 const SkillChatPanel = ({ skill, t, isDarkMode }) => {
@@ -109,7 +108,7 @@ const SkillGapCard = ({ skill, t, isDarkMode }) => {
 
 // ─── Main Skills Page ─────────────────────────────────────────────
 const SkillsPage = () => {
-  const { t, isDarkMode, user } = useAppContext();
+  const { t, isDarkMode, user, studentSkills, isDataLoading } = useAppContext();
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [tutorLoading, setTutorLoading] = useState(false);
@@ -150,16 +149,24 @@ const SkillsPage = () => {
     }
   };
 
-  const radarData = skillGaps.map(s => ({
+  const radarData = studentSkills.map(s => ({
     subject: s.name.split(' ')[0],
     current: s.current,
     required: s.required,
     fullName: s.name,
   }));
 
-  const avgCurrent = Math.round(skillGaps.reduce((a, s) => a + s.current, 0) / skillGaps.length);
-  const avgRequired = Math.round(skillGaps.reduce((a, s) => a + s.required, 0) / skillGaps.length);
-  const metCount = skillGaps.filter(s => s.current >= s.required).length;
+  const avgCurrent = studentSkills.length > 0 ? Math.round(studentSkills.reduce((a, s) => a + s.current, 0) / studentSkills.length) : 0;
+  const metCount = studentSkills.filter(s => s.current >= s.required).length;
+
+  if (isDataLoading && studentSkills.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
+        <p className={`mt-4 ${t.textMuted}`}>Synchronizing your skill matrix...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -260,9 +267,14 @@ const SkillsPage = () => {
           Individual Skill Breakdown
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {skillGaps.map(skill => (
+          {studentSkills.map(skill => (
             <SkillGapCard key={skill.id} skill={skill} t={t} isDarkMode={isDarkMode} />
           ))}
+          {studentSkills.length === 0 && (
+              <div className={`p-8 rounded-2xl text-center border-dashed border-2 col-span-full ${t.card}`}>
+                  <p className={t.textMuted}>No skills assigned to your department yet.</p>
+              </div>
+          )}
         </div>
       </div>
 

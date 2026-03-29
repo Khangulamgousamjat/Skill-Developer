@@ -78,9 +78,12 @@ const EvaluationsPage = () => {
     
     setSubmitting(true);
     try {
-      await api.post('/manager/evaluations', {
-        intern_id: selectedIntern.id,
-        ...evaluation
+      await api.post('/evaluations', { // Corrected from /manager/evaluations
+        internId: selectedIntern.id,
+        periodStart: evaluation.period_start,
+        periodEnd: evaluation.period_end,
+        scores: evaluation.scores,
+        comments: evaluation.comments
       });
       toast.success(`Evaluation for ${selectedIntern.full_name} submitted`);
       setSelectedIntern(null);

@@ -12,7 +12,8 @@ import {
   generatePlatformHealthInsight,
   auditInternPerformance
 } from '../controllers/ai.controller.js';
-import { verifyToken, checkRole } from '../middleware/auth.middleware.js';
+import { verifyToken } from '../middleware/auth.middleware.js';
+import { checkRole } from '../middleware/roleCheck.middleware.js';
 
 const router = express.Router();
 

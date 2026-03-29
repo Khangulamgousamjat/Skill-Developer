@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import api from '../../api/axios';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
-import { BarChart3, Users, Clock, ShieldAlert, Loader2 } from 'lucide-react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, LineChart, Line,
+  AreaChart, Area
+} from 'recharts';
+import { 
+  BarChart3, Users, Clock, ShieldAlert, 
+  Loader2, Zap, Target, TrendingUp, 
+  Activity, ArrowUpRight, Award, Building2
+} from 'lucide-react';
 
 const COLORS = {
   student:    '#22C55E',
@@ -20,11 +28,22 @@ const AnalyticsPage = () => {
   const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
-    api.get('/admin/analytics')
-      .then(res => setData(res.data.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    fetchAnalytics();
   }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/analytics');
+      if (res.data.success) {
+        setData(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const generateInsight = async () => {
     setAiLoading(true);
@@ -42,128 +61,169 @@ const AnalyticsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#F4A100' }} />
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
+        <p className={`text-[10px] font-black uppercase tracking-widest ${t.textMuted}`}>Aggregating Platform Intelligence...</p>
       </div>
     );
   }
 
   const roleData = (data?.roleDistribution || []).map(r => ({
     name: r.role.replace('_', ' '),
-    value: parseInt(r.count),
+    count: parseInt(r.count),
     color: COLORS[r.role] || '#64748B',
   }));
 
-  const totalUsers = roleData.reduce((s, r) => s + r.value, 0);
+  // Mock Velocity Data (To be replaced by real sprint logs in Phase 7)
+  const velocityData = [
+    { day: 'Mon', completed: 4, pending: 12 },
+    { day: 'Tue', completed: 7, pending: 10 },
+    { day: 'Wed', completed: 12, pending: 8 },
+    { day: 'Thu', completed: 18, pending: 5 },
+    { day: 'Fri', completed: 25, pending: 3 },
+    { day: 'Sat', completed: 28, pending: 2 },
+    { day: 'Sun', completed: 32, pending: 1 },
+  ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h2 className={`text-2xl font-bold font-sora ${t.textMain}`}>Platform Analytics</h2>
-        <p className={t.textMuted}>Live user distribution and activity overview.</p>
+    <div className="space-y-6 animate-fade-in pb-10">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className={`text-2xl font-bold font-sora flex items-center gap-3 ${t.textMain}`}>
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-amber-500" />
+            </div>
+            Intelligence Command
+          </h2>
+          <p className={`text-sm ${t.textMuted} mt-1`}>Real-time visibility into organizational growth, development velocity, and mission status.</p>
+        </div>
+        <div className="flex items-center gap-3">
+           <div className={`px-4 py-2 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-3`}>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+              <span className={`text-[10px] font-black uppercase tracking-widest ${t.textMain}`}>Live Sync Active</span>
+           </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* High Level Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Users',       value: totalUsers,                          color: '#F4A100', icon: Users        },
-          { label: 'Pending Approvals', value: data?.pendingApprovals || 0,         color: '#EF4444', icon: ShieldAlert  },
-          { label: 'Active Students',   value: roleData.find(r=>r.name==='student')?.value || 0, color:'#22C55E', icon: Users },
-          { label: 'Experts / Staff',   value: (roleData.find(r=>r.name==='expert')?.value||0) + (roleData.find(r=>r.name==='manager')?.value||0), color:'#3B82F6', icon: BarChart3 },
-        ].map(({ label, value, color, icon: Icon }) => (
-          <div key={label} className={`p-5 rounded-2xl ${t.card}`}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}18`, border: `1px solid ${color}30` }}>
-                <Icon className="w-5 h-5" style={{ color }} />
-              </div>
-            </div>
-            <div className="text-3xl font-black" style={{ color }}>{value}</div>
-            <div className={`text-xs mt-1 ${t.textMuted}`}>{label}</div>
+          { label: 'Total Workforce', value: roleData.reduce((s, r) => s + r.count, 0), color: '#3B82F6', icon: Users, trend: '+12%' },
+          { label: 'Development Velocity', value: '84%', color: '#22C55E', icon: Activity, trend: '+5.4%' },
+          { label: 'Active Missions', value: data?.pendingApprovals || 0, color: '#F4A100', icon: Zap, trend: 'High' },
+          { label: 'Sprint Health', value: 'Optimal', color: '#8B5CF6', icon: Target, trend: 'Safe' },
+        ].map((stat, i) => (
+          <div key={i} className={`p-6 rounded-[32px] border relative overflow-hidden group hover:scale-[1.02] transition-all ${t.card} ${t.borderSoft}`}>
+             <div className="flex justify-between items-start mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center`} style={{ background: `${stat.color}15`, border: `1px solid ${stat.color}30` }}>
+                   <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
+                </div>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg bg-white/5 text-slate-500 border border-white/5`}>{stat.trend}</span>
+             </div>
+             <p className={`text-3xl font-black font-sora ${t.textMain}`}>{stat.value}</p>
+             <p className={`text-[10px] font-black uppercase tracking-widest mt-1 opacity-60 ${t.textMuted}`}>{stat.label}</p>
+             {/* Background Decoration */}
+             <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-white/3 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700" />
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`p-6 rounded-2xl ${t.card}`}>
-          <h3 className={`font-semibold mb-4 flex items-center gap-2 ${t.textMain}`}>
-            <BarChart3 className="w-5 h-5" style={{ color: '#F4A100' }} />
-            User Distribution by Role
-          </h3>
-          {roleData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={roleData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
-                  {roleData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: isDarkMode ? '#1e293b' : '#fff',
-                    border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    color: isDarkMode ? '#f1f5f9' : '#0f172a',
-                  }}
-                  formatter={(v, name) => [`${v} users`, name]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className={`text-center py-12 ${t.textMuted}`}>No user data yet</p>
-          )}
-          <div className="flex flex-wrap gap-3 justify-center mt-2">
-            {roleData.map(r => (
-              <div key={r.name} className="flex items-center gap-1.5 text-xs" style={{ color: r.color }}>
-                <div className="w-3 h-3 rounded-full" style={{ background: r.color }} />
-                <span className="capitalize font-semibold">{r.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={`p-6 rounded-2xl ${t.card}`}>
-          <h3 className={`font-semibold mb-4 flex items-center gap-2 ${t.textMain}`}>
-            <Clock className="w-5 h-5" style={{ color: '#F4A100' }} />
-            Most Recent Signups
-          </h3>
-          <div className="space-y-3">
-            {(data?.recentUsers || []).length === 0 && <p className={`text-sm ${t.textMuted} text-center py-8`}>No users yet</p>}
-            {(data?.recentUsers || []).map((u, i) => (
-              <div key={i} className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${t.hover}`}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg,#1E3A5F,#2E5490)' }}>
-                  {u.full_name?.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold truncate ${t.textMain}`}>{u.full_name}</p>
-                  <p className={`text-xs truncate ${t.textMuted}`}>{u.email}</p>
-                </div>
-                <span className={`text-[10px] font-bold capitalize flex-shrink-0`} style={{ color: COLORS[u.role] || '#64748B' }}>
-                  {u.role?.replace('_',' ')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className={`p-8 rounded-3xl border-2 border-indigo-500/30 overflow-hidden relative shadow-2xl flex flex-col items-center justify-between text-center md:text-left md:flex-row gap-8 ${isDarkMode ? 'bg-indigo-900/10' : 'bg-indigo-50'}`}>
-         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] pointer-events-none rounded-full"></div>
-         <div className="bg-indigo-600/20 p-6 rounded-3xl border border-indigo-500/30 flex-shrink-0">
-            <BarChart3 className="w-12 h-12 text-indigo-500 animate-pulse" />
-         </div>
-         <div className="flex-1">
-            <h3 className={`text-2xl font-black font-sora mb-2 ${t.textMain}`}>Strategic Synthesis <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500 text-white ml-2">POWERED BY GEMINI</span></h3>
-            <p className={`${t.textMuted} mb-6 max-w-xl`}>Unlock an automated platform SWOT analysis. Our AI will evaluate your current user distribution, pending workload, and staff-to-intern ratios to provide actionable advice.</p>
-            <button onClick={generateInsight} disabled={aiLoading} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-2xl transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2 mx-auto md:mx-0 group active:scale-95">
-               {aiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Generate Platform Briefing"}
-               {!aiLoading && <Clock className="w-4 h-4 opacity-70 group-hover:translate-x-1 transition-transform" /> }
-            </button>
-         </div>
-         {aiInsight && (
-            <div className={`mt-8 md:mt-0 p-6 rounded-2xl border text-sm leading-relaxed whitespace-pre-wrap animate-fade-in max-h-[300px] overflow-y-auto w-full md:w-[45%] ${t.card}`}>
-                <div className="flex items-center gap-2 mb-4 text-indigo-500 font-bold border-b border-indigo-500/10 pb-2">
-                    <ShieldAlert className="w-4 h-4" /> EXECUTIVE SUMMARY
-                </div>
-               <p className={t.textMain}>{aiInsight}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+         {/* Velocity Analytics (Phase 6 Core) */}
+         <div className={`lg:col-span-8 p-8 rounded-[40px] border ${t.card} ${t.borderSoft}`}>
+            <div className="flex justify-between items-center mb-10">
+               <div>
+                  <h3 className={`text-lg font-bold font-sora flex items-center gap-2 ${t.textMain}`}>
+                     <Zap className="w-5 h-5 text-amber-500" /> Development Velocity
+                  </h3>
+                  <p className={`text-xs ${t.textMuted}`}>14-day sprint performance tracking across all departments.</p>
+               </div>
+               <select className={`bg-white/5 border ${t.borderSoft} rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none transition-all`}>
+                  <option>Current Sprint</option>
+                  <option>Previous Week</option>
+               </select>
             </div>
-         )}
+            
+            <ResponsiveContainer width="100%" height={300}>
+               <AreaChart data={velocityData}>
+                  <defs>
+                     <linearGradient id="colorComp" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#F4A100" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#F4A100" stopOpacity={0}/>
+                     </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? 'rgba(255,255,255,0.05)' : '#f1f5f9'} />
+                  <XAxis 
+                    dataKey="day" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#64748B', fontSize: 10, fontWeight: 700 }}
+                  />
+                  <YAxis hide />
+                  <Tooltip 
+                    contentStyle={{ background: '#1E3A5F', border: 'none', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)' }}
+                    itemStyle={{ color: '#F4A100', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase' }}
+                  />
+                  <Area type="monotone" dataKey="completed" stroke="#F4A100" strokeWidth={3} fillOpacity={1} fill="url(#colorComp)" />
+                  <Line type="monotone" dataKey="pending" stroke="#3B82F6" strokeWidth={2} strokeDasharray="5 5" />
+               </AreaChart>
+            </ResponsiveContainer>
+
+            <div className="flex items-center gap-6 mt-6 pt-6 border-t border-white/5">
+                <div className="flex items-center gap-2">
+                   <div className="w-3 h-3 rounded-full bg-amber-500" />
+                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Missions Completed</span>
+                </div>
+                <div className="flex items-center gap-2 text-blue-500">
+                   <div className="w-3 h-3 rounded-full border-2 border-blue-500 border-dashed" />
+                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Scheduled Backlog</span>
+                </div>
+            </div>
+         </div>
+
+         {/* Distribution & Insights */}
+         <div className="lg:col-span-4 space-y-6">
+            <div className={`p-8 rounded-[40px] border ${t.card} ${t.borderSoft}`}>
+               <h3 className={`text-sm font-bold uppercase tracking-widest mb-6 ${t.textMuted} flex items-center gap-2`}>
+                  <Users className="w-4 h-4" /> Role Distribution
+               </h3>
+               <div className="space-y-4">
+                  {roleData.map(role => (
+                     <div key={role.name} className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                           <span className={t.textMain}>{role.name}</span>
+                           <span style={{ color: role.color }}>{role.count}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                           <div className="h-full rounded-full transition-all duration-1000" style={{ background: role.color, width: `${(role.count / roleData.reduce((s,r)=>s+r.count,0)) * 100}%` }} />
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+
+            <div className="p-8 rounded-[40px] bg-gradient-to-br from-indigo-600 to-indigo-800 text-white relative overflow-hidden group shadow-xl">
+               <div className="relative z-10">
+                  <h4 className="text-lg font-black font-sora mb-1">AI Platform Briefing</h4>
+                  <p className="text-[10px] opacity-70 mb-6 leading-relaxed">Synthesis of platform health based on user ratios and dev velocity.</p>
+                  
+                  {aiLoading ? (
+                     <div className="flex items-center gap-2 text-xs font-bold animate-pulse">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Analyzing Ecosystem...
+                     </div>
+                  ) : aiInsight ? (
+                     <p className="text-xs leading-relaxed italic border-l-2 border-amber-400 pl-4 py-1">{aiInsight.slice(0, 150)}...</p>
+                  ) : (
+                     <button onClick={generateInsight} className="w-full py-3 bg-white text-indigo-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-400 hover:text-slate-900 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        Initialize Synthesizer <ArrowUpRight className="w-4 h-4" />
+                     </button>
+                  )}
+               </div>
+               {/* Decoration */}
+               <BarChart3 className="absolute -bottom-4 -right-4 w-24 h-24 opacity-10 rotate-12 group-hover:rotate-0 transition-all duration-1000" />
+            </div>
+         </div>
       </div>
     </div>
   );

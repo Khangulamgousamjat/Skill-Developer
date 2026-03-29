@@ -7,6 +7,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { AllModals } from './components/modals/AllModals';
 import { Chatbot } from './components/chatbot/Chatbot';
 import { CommandPalette } from './components/ui/CommandPalette';
+import { NotificationCenter } from './components/ui/NotificationCenter';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 
 // Auth Pages
@@ -15,6 +16,7 @@ import StudentRegisterPage from './pages/auth/StudentRegisterPage';
 import StaffRegisterPage from './pages/auth/StaffRegisterPage';
 import OTPVerifyPage from './pages/auth/OTPVerifyPage';
 import PendingApprovalPage from './pages/auth/PendingApprovalPage';
+import CertificateVerifyPage from './pages/public/CertificateVerifyPage';
 
 // Role-Specific Dashboard Pages
 import { SuperAdminDashboard } from './pages/dashboard/SuperAdminDashboard';
@@ -41,17 +43,19 @@ import ApprovalsPage   from './pages/admin/ApprovalsPage';
 import UsersPage       from './pages/admin/UsersPage';
 import AnalyticsPage   from './pages/admin/AnalyticsPage';
 import DepartmentsPage from './pages/admin/DepartmentsPage';
+import { SkillsManagement } from './pages/admin/SkillsManagement';
 import SettingsPage    from './pages/admin/SettingsPage';
 
 // HR & Manager Pages (Phase 5)
 import InternsPage          from './pages/hr/InternsPage';
 import AttendancePage       from './pages/hr/AttendancePage';
 import OnboardingPage       from './pages/hr/OnboardingPage';
+import IssueCertificatePage from './pages/hr/IssueCertificatePage';
 import TeamPage             from './pages/manager/TeamPage';
 import EvaluationsPage      from './pages/manager/EvaluationsPage';
 import ManagerProjectsPage  from './pages/manager/ManagerProjectsPage';
 
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Bell, Command } from 'lucide-react';
 
 // ─── Global CSS injected once ─────────────────────────────────────
 const GlobalStyles = () => (
@@ -110,9 +114,8 @@ const RoleDashboardOverview = () => {
   }
 };
 
-// ─── Main Dashboard Shell (Sidebar + Content area) ───────────────
 const DashboardShell = () => {
-  const { t } = useAppContext();
+  const { t, isSidebarOpen, setIsSidebarOpen, isNotifOpen, setIsNotifOpen } = useAppContext();
   const { role } = useSelector((state) => state.auth);
 
   const showChatbot = role === 'student';
@@ -120,9 +123,45 @@ const DashboardShell = () => {
   return (
     <div className={`flex h-screen overflow-hidden font-sans transition-colors duration-500 ${t.bg}`}>
       <GlobalStyles />
-      <Sidebar />
+      
+      {/* Mobile Header Bar */}
+      <div className={`lg:hidden fixed top-0 left-0 right-0 h-16 border-b flex items-center justify-between px-6 z-[100] ${t.sidebar} backdrop-blur-xl`}>
+         <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-900 font-black text-xs">S</div>
+            <span className="text-white font-black text-xs uppercase tracking-widest font-sora">SSLLM Platform</span>
+         </div>
+         <div className="flex items-center gap-3">
+           <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="p-2 rounded-xl bg-blue-500/10 text-blue-500 relative">
+             <Bell className="w-5 h-5" />
+             {notifications.some(n=>!n.read) && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-slate-900 border border-white/20"></span>}
+           </button>
+           <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-xl bg-white/5 text-slate-400">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+           </button>
+         </div>
+      </div>
 
-      <div className="flex-1 overflow-auto">
+      <Sidebar />
+      <div className="flex-1 overflow-auto pt-16 lg:pt-0 relative">
+        {/* Desktop Top Nav */}
+        <div className={`hidden lg:flex sticky top-0 left-0 right-0 h-20 items-center justify-between px-10 z-40 ${t.bg} backdrop-blur-3xl border-b border-white/5`}>
+           <div className="flex items-center gap-8">
+              <h2 className={`font-sora font-black text-xl tracking-tight ${t.textMain}`}>Internal <span className="text-amber-500">SSLLM-X</span></h2>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] text-slate-500 font-black cursor-pointer hover:bg-white/10" onClick={() => setIsCommandPaletteOpen(true)}>
+                 <Command className="w-3 h-3" /> CTRL + K
+              </div>
+           </div>
+           <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className={`p-2.5 rounded-2xl relative transition-all ${t.hover} ${isNotifOpen ? 'bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/30' : 'text-slate-400'}`}
+              >
+                 <Bell className="w-5 h-5" />
+                 {notifications.some(n=>!n.read) && <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-slate-900 shadow-xl"></span>}
+              </button>
+           </div>
+        </div>
+
         <div className="p-8 max-w-6xl mx-auto">
           {/* Nested sub-routes render here */}
           <Routes>
@@ -141,11 +180,13 @@ const DashboardShell = () => {
             <Route path="users"         element={<UsersPage />} />
             <Route path="analytics"     element={<AnalyticsPage />} />
             <Route path="departments"   element={<DepartmentsPage />} />
+            <Route path="skills-master"  element={<SkillsManagement />} />
             <Route path="settings"      element={<SettingsPage />} />
             {/* STAFF: HR Admin routes */}
             <Route path="interns"       element={<InternsPage />} />
             <Route path="attendance"    element={<AttendancePage />} />
             <Route path="onboarding"    element={<OnboardingPage />} />
+            <Route path="issue-certificate" element={<IssueCertificatePage />} />
             
             {/* STAFF: Manager routes */}
             <Route path="team"          element={<TeamPage />} />
@@ -166,6 +207,7 @@ const DashboardShell = () => {
 
       <AllModals />
       <CommandPalette />
+      <NotificationCenter isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
       {showChatbot && <Chatbot />}
     </div>
   );
@@ -188,6 +230,7 @@ const AppRoutes = () => {
         <Route path="/register/staff"     element={<StaffRegisterPage />} />
         <Route path="/verify-email"       element={<OTPVerifyPage />} />
         <Route path="/pending-approval"   element={<PendingApprovalPage />} />
+        <Route path="/verify/:code"      element={<CertificateVerifyPage />} />
 
         {/* Protected Dashboard - with nested routes */}
         <Route

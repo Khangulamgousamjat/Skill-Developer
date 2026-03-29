@@ -2,9 +2,8 @@ import { GoogleGenAI } from '@google/genai';
 import pool from '../config/db.js';
 
 // Initialize Gemini Client
-// The SDK will automatically pick up GEMINI_API_KEY from the environment
-const ai = new GoogleGenAI();
-const MODEL_NAME = 'gemini-2.5-flash';
+const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+const MODEL_NAME = 'gemini-1.5-flash';
 
 // ─── GET /api/ai/skill-gap/:internId ────────────────────────────
 export const generateSkillGapAnalysis = async (req, res) => {

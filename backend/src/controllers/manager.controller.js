@@ -1,92 +1,4 @@
 import pool from '../config/db.js';
-import { notifyUser } from '../config/socket.js';
-
-// ─── GET /api/manager/team ─────────────────────────────────────────
-
-// ... skipping other functions for brevity ...
-
-
-export const getMyTeam = async (req, res) => {
-  const managerId = req.user.id;
-  try {
-    // A manager's team is defined as all interns in the same department
-    // OR we could have a specific 'assigned_manager_id' in the users table later.
-    // For now, let's use the department-based relationship.
-    const result = await pool.query(`
-      SELECT 
-        u.id, u.full_name, u.email, u.profile_photo_url, u.employee_id,
-        u.onboarding_completed,
-        (SELECT COUNT(*) FROM project_assignments WHERE intern_id = u.id AND status = 'in_progress') as active_tasks,
-        (SELECT COUNT(*) FROM project_assignments WHERE intern_id = u.id AND status = 'under_review') as pending_reviews
-      FROM users u
-      WHERE u.role = 'student' 
-      AND u.department_id = (SELECT department_id FROM users WHERE id = $1)
-      ORDER BY u.full_name ASC
-    `, [managerId]);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Failed to fetch team' });
-  }
-};
-
-// ─── POST /api/manager/evaluations ───────────────────────────────
-export const createEvaluation = async (req, res) => {
-  const managerId = req.user.id;
-  const { intern_id, period_start, period_end, scores, comments } = req.body;
-
-  if (!intern_id || !scores || !period_start || !period_end) {
-    return res.status(400).json({ success: false, message: 'Missing required fields' });
-  }
-
-  try {
-    // Calculate overall score from the JSON scores object
-    const total = Object.values(scores).reduce((a, b) => a + b, 0);
-    const count = Object.values(scores).length;
-    const overallScore = total / count;
-
-    const result = await pool.query(
-      `INSERT INTO evaluations (intern_id, manager_id, period_start, period_end, scores, comments, overall_score)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [intern_id, managerId, period_start, period_end, JSON.stringify(scores), comments, overallScore]
-    );
-
-    res.status(201).json({ success: true, data: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Failed to submit evaluation' });
-  }
-};
-
-// ─── POST /api/manager/projects/assign ─────────────────────────────
-export const assignProject = async (req, res) => {
-  const managerId = req.user.id;
-  const { project_id, intern_id } = req.body;
-
-  try {
-    const result = await pool.query(
-      `INSERT INTO project_assignments (project_id, intern_id, assigned_by)
-       VALUES ($1, $2, $3)
-       ON CONFLICT (project_id, intern_id) 
-       DO UPDATE SET status = 'todo', assigned_at = NOW()
-       RETURNING *`,
-      [project_id, intern_id, managerId]
-    );
-
-    // Trigger Real-Time Notification
-    notifyUser(intern_id, 'receive_notification', {
-      type: 'PROJECT_ASSIGNED',
-      message: 'You have been assigned a new project by your manager.',
-      projectId: project_id
-    });
-
-    res.status(201).json({ success: true, data: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Failed to assign project' });
-  }
-};
 
 // ─── GET /api/manager/reviews ─────────────────────────────────────
 export const getPendingReviews = async (req, res) => {
@@ -101,11 +13,48 @@ export const getPendingReviews = async (req, res) => {
       JOIN projects p ON pa.project_id = p.id
       JOIN users u ON pa.intern_id = u.id
       WHERE pa.status = 'under_review'
+      AND (p.department_id = (SELECT department_id FROM users WHERE id = $1) OR p.department_id IS NULL)
       ORDER BY pa.submitted_at ASC
-    `);
+    `, [managerId]);
     res.json({ success: true, data: result.rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch pending reviews' });
+  }
+};
+
+// ─── PATCH /api/manager/reviews/:id ───────────────────────────────
+export const reviewAssignment = async (req, res) => {
+  const { id } = req.params;
+  const { status, feedback } = req.body; // status: 'completed' or 'todo'
+  const managerId = req.user.id;
+
+  try {
+    const updateResult = await pool.query(`
+      UPDATE project_assignments
+      SET status = $1, reviewer_feedback = $2, reviewed_at = NOW(), reviewed_by = $3
+      WHERE id = $4
+      RETURNING *
+    `, [status, feedback, managerId, id]);
+
+    if (updateResult.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Assignment not found' });
+    }
+
+    const assignment = updateResult.rows[0];
+
+    // Award XP if completed
+    if (status === 'completed') {
+      await pool.query(`
+        UPDATE gamification 
+        SET total_xp = total_xp + (SELECT max_marks FROM projects WHERE id = $1)
+        WHERE user_id = $2
+      `, [assignment.project_id, assignment.intern_id]);
+    }
+
+    res.json({ success: true, message: `Project ${status}` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to update review' });
   }
 };

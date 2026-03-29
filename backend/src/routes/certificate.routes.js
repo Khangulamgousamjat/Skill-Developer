@@ -1,13 +1,24 @@
 import express from 'express';
-import { getMyCertificates, downloadCertificate } from '../controllers/certificate.controller.js';
-import { verifyToken, checkRole } from '../middleware/auth.middleware.js';
+import { 
+  getMyCertificates, 
+  issueCertificate, 
+  verifyCertificate, 
+  downloadCertificate 
+} from '../controllers/certificate.controller.js';
+import { verifyToken } from '../middleware/auth.middleware.js';
+import { checkRole } from '../middleware/roleCheck.middleware.js';
 
 const router = express.Router();
 
-// Only authenticated students can view their certs
-router.get('/', verifyToken, checkRole(['student']), getMyCertificates);
+// ─── PUBLIC ───────────────────────────────────────────────
+// Verification is public for anyone scanning the QR code
+router.get('/verify/:code', verifyCertificate);
 
-// The actual download utilizes Puppeteer. Also requiring student token auth
-router.get('/download/:code', verifyToken, checkRole(['student']), downloadCertificate);
+// ─── AUTHENTICATED (STUDENT) ─────────────────────────────
+router.get('/me', verifyToken, checkRole(['student']), getMyCertificates);
+router.get('/download/:id', verifyToken, checkRole(['student']), downloadCertificate);
+
+// ─── ADMIN/HR (AUTHORITY) ───────────────────────────────
+router.post('/issue', verifyToken, checkRole(['super_admin', 'hr_admin']), issueCertificate);
 
 export default router;

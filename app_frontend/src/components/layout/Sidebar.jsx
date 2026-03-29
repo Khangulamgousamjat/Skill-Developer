@@ -19,6 +19,7 @@ const NAV_CONFIG = {
     { id: 'approvals',     label: 'Role Approvals',    icon: ShieldAlert,     path: '/dashboard/approvals' },
     { id: 'users',         label: 'All Users',         icon: Users,           path: '/dashboard/users' },
     { id: 'departments',   label: 'Departments',       icon: Building2,       path: '/dashboard/departments' },
+    { id: 'skills',        label: 'Skills Master',      icon: Target,          path: '/dashboard/skills-master' },
     { id: 'analytics',     label: 'Analytics',         icon: BarChart3,       path: '/dashboard/analytics' },
     { id: 'settings',      label: 'Platform Settings', icon: Settings,        path: '/dashboard/settings' },
   ],
@@ -28,6 +29,7 @@ const NAV_CONFIG = {
     { id: 'departments',   label: 'Departments',       icon: Building2,       path: '/dashboard/departments' },
     { id: 'attendance',    label: 'Attendance',        icon: CalendarCheck,   path: '/dashboard/attendance' },
     { id: 'onboarding',    label: 'Onboarding',        icon: FileUser,        path: '/dashboard/onboarding' },
+    { id: 'issue-certificate', label: 'Issue Credentials', icon: Award,    path: '/dashboard/issue-certificate' },
     { id: 'analytics',     label: 'HR Analytics',      icon: BarChart3,       path: '/dashboard/analytics' },
   ],
   manager: [
@@ -73,6 +75,7 @@ const ROLE_COLORS = {
 export const Sidebar = () => {
   const {
     isDarkMode, t,
+    isSidebarOpen, setIsSidebarOpen,
     setIsSettingsOpen, handleCareerCoach,
     handleGenerateBio, handleStandupPrep, handleOneOnOnePrep
   } = useAppContext();
@@ -96,23 +99,48 @@ export const Sidebar = () => {
     navigate('/login');
   };
 
+  const handleNav = (path) => {
+    navigate(path);
+    setIsSidebarOpen(false); // Close on mobile navigation
+  };
+
   // Show student AI toolkit only for students
   const showAIToolkit = role === 'student';
 
   return (
-    <div className={`w-64 flex flex-col border-r shrink-0 transition-colors duration-500 ${t.sidebar}`}>
-      {/* Logo / Branding */}
-      <div className="flex flex-col items-center px-4 py-6 border-b border-white/10">
-        <span className="text-[var(--color-accent)] font-bold text-base leading-tight text-center font-sora">
-          Smart Skill &
-        </span>
-        <span className="text-[var(--color-accent)] font-bold text-base leading-tight text-center font-sora">
-          Live Learning
-        </span>
-        <span className="text-white/60 text-xs mt-1 text-center tracking-wide">
-          Gous org
-        </span>
-      </div>
+    <>
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity duration-300"
+        />
+      )}
+
+      <div className={`
+        w-64 flex flex-col border-r shrink-0 transition-all duration-300
+        fixed inset-y-0 left-0 z-[101] lg:static lg:flex
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${t.sidebar}
+      `}>
+        {/* Logo / Branding */}
+        <div className="flex flex-col items-center px-4 py-8 border-b border-white/10 relative">
+          <button 
+             onClick={() => setIsSidebarOpen(false)}
+             className="lg:hidden absolute left-4 top-8 p-1.5 rounded-lg bg-white/5 text-slate-500"
+          >
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+          </button>
+          <span className="text-[var(--color-accent)] font-bold text-lg leading-tight text-center font-sora tracking-tight">
+            Smart Skill &
+          </span>
+          <span className="text-[var(--color-accent)] font-bold text-lg leading-tight text-center font-sora tracking-tight">
+            Live Learning
+          </span>
+          <span className="text-white/40 text-[10px] mt-2 text-center font-black uppercase tracking-[3px]">
+            Gous org
+          </span>
+        </div>
 
       {/* Navigation Links */}
       <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -121,7 +149,7 @@ export const Sidebar = () => {
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNav(item.path)}
               className={`w-full flex items-center px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200 ${
                 active
                   ? 'font-semibold shadow-inner border'
@@ -220,6 +248,7 @@ export const Sidebar = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

@@ -1,21 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send, Loader2, CheckCircle2 } from 'lucide-react';
+import axios from '../../api/axios';
+import toast from 'react-hot-toast';
 
 export const ExpertQnAPage = () => {
   const { t, isDarkMode } = useAppContext();
-  const [questions, setQuestions] = useState([
-    { id: 1, student: 'Alex Singh', question: 'How do you handle state normalization in Redux across large arrays?', lecture: 'Advanced State Management', answered: false },
-    { id: 2, student: 'Sarah Connor', question: 'Does context API replace Redux completely?', lecture: 'Introduction to React Internals', answered: true, answer: 'No, they solve different problems. Context is for dependency injection, Redux is state management.' },
-  ]);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeQuestion, setActiveQuestion] = useState(null);
   const [reply, setReply] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitAnswer = () => {
-    if (!reply.trim()) return;
-    setQuestions(questions.map(q => q.id === activeQuestion.id ? { ...q, answered: true, answer: reply } : q));
-    setActiveQuestion(null);
-    setReply('');
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const fetchQuestions = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('/expert/qna');
+      if (res.data.success) {
+        setQuestions(res.data.data);
+      }
+    } catch (err) {
+      toast.error('Failed to load questions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitAnswer = async () => {
+    if (!reply.trim() || !activeQuestion) return;
+    try {
+      setIsSubmitting(true);
+      const res = await axios.post(`/expert/qna/${activeQuestion.id}/answer`, { answer: reply });
+      if (res.data.success) {
+        toast.success('Answer sent to student!');
+        setReply('');
+        setActiveQuestion(null);
+        fetchQuestions();
+      }
+    } catch (err) {
+      toast.error('Failed to send answer');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

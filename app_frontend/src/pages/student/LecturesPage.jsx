@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { upcomingLectures } from '../../data/mockData';
 import {
   Video, Calendar, User2, Clock, Loader2,
-  MessageSquare, BookMarked, ExternalLink, Mic
+  MessageSquare, BookMarked, ExternalLink, Mic, CheckCircle
 } from 'lucide-react';
 
 const LectureCard = ({ lecture, t, isDarkMode }) => {
@@ -33,12 +32,18 @@ const LectureCard = ({ lecture, t, isDarkMode }) => {
         <div className="space-y-1.5 mb-4">
           <div className={`flex items-center gap-2 text-sm ${t.textMuted}`}>
             <User2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F4A100' }} />
-            {lecture.expert}
+            {lecture.expert_name}
           </div>
           <div className={`flex items-center gap-2 text-sm ${t.textMuted}`}>
             <Clock className="w-4 h-4 flex-shrink-0" style={{ color: '#F4A100' }} />
-            {lecture.time}
+            {new Date(lecture.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
           </div>
+          {lecture.attended && (
+            <div className={`flex items-center gap-2 text-sm text-emerald-500 font-bold`}>
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              Attended
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 flex-wrap">
@@ -64,15 +69,30 @@ const LectureCard = ({ lecture, t, isDarkMode }) => {
             <BookMarked className="w-3 h-3" /> Pre-Lecture Brief
           </button>
 
-          {/* Join Link Placeholder */}
-          <button
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-colors ${
-              isDarkMode ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20'
-                         : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
-            }`}
-          >
-            <ExternalLink className="w-3 h-3" /> Join Session
-          </button>
+          {/* Join Link */}
+          {lecture.meeting_link ? (
+            <a
+              href={lecture.meeting_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-colors ${
+                isDarkMode ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20'
+                           : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
+              }`}
+            >
+              <ExternalLink className="w-3 h-3" /> Join Session
+            </a>
+          ) : (
+            <button
+               disabled
+               className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border opacity-50 cursor-not-allowed ${
+                isDarkMode ? 'bg-slate-500/10 text-slate-300 border-slate-500/20'
+                           : 'bg-slate-50 text-slate-700 border-slate-100'
+              }`}
+            >
+              <Clock className="w-3 h-3" /> Link Not Ready
+            </button>
+          )}
         </div>
       </div>
 
@@ -118,8 +138,22 @@ const LectureCard = ({ lecture, t, isDarkMode }) => {
 };
 
 const LecturesPage = () => {
-  const { t, isDarkMode } = useAppContext();
+  const { t, isDarkMode, studentLectures, isDataLoading } = useAppContext();
   const [tab, setTab] = useState('upcoming');
+
+  const filteredLectures = studentLectures.filter(l => {
+    const isPast = new Date(l.scheduled_at) < new Date();
+    return tab === 'past' ? isPast : !isPast;
+  });
+
+  if (isDataLoading && studentLectures.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-10 h-10 animate-spin text-red-500" />
+        <p className={`mt-4 ${t.textMuted}`}>Retrieving live session calendar...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -132,7 +166,7 @@ const LecturesPage = () => {
           isDarkMode ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-100'
         }`}>
           <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-          {upcomingLectures.length} Sessions This Week
+          {studentLectures.filter(l => new Date(l.scheduled_at) > new Date()).length} Sessions Upcoming
         </div>
       </div>
 
@@ -153,17 +187,17 @@ const LecturesPage = () => {
         ))}
       </div>
 
-      {tab === 'upcoming' ? (
+      {filteredLectures.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {upcomingLectures.map(l => (
+          {filteredLectures.map(l => (
             <LectureCard key={l.id} lecture={l} t={t} isDarkMode={isDarkMode} />
           ))}
         </div>
       ) : (
         <div className={`p-12 rounded-2xl text-center ${t.card}`}>
           <Video className={`w-12 h-12 mx-auto mb-3 ${isDarkMode ? 'text-slate-700' : 'text-gray-200'}`} />
-          <p className={`font-semibold ${t.textMain}`}>No Past Lectures Yet</p>
-          <p className={`text-sm mt-1 ${t.textMuted}`}>Recorded sessions will appear here after they're completed.</p>
+          <p className={`font-semibold ${t.textMain}`}>No {tab} sessions found.</p>
+          <p className={`text-sm mt-1 ${t.textMuted}`}>Records will appear here as they are scheduled.</p>
         </div>
       )}
     </div>
