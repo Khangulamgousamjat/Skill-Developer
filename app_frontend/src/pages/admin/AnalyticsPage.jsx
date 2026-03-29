@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import api from '../../api/axios';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart3, Users, Clock, ShieldAlert, Loader2 } from 'lucide-react';
 
 const COLORS = {
@@ -12,12 +12,12 @@ const COLORS = {
   super_admin:'#EF4444',
 };
 
-const ROLE_STATUS_COLORS = ['#22C55E', '#F4A100', '#3B82F6', '#EF4444', '#64748B'];
-
 const AnalyticsPage = () => {
   const { t, isDarkMode } = useAppContext();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [aiInsight, setAiInsight] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     api.get('/admin/analytics')
@@ -25,6 +25,20 @@ const AnalyticsPage = () => {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const generateInsight = async () => {
+    setAiLoading(true);
+    try {
+      const res = await api.get('/ai/analytics-insight');
+      if (res.data.success) {
+        setAiInsight(res.data.data.insight);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -49,7 +63,6 @@ const AnalyticsPage = () => {
         <p className={t.textMuted}>Live user distribution and activity overview.</p>
       </div>
 
-      {/* Top Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Users',       value: totalUsers,                          color: '#F4A100', icon: Users        },
@@ -70,7 +83,6 @@ const AnalyticsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Role Distribution Pie */}
         <div className={`p-6 rounded-2xl ${t.card}`}>
           <h3 className={`font-semibold mb-4 flex items-center gap-2 ${t.textMain}`}>
             <BarChart3 className="w-5 h-5" style={{ color: '#F4A100' }} />
@@ -79,18 +91,8 @@ const AnalyticsPage = () => {
           {roleData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie
-                  data={roleData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {roleData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                <Pie data={roleData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
+                  {roleData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                 </Pie>
                 <Tooltip
                   contentStyle={{
@@ -106,46 +108,62 @@ const AnalyticsPage = () => {
           ) : (
             <p className={`text-center py-12 ${t.textMuted}`}>No user data yet</p>
           )}
-          {/* Legend */}
           <div className="flex flex-wrap gap-3 justify-center mt-2">
             {roleData.map(r => (
               <div key={r.name} className="flex items-center gap-1.5 text-xs" style={{ color: r.color }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: r.color }} />
                 <span className="capitalize font-semibold">{r.name}</span>
-                <span className={t.textMuted}>({r.value})</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Recent Users */}
         <div className={`p-6 rounded-2xl ${t.card}`}>
           <h3 className={`font-semibold mb-4 flex items-center gap-2 ${t.textMain}`}>
             <Clock className="w-5 h-5" style={{ color: '#F4A100' }} />
             Most Recent Signups
           </h3>
           <div className="space-y-3">
-            {(data?.recentUsers || []).length === 0 && (
-              <p className={`text-sm ${t.textMuted} text-center py-8`}>No users yet</p>
-            )}
+            {(data?.recentUsers || []).length === 0 && <p className={`text-sm ${t.textMuted} text-center py-8`}>No users yet</p>}
             {(data?.recentUsers || []).map((u, i) => (
-              <div key={i} className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#1E3A5F,#2E5490)' }}>
+              <div key={i} className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${t.hover}`}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg,#1E3A5F,#2E5490)' }}>
                   {u.full_name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-semibold truncate ${t.textMain}`}>{u.full_name}</p>
                   <p className={`text-xs truncate ${t.textMuted}`}>{u.email}</p>
                 </div>
-                <span className={`text-[10px] font-bold capitalize flex-shrink-0`}
-                  style={{ color: COLORS[u.role] || '#64748B' }}>
+                <span className={`text-[10px] font-bold capitalize flex-shrink-0`} style={{ color: COLORS[u.role] || '#64748B' }}>
                   {u.role?.replace('_',' ')}
                 </span>
               </div>
             ))}
           </div>
         </div>
+      </div>
+
+      <div className={`p-8 rounded-3xl border-2 border-indigo-500/30 overflow-hidden relative shadow-2xl flex flex-col items-center justify-between text-center md:text-left md:flex-row gap-8 ${isDarkMode ? 'bg-indigo-900/10' : 'bg-indigo-50'}`}>
+         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] pointer-events-none rounded-full"></div>
+         <div className="bg-indigo-600/20 p-6 rounded-3xl border border-indigo-500/30 flex-shrink-0">
+            <BarChart3 className="w-12 h-12 text-indigo-500 animate-pulse" />
+         </div>
+         <div className="flex-1">
+            <h3 className={`text-2xl font-black font-sora mb-2 ${t.textMain}`}>Strategic Synthesis <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500 text-white ml-2">POWERED BY GEMINI</span></h3>
+            <p className={`${t.textMuted} mb-6 max-w-xl`}>Unlock an automated platform SWOT analysis. Our AI will evaluate your current user distribution, pending workload, and staff-to-intern ratios to provide actionable advice.</p>
+            <button onClick={generateInsight} disabled={aiLoading} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-2xl transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2 mx-auto md:mx-0 group active:scale-95">
+               {aiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Generate Platform Briefing"}
+               {!aiLoading && <Clock className="w-4 h-4 opacity-70 group-hover:translate-x-1 transition-transform" /> }
+            </button>
+         </div>
+         {aiInsight && (
+            <div className={`mt-8 md:mt-0 p-6 rounded-2xl border text-sm leading-relaxed whitespace-pre-wrap animate-fade-in max-h-[300px] overflow-y-auto w-full md:w-[45%] ${t.card}`}>
+                <div className="flex items-center gap-2 mb-4 text-indigo-500 font-bold border-b border-indigo-500/10 pb-2">
+                    <ShieldAlert className="w-4 h-4" /> EXECUTIVE SUMMARY
+                </div>
+               <p className={t.textMain}>{aiInsight}</p>
+            </div>
+         )}
       </div>
     </div>
   );

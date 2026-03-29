@@ -193,3 +193,41 @@ export const searchUniversally = async (req, res) => {
         res.status(500).json({ success: false, message: 'Search failed.' });
     }
 };
+
+// ─── GET /api/ai/analytics-insight ────────────────────────────────
+export const generateAnalyticsInsight = async (req, res) => {
+    try {
+        // Fetch raw statistics first
+        const [roleCounts, pendingCount] = await Promise.all([
+            pool.query(`SELECT role, COUNT(*) as count FROM users GROUP BY role`),
+            pool.query(`SELECT COUNT(*) FROM role_requests WHERE status = 'pending'`),
+        ]);
+
+        const roleDist = roleCounts.rows;
+        const pending = pendingCount.rows[0].count;
+
+        const prompt = `
+            You are a Strategic Data Analyst for NRC INNOVATE-X. 
+            Analyze the following platform distribution:
+            - User Distribution by Role: ${JSON.stringify(roleDist)}
+            - Pending Access Approvals: ${pending}
+            
+            Provide a 3-paragraph "Strategic Overview":
+            1. An assessment of the current user composition (balancing interns vs staff).
+            2. A risk assessment regarding the pending approvals.
+            3. A prioritized suggestion for the Super Admin to optimize the platform today.
+            
+            Keep the tone professional, objective, and urgent if needed.
+        `;
+
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: prompt,
+        });
+
+        res.json({ success: true, data: { insight: response.text } });
+    } catch (error) {
+        console.error('AI Insight Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate strategic insight.' });
+    }
+};
