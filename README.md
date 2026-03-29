@@ -1,7 +1,7 @@
-# 🚀 SSLLM ERP Platform
-**Smart Skill & Live Learning Module (SSLLM)** 
+# 🚀 Gous org — Enterprise Learning Platform
+**Smart Skill & Live Learning Module** 
 
-Developed for **NRC INNOVATE-X**, this platform is an end-to-end Enterprise Resource Planning (ERP) application focused on cultivating, tracking, and elevating the capabilities of an engineering workforce. Built with a pristine glassmorphic design system and fueled by real-time Google Gemini AI insights, it redefines the modern training dashboard.
+Developed for **Gous org**, this platform is an end-to-end Enterprise Resource Planning (ERP) application focused on cultivating, tracking, and elevating the capabilities of an engineering workforce. Built with a pristine glassmorphic design system and fueled by real-time Google Gemini AI insights, it redefines the modern training dashboard.
 
 ---
 
@@ -10,7 +10,7 @@ Developed for **NRC INNOVATE-X**, this platform is an end-to-end Enterprise Reso
 The project is structured as a full-stack monorepo bridging a Vite-React frontend and an Express Node.js backend.
 
 ```text
-Smart-Skill-Live-Learning-Module/
+Gous-Org-Learning-Module/
 │
 ├── app_frontend/                 # React 18 + Vite Frontend Application
 │   ├── public/                   # Static uncompiled assets (favicons, etc.)
@@ -163,9 +163,9 @@ DATABASE_URL=postgres://[user]:[password]@[host]:[port]/postgres?sslmode=require
 GEMINI_API_KEY=AIzaSy...[Your-Google-AI-Key]
 
 # Mailing Configuration (Insert a fake ID if skipping mailing)
-SENDGRID_API_KEY=SG.fake-key-for-now
-FROM_EMAIL=noreply@nrcinnovatex.com
-FROM_NAME=NRC INNOVATE-X
+RESEND_API_KEY=re_your-key-here
+FROM_EMAIL=onboarding@resend.dev
+FROM_NAME=Gous org
 ```
 
 ### 3. Backend Test Data Generation
@@ -175,8 +175,8 @@ node seed_users.js
 ```
 This forces the creation of `platform_settings` logic and inserts your testing profiles over the encrypted API.
 Test Profiles generated:
-*   `hr@nrcinnovatex.com` / `HrAdmin@12`
-*   `manager@nrcinnovatex.com` / `Manager@12`
+*   `hr@gousorg.com` / `HrAdmin@12`
+*   `manager@gousorg.com` / `Manager@12`
 
 > *To setup your Super Admin, manually go into Supabase Table Editor, create a row in `users`, and set role to `super_admin`.*
 
@@ -228,4 +228,4 @@ The SSLLM system utilizes "Glassmorphism" as its primary aesthetic, bound to dyn
 6. Trigger the build.
 
 ---
-📝 *SSLLM Engine is crafted with extreme precision to elevate the standard of learning and management within the modern Enterprise.*
+📝 *Built for Gous org with extreme precision to elevate the standard of learning and management within the modern Enterprise.*

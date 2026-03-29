@@ -141,7 +141,7 @@ export const useAppLogic = () => {
     setProgressEmail({ isOpen: true, loading: true, text: '', copied: false });
     const stats = "85% lecture attendance, 92% project performance, 65% overall skill completion.";
     const skillsList = skillGaps.map(s => s.name).join(', ');
-    const prompt = `Act as a highly articulate software engineering intern (${internData.name}). Draft a short, professional end-of-week update email to my manager summarizing my recent progress on the SSLLM platform. My current stats: ${stats}. Mention I've been focusing on ${skillsList}. Keep it concise, positive, and ready to send. Include a subject line.`;
+    const prompt = `Act as a highly articulate software engineering intern (${internData.name}). Draft a short, professional end-of-week update email to my manager summarizing my recent progress on the Smart Skill & Live Learning Module. My current stats: ${stats}. Mention I've been focusing on ${skillsList}. Keep it concise, positive, and ready to send. Include a subject line.`;
     const result = await callGemini(prompt);
     setProgressEmail({ isOpen: true, loading: false, text: result, copied: false });
   };
@@ -175,7 +175,7 @@ export const useAppLogic = () => {
     setIsChatLoading(true);
 
     const conversationHistory = chatMessages.map(m => `${m.role === 'user' ? 'Intern' : 'AI'}: ${m.text}`).join('\n');
-    const prompt = `You are an internal AI Mentor for NRC INNOVATE-X. You are helping ${internData.name}, a ${internData.role} in the ${internData.department}. Keep your responses concise, actionable, and encouraging. \n\nConversation History:\n${conversationHistory}\nIntern: ${userMsg}\nAI:`;
+    const prompt = `You are an internal AI Mentor for Smart Skill & Live Learning Module at Gous org. You are helping ${internData.name}, a ${internData.role} in the ${internData.department}. Keep your responses concise, actionable, and encouraging. \n\nConversation History:\n${conversationHistory}\nIntern: ${userMsg}\nAI:`;
 
     const result = await callGemini(prompt);
     setChatMessages(prev => [...prev, { role: 'model', text: result }]);

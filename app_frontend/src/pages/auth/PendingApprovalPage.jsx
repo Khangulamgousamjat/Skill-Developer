@@ -25,9 +25,13 @@ const PendingApprovalPage = () => {
       {/* Background blobs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
       
-      <div className="mb-8 text-center relative z-10">
-        <h1 className="text-3xl font-black text-white tracking-widest font-sora mb-1">NRC INNOVATE-X</h1>
-        <p className="text-xs text-amber-500 font-bold uppercase tracking-widest">Access Portal</p>
+      <div className="text-center mb-6 relative z-10">
+        <h1 className="font-sora font-bold text-xl text-white">
+          Smart Skill & Live Learning Module
+        </h1>
+        <p className="text-slate-400 text-xs mt-1">
+          Gous org
+        </p>
       </div>
 
       <div className="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-lg p-8 shadow-2xl relative z-10 text-center">
@@ -51,7 +55,7 @@ const PendingApprovalPage = () => {
         <p className="text-slate-400 text-sm mb-6 leading-relaxed">
           {status === 'pending' 
              ? 'Your request has been submitted. The Super Admin will review your request and you will receive an email with the decision.'
-             : 'Unfortunately, your request to access the SSLLM platform has not been approved.'}
+             : 'Unfortunately, your request to access the Smart Skill & Live Learning Module has not been approved.'}
         </p>
 
         {status === 'pending' ? (

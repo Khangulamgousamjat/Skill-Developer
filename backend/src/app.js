@@ -53,6 +53,21 @@ app.use('/api/expert', expertRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/ai', aiRoutes);
 
+import { sendEmailVerificationOTP } from './services/emailService.js';
+
+app.get('/api/test-email', async (req, res) => {
+  try {
+    await sendEmailVerificationOTP(
+      'gousk2004@gmail.com',
+      'Test User',
+      '123456'
+    );
+    res.json({ success: true, message: 'Email sent to gousk2004@gmail.com! Check inbox.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -14,6 +14,7 @@ const EvaluationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedIntern, setSelectedIntern] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [auditing, setAuditing] = useState(false);
   const [evaluation, setEvaluation] = useState({
     period_start: '',
     period_end: '',
@@ -26,6 +27,27 @@ const EvaluationsPage = () => {
     },
     comments: ''
   });
+
+  const handleAIAudit = async () => {
+    if (!selectedIntern) return;
+    setAuditing(true);
+    try {
+        const res = await api.post('/ai/audit-intern', { internId: selectedIntern.id });
+        if (res.data.success) {
+            const { scores, comments } = res.data.data;
+            setEvaluation(prev => ({
+                ...prev,
+                scores: scores,
+                comments: comments
+            }));
+            toast.success('AI Audit Complete: Scores & comments populated!');
+        }
+    } catch (error) {
+        toast.error('AI Audit failed. Please grade manually.');
+    } finally {
+        setAuditing(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -134,9 +156,22 @@ const EvaluationsPage = () => {
                       <h3 className={`text-xl font-bold mb-1 ${t.textMain}`}>Evaluating {selectedIntern.full_name}</h3>
                       <p className={`text-sm ${t.textMuted}`}>Fill out the scores based on recent performance.</p>
                    </div>
-                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[10px] font-bold uppercase">
-                     <Star className="w-3 h-3 fill-white" />
-                     Rating Mode
+                   <div className="flex items-center gap-3">
+                      {selectedIntern && (
+                        <button 
+                          type="button"
+                          onClick={handleAIAudit}
+                          disabled={auditing}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-[10px] font-bold uppercase transition-all hover:bg-indigo-400 active:scale-95 disabled:opacity-50"
+                        >
+                           {auditing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                           {auditing ? "Auditing History..." : "Smart AI Audit"}
+                        </button>
+                      )}
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[10px] font-bold uppercase">
+                        <Star className="w-3 h-3 fill-white" />
+                        Rating Mode
+                      </div>
                    </div>
                 </div>
 

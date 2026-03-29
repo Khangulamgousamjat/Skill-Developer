@@ -14,8 +14,8 @@ const SettingsPage = () => {
     maintenance_mode: false,
     allow_registration: true,
     require_approval: true,
-    company_name: 'NRC INNOVATE-X',
-    contact_email: 'support@nrcinnovatex.com',
+    company_name: 'Gous org',
+    contact_email: 'support@gousorg.com',
     max_file_size_mb: 10,
     session_timeout_mins: 60
   });
@@ -71,7 +71,7 @@ const SettingsPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className={`text-2xl font-bold font-sora ${t.textMain}`}>Platform Settings</h2>
-          <p className={t.textMuted}>Global configuration for the SSLLM ecosystem.</p>
+          <p className={t.textMuted}>Global configuration for the Smart Skill & Live Learning Module ecosystem.</p>
         </div>
         <button 
           onClick={handleSave}

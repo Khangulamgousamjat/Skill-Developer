@@ -167,7 +167,7 @@ export const CommandPalette = () => {
         {/* Footer */}
         <div className="p-3 border-t border-white/10 bg-black/20 flex justify-between items-center">
           <p className="text-[10px] text-slate-500">
-            Intelligent Search <span className="text-blue-500/60 font-black">SSLLM-v2.5</span>
+            Intelligent Search <span className="text-blue-500/60 font-black">GOUS-v2.5</span>
           </p>
           <div className="flex gap-4">
              <div className="flex items-center gap-1.5">

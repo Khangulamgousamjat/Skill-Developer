@@ -207,7 +207,7 @@ export const generateAnalyticsInsight = async (req, res) => {
         const pending = pendingCount.rows[0].count;
 
         const prompt = `
-            You are a Strategic Data Analyst for NRC INNOVATE-X. 
+            You are a Strategic Data Analyst for Gous org. 
             Analyze the following platform distribution:
             - User Distribution by Role: ${JSON.stringify(roleDist)}
             - Pending Access Approvals: ${pending}
@@ -262,7 +262,7 @@ export const generatePersonalizedTutorInsight = async (req, res) => {
 
         // 3. Construct Prompt with real Context
         const prompt = `
-            You are a Personal AI Learning Tutor for NRC INNOVATE-X. 
+            You are a Personal AI Learning Tutor for Gous org. 
             Student Data:
             - Skill Levels (Current vs Target): ${JSON.stringify(skills)}
             - Recent Projects: ${JSON.stringify(projects)}
@@ -313,7 +313,7 @@ export const generateExpertLectureAdvice = async (req, res) => {
         const gaps = skillGaps.rows;
 
         const prompt = `
-            You are a Lecture Strategist for NRC INNOVATE-X. 
+            You are a Lecture Strategist for Gous org. 
             Department Statistics (Avg Skill Levels): ${JSON.stringify(gaps)}
             
             Based on these weaknesses, suggest 3 highly specialized lecture topics.
@@ -356,7 +356,7 @@ export const generateManagerTeamSentiment = async (req, res) => {
         const notes = submissionNotes.rows.map(r => r.submission_notes).join(' | ');
 
         const prompt = `
-            You are a Team Performance Analyst for NRC INNOVATE-X. 
+            You are a Team Performance Analyst for Gous org. 
             Analyze the following student submission notes (sentiments): "${notes}"
             
             Identify:
@@ -415,5 +415,50 @@ export const generatePlatformHealthInsight = async (req, res) => {
     } catch (error) {
         console.error('Platform Health Error:', error);
         res.status(500).json({ success: false, message: 'Failed to generate platform health insight.' });
+    }
+};
+
+// ─── POST /api/ai/audit-intern ────────────────────────────────────
+export const auditInternPerformance = async (req, res) => {
+    const { internId } = req.body;
+
+    try {
+        // Fetch recent project submissions and mentor feedback
+        const submissionHistory = await pool.query(`
+            SELECT pa.status, pa.submission_notes, p.title
+            FROM project_assignments pa
+            JOIN projects p ON pa.project_id = p.id
+            WHERE pa.intern_id = $1
+            ORDER BY pa.submitted_at DESC
+            LIMIT 5
+        `, [internId]);
+
+        const history = submissionHistory.rows;
+
+        const prompt = `
+            You are a Senior Engineering Manager at Gous org. 
+            Evaluate the following intern's recent project performance: ${JSON.stringify(history)}
+            
+            Provide suggested scores (1-10) for:
+            - technical
+            - communication
+            - collaboration
+            - discipline
+            - problem_solving
+            
+            Also draft a 2-sentence professional comment for their performance review.
+            Format: {"scores": {"technical": 8, "communication": 7, ...}, "comments": "draft text"}
+        `;
+
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+        });
+
+        res.json({ success: true, data: JSON.parse(response.text) });
+    } catch (error) {
+        console.error('Audit Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to perform AI audit.' });
     }
 };

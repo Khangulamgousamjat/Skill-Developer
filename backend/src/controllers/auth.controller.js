@@ -1,7 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from '../config/db.js';
-import { sendEmail } from '../services/emailService.js';
+import { 
+  sendEmailVerificationOTP, 
+  sendPasswordResetOTP, 
+  sendRequestReceivedEmail 
+} from '../services/emailService.js';
 import { generateOTP } from '../utils/generateOTP.js';
 import { hashToken } from '../utils/hashToken.js';
 import crypto from 'crypto';
@@ -42,11 +46,11 @@ export const registerStudent = async (req, res, next) => {
     );
 
     // Send email
-    await sendEmail({
-      to: email,
-      subject: 'Verify your NRC INNOVATE-X account',
-      html: `<h2>Welcome to SSLLM</h2><p>Your OTP is: <strong>${otp}</strong>. It expires in 10 minutes.</p>`
-    });
+    try {
+      await sendEmailVerificationOTP(user.email, full_name, otp);
+    } catch (emailErr) {
+      console.error('Email verification OTP failed:', emailErr.message);
+    }
 
     res.status(201).json({ success: true, message: 'Registration successful. Please verify your email.', data: { userId: user.id } });
   } catch (err) {
@@ -88,11 +92,11 @@ export const registerStaff = async (req, res, next) => {
       [user.id, requested_role, department_id, employee_id, reason]
     );
 
-    await sendEmail({
-      to: email,
-      subject: 'Your access request has been received',
-      html: `<p>We received your request for ${requested_role} access. Super Admin will review it.</p>`
-    });
+    try {
+      await sendRequestReceivedEmail(user.email, full_name, requested_role);
+    } catch (emailErr) {
+      console.error('Staff request received email failed:', emailErr.message);
+    }
 
     res.status(201).json({ success: true, message: 'Request submitted for approval.', data: { userId: user.id } });
   } catch (err) {

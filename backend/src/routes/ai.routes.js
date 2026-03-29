@@ -9,7 +9,8 @@ import {
   generatePersonalizedTutorInsight,
   generateExpertLectureAdvice,
   generateManagerTeamSentiment,
-  generatePlatformHealthInsight
+  generatePlatformHealthInsight,
+  auditInternPerformance
 } from '../controllers/ai.controller.js';
 import { verifyToken, checkRole } from '../middleware/auth.middleware.js';
 
@@ -22,6 +23,7 @@ router.get('/personalized-tutor', checkRole(['student']), generatePersonalizedTu
 router.get('/expert-lecture-advice', checkRole(['expert']), generateExpertLectureAdvice);
 router.get('/manager-team-sentiment', checkRole(['manager']), generateManagerTeamSentiment);
 router.get('/platform-health', checkRole(['super_admin']), generatePlatformHealthInsight);
+router.post('/audit-intern', checkRole(['manager']), auditInternPerformance);
 router.get('/skill-gap/:internId', generateSkillGapAnalysis);
 router.post('/lecture-prep', generateLecturePrep);
 router.post('/review-project', generateProjectFeedback);

@@ -102,13 +102,16 @@ export const Sidebar = () => {
   return (
     <div className={`w-64 flex flex-col border-r shrink-0 transition-colors duration-500 ${t.sidebar}`}>
       {/* Logo / Branding */}
-      <div className={`p-5 border-b ${t.border}`}>
-        <h1 className="text-xl font-black tracking-tight font-sora" style={{ color: '#F4A100' }}>
-          NRC INNOVATE-X
-        </h1>
-        <p className={`text-[10px] tracking-widest mt-0.5 font-semibold uppercase ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`}>
-          SSLLM Platform
-        </p>
+      <div className="flex flex-col items-center px-4 py-6 border-b border-white/10">
+        <span className="text-[var(--color-accent)] font-bold text-base leading-tight text-center font-sora">
+          Smart Skill &
+        </span>
+        <span className="text-[var(--color-accent)] font-bold text-base leading-tight text-center font-sora">
+          Live Learning
+        </span>
+        <span className="text-white/60 text-xs mt-1 text-center tracking-wide">
+          Gous org
+        </span>
       </div>
 
       {/* Navigation Links */}

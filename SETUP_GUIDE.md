@@ -1,6 +1,6 @@
-# SSLLM Master Setup Guide
+# Smart Skill & Live Learning Module — Master Setup Guide
 
-This document contains everything you need to set up the necessary third-party services and initialize your database for the SSLLM ERP Platform. Follow these steps sequentially.
+This document contains everything you need to set up the necessary third-party services and initialize your database for the Gous org Learning Platform. Follow these steps sequentially.
 
 ---
 
@@ -10,7 +10,7 @@ This document contains everything you need to set up the necessary third-party s
 *Used for: Core database. Storing users, roles, and dashboards.*
 
 1. Go to **[https://supabase.com/](https://supabase.com/)** and click **Start your project**.
-2. Create a new organization and project (e.g., `SSLLM Database`). 
+2. Create a new organization and project (e.g., `Gous org Learning Database`). 
 3. **Important:** Create a strong Database Password and save it somewhere secure.
 4. Once the database finishes provisioning, go to **Settings (Gear Icon on the left) -> Database**.
 5. Scroll down to the **Connection string** section and click the **URI** tab.
@@ -18,17 +18,17 @@ This document contains everything you need to set up the necessary third-party s
 7. Replace `[YOUR-PASSWORD]` with the password you created in Step 3.
 8. **Paste this into `.env`** as `DATABASE_URL`.
 
-### 2. Email Delivery (SendGrid) 📧
+### 2. Email Delivery (Resend) 📧
 *Used for: Secure Student/Staff OTP Verification.*
 
-1. Go to **[https://sendgrid.com/](https://sendgrid.com/)** and create a free account.
+1. Go to **[https://resend.com/](https://resend.com/)** and create a search account.
 2. In the left menu dashboard, go to **Settings -> API Keys**.
 3. Click **Create API Key** (top right).
-4. Name it `SSLLM Backend` and grant it **Full Access**, then create it.
+4. Name it `Gous org Backend` and copy it.
 5. Copy the generated key (it starts with `SG.`).
-6. **Paste this into `.env`** as `SENDGRID_API_KEY`.
+6. **Paste this into `.env`** as `RESEND_API_KEY`.
 7. Go to **Settings -> Sender Authentication** and register your sender email.
-8. **Paste this email into `.env`** as `FROM_EMAIL`.
+8. **Paste this email into `.env`** as `FROM_EMAIL`. Use `onboarding@resend.dev` for testing.
 
 ### 3. Gemini 2.5 Flash AI 🤖
 *Used for: AI Mentor Chatbot and dynamic generation tools.*

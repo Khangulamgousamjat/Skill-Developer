@@ -47,9 +47,13 @@ const LoginPage = () => {
       <div className="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
 
       <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-black tracking-tight text-white mb-2 font-sora">SSLLM</h1>
-          <p className="text-blue-200 font-medium tracking-wide uppercase text-sm">NRC INNOVATE-X</p>
+        <div className="text-center mb-8">
+          <h1 className="font-sora font-bold text-2xl text-white mb-1">
+            Smart Skill & Live Learning Module
+          </h1>
+          <p className="text-blue-200 text-sm">
+            Gous org — ERP Learning Platform
+          </p>
         </div>
 
         <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-8 glare-hover">
@@ -67,7 +71,7 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl leading-5 bg-white/5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all sm:text-sm shadow-inner"
-                  placeholder="intern@nrcinnovatex.com"
+                  placeholder="intern@gousorg.com"
                   required
                 />
               </div>

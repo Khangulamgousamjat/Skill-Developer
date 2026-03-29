@@ -1,4 +1,8 @@
 import pool from '../config/db.js';
+import { 
+  sendAccountApprovedEmail, 
+  sendAccountRejectedEmail 
+} from '../services/emailService.js';
 
 // ─── GET /api/admin/role-requests ─────────────────────────────────
 export const getPendingRoleRequests = async (req, res) => {
@@ -76,6 +80,19 @@ export const approveRoleRequest = async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    // Send Approval Email (background)
+    try {
+      await sendAccountApprovedEmail(
+        request.email, 
+        request.full_name, 
+        request.requested_role,
+        `${process.env.CLIENT_URL}/login`
+      );
+    } catch (emailErr) {
+      console.error('Approval email failed:', emailErr.message);
+    }
+
     res.json({ success: true, message: 'Role request approved successfully' });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -121,6 +138,7 @@ export const rejectRoleRequest = async (req, res) => {
       [rejection_reason || 'No reason provided', request.user_id]
     );
 
+    // Insert notification for user
     await client.query(
       `INSERT INTO notifications (user_id, title, message, notification_type)
        VALUES ($1, $2, $3, 'approval_update')`,
@@ -132,6 +150,19 @@ export const rejectRoleRequest = async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    // Send Rejection Email (background)
+    try {
+      await sendAccountRejectedEmail(
+        request.email, 
+        request.full_name, 
+        request.requested_role,
+        rejection_reason
+      );
+    } catch (emailErr) {
+      console.error('Rejection email failed:', emailErr.message);
+    }
+
     res.json({ success: true, message: 'Role request rejected' });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -283,11 +314,8 @@ export const deleteDepartment = async (req, res) => {
 };
 
 // ─── PLATFORM SETTINGS ───────────────────────────────────────────
-// This uses a key-value store in a hypothetical 'platform_settings' table or just env/mock for now.
-// For now, let's assume there's a table. If not, we'll return default mock settings.
 export const getPlatformSettings = async (req, res) => {
   try {
-    // Check if table exists, if not return defaults
     const tableCheck = await pool.query("SELECT to_regclass('public.platform_settings')");
     if (!tableCheck.rows[0].to_regclass) {
       return res.json({
@@ -296,8 +324,8 @@ export const getPlatformSettings = async (req, res) => {
           maintenance_mode: false,
           allow_registration: true,
           require_approval: true,
-          company_name: 'NRC INNOVATE-X',
-          contact_email: 'support@nrcinnovatex.com'
+          company_name: 'Gous org',
+          contact_email: 'support@gousorg.com'
         }
       });
     }
@@ -315,9 +343,8 @@ export const getPlatformSettings = async (req, res) => {
 };
 
 export const updatePlatformSettings = async (req, res) => {
-  const settings = req.body; // { key: value, ... }
+  const settings = req.body; 
   try {
-    // This is a simple implementation: loop and upsert
     for (const [key, value] of Object.entries(settings)) {
       await pool.query(
         `INSERT INTO platform_settings (key, value) VALUES ($1, $2)

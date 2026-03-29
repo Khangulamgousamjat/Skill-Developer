@@ -1,6 +1,7 @@
 import pool from '../config/db.js';
 import puppeteer from 'puppeteer';
 import QRCode from 'qrcode';
+import { sendCertificateIssuedEmail } from '../services/emailService.js';
 
 // ─── GET /api/certificates ──────────────────────────────────────────
 export const getMyCertificates = async (req, res) => {
@@ -9,7 +10,7 @@ export const getMyCertificates = async (req, res) => {
   try {
     // In a production app, we would query the `certificates` table.
     // For this demonstration, we'll check if they've completed onboarding
-    // to dynamically assign an "SSLLM Onboarding Verified" certificate.
+    // to dynamically assign a "Gous org Learning Module" certificate.
     
     const userResult = await pool.query(`SELECT full_name, onboarding_completed FROM users WHERE id = $1`, [internId]);
     if (userResult.rowCount === 0) return res.status(404).json({ success: false, message: 'User not found.' });
@@ -23,7 +24,7 @@ export const getMyCertificates = async (req, res) => {
         title: 'React.js Fundamentals',
         type: 'Skill Certificate',
         issued: new Date().toLocaleDateString(),
-        code: `NRC-CERT-${internId.substring(0,6)}-REACT`,
+        code: `GOUS-CERT-${internId.substring(0,6)}-REACT`,
         color: '#3B82F6',
         earned: true,
       },
@@ -32,13 +33,13 @@ export const getMyCertificates = async (req, res) => {
         title: 'Platform Orientation completed',
         type: 'Onboarding Module',
         issued: user.onboarding_completed ? new Date().toLocaleDateString() : 'Pending',
-        code: user.onboarding_completed ? `NRC-CERT-${internId.substring(0,6)}-ONB` : null,
+        code: user.onboarding_completed ? `GOUS-CERT-${internId.substring(0,6)}-ONB` : null,
         color: '#22C55E',
         earned: user.onboarding_completed,
       },
       {
         id: 3,
-        title: 'Full Stack SSLLM Mastery',
+        title: 'Full Stack Mastery — Gous org',
         type: 'Program Completion',
         issued: 'Not yet earned',
         code: null,
@@ -110,7 +111,7 @@ export const downloadCertificate = async (req, res) => {
         <body>
           <div class="certificate">
             <h1>Certificate of Completion</h1>
-            <h2>NRC INNOVATE-X Intern Training Module</h2>
+            <h2>Gous org Learning Module</h2>
             
             <div class="certify">This certifies that</div>
             <div class="name">${internName}</div>
@@ -151,7 +152,7 @@ export const downloadCertificate = async (req, res) => {
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Length': pdfBuffer.length,
-      'Content-Disposition': `attachment; filename="NRC-CERTIFICATE-${code}.pdf"`
+      'Content-Disposition': `attachment; filename="GOUS-CERTIFICATE-${code}.pdf"`
     });
 
     res.send(pdfBuffer);

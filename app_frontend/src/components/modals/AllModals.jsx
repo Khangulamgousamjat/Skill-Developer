@@ -334,7 +334,7 @@ export const AllModals = () => {
               
               <Award className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
               <h2 className="text-3xl font-serif font-bold tracking-wide uppercase">Certificate of Achievement</h2>
-              <p className="text-gray-500 mt-2 uppercase tracking-widest text-sm">NRC INNOVATE-X SSLLM Platform</p>
+              <p className="text-gray-500 mt-2 uppercase tracking-widest text-sm">Smart Skill & Live Learning Module — Gous org</p>
               
               <div className="my-8">
                 <p className="text-gray-600 italic mb-2">This certifies that</p>

@@ -46,9 +46,13 @@ const StudentRegisterPage = () => {
       <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
 
       <div className="w-full max-w-lg relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-black tracking-tight text-white mb-2 font-sora">Student Registration</h1>
-          <p className="text-slate-400 text-sm">Create your NRC INNOVATE-X intern account</p>
+        <div className="text-center mb-6">
+          <h1 className="font-sora font-bold text-xl text-white">
+            Smart Skill & Live Learning Module
+          </h1>
+          <p className="text-slate-400 text-xs mt-1">
+            Gous org
+          </p>
         </div>
 
         <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-8 glare-hover">
@@ -82,7 +86,7 @@ const StudentRegisterPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-white/10 rounded-xl bg-white/5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all sm:text-sm"
-                  placeholder="intern@nrcinnovatex.com"
+                  placeholder="intern@gousorg.com"
                   required
                 />
               </div>
