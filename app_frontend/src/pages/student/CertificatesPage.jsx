@@ -1,47 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { Award, Download, BadgeCheck, QrCode, Lock } from 'lucide-react';
+import { Award, Download, BadgeCheck, QrCode, Lock, Loader2 } from 'lucide-react';
+import axios from '../../api/axios';
+import toast from 'react-hot-toast';
 
-const mockCertificates = [
-  {
-    id: 1,
-    title: 'React.js Fundamentals',
-    type: 'Skill Certificate',
-    issued: 'March 2026',
-    code: 'NRC-CERT-001-REACT',
-    color: '#3B82F6',
-    earned: true,
-  },
-  {
-    id: 2,
-    title: 'Inventory System Project',
-    type: 'Project Completion',
-    issued: 'March 2026',
-    code: 'NRC-CERT-002-PROJ',
-    color: '#22C55E',
-    earned: true,
-  },
-  {
-    id: 3,
-    title: 'Node.js & Backend APIs',
-    type: 'Skill Certificate',
-    issued: 'Not yet earned',
-    code: null,
-    color: '#8B5CF6',
-    earned: false,
-  },
-  {
-    id: 4,
-    title: 'SSLLM Platform Completion',
-    type: 'Program Completion',
-    issued: 'Not yet earned',
-    code: null,
-    color: '#F4A100',
-    earned: false,
-  },
-];
-
-const CertificateCard = ({ cert, t, isDarkMode }) => (
+const CertificateCard = ({ cert, t, isDarkMode, onDownload }) => (
   <div className={`rounded-2xl overflow-hidden glare-hover relative ${t.card} ${!cert.earned ? 'opacity-60' : ''}`}>
     {/* Color top bar */}
     <div className="h-1.5 w-full" style={{ background: cert.color }} />
@@ -79,6 +42,7 @@ const CertificateCard = ({ cert, t, isDarkMode }) => (
               <QrCode className="w-3.5 h-3.5" /> View QR
             </button>
             <button
+              onClick={() => onDownload(cert.code)}
               className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl text-slate-900 transition-colors hover:opacity-90"
               style={{ background: cert.color }}
             >
@@ -99,8 +63,58 @@ const CertificateCard = ({ cert, t, isDarkMode }) => (
 
 const CertificatesPage = () => {
   const { t, isDarkMode } = useAppContext();
-  const earned = mockCertificates.filter(c => c.earned);
-  const locked = mockCertificates.filter(c => !c.earned);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      const response = await axios.get('/certificates');
+      if (response.data.success) {
+        setCertificates(response.data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to load certificates.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = async (code) => {
+    try {
+      toast.loading('Generating PDF...', { id: 'download' });
+      const response = await axios.get(`/certificates/download/${code}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `NRC-CERTIFICATE-${code}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('Certificate downloaded!', { id: 'download' });
+    } catch (error) {
+      toast.error('Failed to generate certificate.', { id: 'download' });
+    }
+  };
+
+  const earned = certificates.filter(c => c.earned);
+  const locked = certificates.filter(c => !c.earned);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
+        <p className={t.textMuted}>Preparing your achievements...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -116,15 +130,29 @@ const CertificatesPage = () => {
       </div>
 
       <div>
-        <h3 className={`font-semibold mb-3 text-sm uppercase tracking-wider ${t.textMuted}`}>Earned ({earned.length})</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {earned.map(c => <CertificateCard key={c.id} cert={c} t={t} isDarkMode={isDarkMode} />)}
-        </div>
+        {earned.length > 0 && (
+          <>
+            <h3 className={`font-semibold mb-3 text-sm uppercase tracking-wider ${t.textMuted}`}>Earned ({earned.length})</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {earned.map(c => <CertificateCard key={c.id} cert={c} t={t} isDarkMode={isDarkMode} onDownload={handleDownload} />)}
+            </div>
+          </>
+        )}
 
-        <h3 className={`font-semibold mb-3 text-sm uppercase tracking-wider ${t.textMuted}`}>Locked ({locked.length})</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {locked.map(c => <CertificateCard key={c.id} cert={c} t={t} isDarkMode={isDarkMode} />)}
-        </div>
+        {locked.length > 0 && (
+          <>
+            <h3 className={`font-semibold mb-3 text-sm uppercase tracking-wider ${t.textMuted}`}>Locked ({locked.length})</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {locked.map(c => <CertificateCard key={c.id} cert={c} t={t} isDarkMode={isDarkMode} onDownload={handleDownload} />)}
+            </div>
+          </>
+        )}
+
+        {certificates.length === 0 && (
+          <div className={`p-10 rounded-2xl text-center border-dashed border ${t.borderSoft}`}>
+             <p className={t.textMuted}>No certificates available for your program path yet.</p>
+          </div>
+        )}
       </div>
     </div>
   );
