@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }) {
   );
 
   return (
-    <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden font-sans text-[var(--color-text-primary)]">
+    <div className={`${theme} flex h-screen bg-[var(--color-bg)] overflow-hidden font-sans text-[var(--color-text-primary)]`}>
       {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col shrink-0 transition-all duration-300 z-20 shadow-lg ${collapsed ? 'w-[72px]' : 'w-[260px]'}`}
@@ -190,8 +190,8 @@ export default function DashboardLayout({ children }) {
       {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 shadow-xl z-10 transition-transform">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-64 shadow-xl z-10 transition-transform bg-[var(--color-surface)] border-r border-[var(--color-border)]">
             <SidebarContent />
           </aside>
         </div>
@@ -203,11 +203,11 @@ export default function DashboardLayout({ children }) {
         <header className="h-16 shrink-0 flex items-center justify-between px-4 md:px-6
                            bg-[var(--color-surface)] border-b border-[var(--color-border)] z-10 shadow-sm relative">
           <div className="flex items-center gap-3">
-            <button className="md:hidden p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-black/5 dark:hover:bg-white/5"
+            <button className="md:hidden p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-border)]/50"
                     onClick={() => setMobileOpen(true)}>
               <Menu size={20} />
             </button>
-            <button className="hidden md:flex p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-black/5 dark:hover:bg-white/5"
+            <button className="hidden md:flex p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-border)]/50"
                     onClick={() => setCollapsed(!collapsed)}>
               {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             </button>
@@ -217,14 +217,14 @@ export default function DashboardLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button onClick={handleTheme} className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="Toggle theme">
+            <button onClick={handleTheme} className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-border)]/50 transition-all" title="Toggle theme">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button className="relative p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-black/5 dark:hover:bg-white/5"
+            <button className="relative p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-border)]/50"
                     onClick={() => navigate(`/${user?.role === 'super_admin' ? 'admin' : user?.role?.replace('_admin','')}/messages`)}>
               <Bell size={18} />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--color-surface)]">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

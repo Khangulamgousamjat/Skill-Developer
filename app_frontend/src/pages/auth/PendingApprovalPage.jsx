@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logoutSuccess as logout } from '../../store/slices/authSlice';
 
 export default function PendingApprovalPage() {
+  const { theme } = useSelector((state) => state.ui);
   const [status, setStatus] = useState('pending'); // pending, approved, rejected
   const [reason, setReason] = useState('');
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function PendingApprovalPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] p-4">
+    <div className={`${theme} min-h-screen flex items-center justify-center bg-[var(--color-bg)] p-4 transition-colors duration-300`}>
       <div className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-xl p-8 text-center flex flex-col items-center">
         
         <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary)] flex items-center justify-center mb-6">

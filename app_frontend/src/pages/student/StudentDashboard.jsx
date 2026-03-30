@@ -108,12 +108,12 @@ export default function StudentDashboard() {
               {data.skills.map((skill, idx) => {
                 const isGood = skill.gap >= 75;
                 const isWarn = skill.gap >= 40 && skill.gap < 75;
-                const barColor = isGood ? 'bg-green-500' : isWarn ? 'bg-amber-500' : 'bg-red-500';
+                const barColor = isGood ? 'bg-[var(--color-success)]' : isWarn ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-danger)]';
                 return (
                   <div key={idx}>
                     <div className="flex justify-between text-sm mb-1.5 font-medium">
                       <span className="text-[var(--color-text-primary)]">{skill.name}</span>
-                      <span className={isGood ? 'text-green-500' : isWarn ? 'text-amber-500' : 'text-red-500'}>
+                      <span className={isGood ? 'text-[var(--color-success)]' : isWarn ? 'text-[var(--color-warning)]' : 'text-[var(--color-danger)]'}>
                         {skill.gap}%
                       </span>
                     </div>
@@ -181,8 +181,8 @@ export default function StudentDashboard() {
           </div>
 
           {/* Today's AI Recommendation */}
-          <div className="bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 border border-[var(--color-border)] rounded-xl shadow-md overflow-hidden flex flex-col relative text-white">
-            <div className="absolute top-0 right-0 p-4 opacity-20">
+          <div className="bg-[var(--color-primary)] border border-white/10 rounded-xl shadow-lg overflow-hidden flex flex-col relative text-white">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
               <Bot size={80} />
             </div>
             <div className="px-6 py-4 border-b border-white/10 relative z-10 flex items-center gap-2">
@@ -196,7 +196,7 @@ export default function StudentDashboard() {
                      {data.aiRecommendation.platform} match
                    </span>
                    <h3 className="text-xl font-bold font-sora mb-2">{data.aiRecommendation.title}</h3>
-                   <p className="text-sm text-indigo-100/80 mb-6 flex-1">{data.aiRecommendation.reason}</p>
+                   <p className="text-sm text-white/70 mb-6 flex-1">{data.aiRecommendation.reason}</p>
                    <button className="w-full py-3 bg-[var(--color-accent)] text-[var(--color-primary)] font-bold text-sm rounded-lg hover:bg-white transition-colors flex items-center justify-center gap-2">
                      Start Learning <ArrowRight size={16} />
                    </button>

@@ -2,11 +2,11 @@ export default function StatCard({
   title, value, icon: Icon, color = 'primary', trend
 }) {
   const colors = {
-    primary : 'bg-blue-50   text-blue-600   dark:bg-blue-900/20 dark:text-blue-400',
-    success : 'bg-green-50  text-green-600  dark:bg-green-900/20 dark:text-green-400',
-    warning : 'bg-amber-50  text-amber-600  dark:bg-amber-900/20 dark:text-amber-400',
-    danger  : 'bg-red-50    text-red-600    dark:bg-red-900/20 dark:text-red-400',
-    info    : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
+    primary : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]',
+    success : 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+    warning : 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+    danger  : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]',
+    info    : 'bg-[var(--color-info)]/10 text-[var(--color-info)]',
   };
 
   return (
@@ -21,7 +21,7 @@ export default function StatCard({
           </p>
           {trend !== undefined && (
             <div className={`flex items-center gap-1 mt-2 text-xs font-medium px-2 py-0.5 rounded-full inline-flex
-              ${trend >= 0 ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
+              ${trend >= 0 ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'}`}>
               <span>{trend >= 0 ? '▲' : '▼'}</span>
               <span>{Math.abs(trend)}% this week</span>
             </div>

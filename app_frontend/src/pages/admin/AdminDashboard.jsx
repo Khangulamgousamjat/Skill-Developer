@@ -88,7 +88,7 @@ export default function AdminDashboard() {
     return (
       <DashboardLayout>
         <div className="text-center py-20 min-h-[50vh] flex flex-col items-center justify-center">
-          <p className="text-red-500 font-medium mb-4">{error}</p>
+          <p className="text-[var(--color-danger)] font-medium mb-4">{error}</p>
           <button onClick={fetchData} className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium">
             Try Again
           </button>
@@ -124,10 +124,10 @@ export default function AdminDashboard() {
           
           {data.requests.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
-                 <Check size={32} className="text-green-500" />
+              <div className="w-16 h-16 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--color-success)]/20">
+                 <Check size={32} className="text-[var(--color-success)]" />
               </div>
-              <p className="text-green-600 font-bold text-lg mb-1 font-sora">All Caught Up!</p>
+              <p className="text-[var(--color-success)] font-bold text-lg mb-1 font-sora">All Caught Up!</p>
               <p className="text-[var(--color-text-muted)] text-sm">There are no pending role requests.</p>
             </div>
           ) : (
@@ -164,13 +164,13 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
                         <button 
                           onClick={() => handleApprove(req.id)}
-                          className="px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors inline-flex items-center gap-1 font-bold text-xs"
+                          className="px-3 py-1.5 bg-[var(--color-success)] text-white rounded-lg hover:opacity-90 transition-colors inline-flex items-center gap-1 font-bold text-xs"
                         >
                           <Check size={14} /> Approve
                         </button>
                         <button 
                           onClick={() => handleReject(req.id)}
-                          className="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors inline-flex items-center gap-1 font-bold text-xs"
+                          className="px-3 py-1.5 bg-[var(--color-danger)] text-white rounded-lg hover:opacity-90 transition-colors inline-flex items-center gap-1 font-bold text-xs"
                         >
                           <X size={14} /> Reject
                         </button>
