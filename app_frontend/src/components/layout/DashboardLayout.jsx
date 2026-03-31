@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }) {
   );
 
   return (
-    <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden font-sans text-[var(--color-text-primary)]">
+    <div className={`${theme} flex h-screen bg-[var(--color-bg)] overflow-hidden font-sans text-[var(--color-text-primary)]`}>
       {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col shrink-0 transition-all duration-300 z-20 shadow-lg ${collapsed ? 'w-[72px]' : 'w-[260px]'}`}

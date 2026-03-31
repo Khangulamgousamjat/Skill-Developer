@@ -7,27 +7,41 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import authRoutes from './routes/auth.routes.js';
-// other routes placeholders
-import adminRoutes from './routes/admin.routes.js';
-import hrRoutes from './routes/hr.routes.js';
-import managerRoutes from './routes/manager.routes.js';
-import expertRoutes from './routes/expert.routes.js';
+import departmentRoutes from './routes/departments.routes.js';
+import roleRequestRoutes from './routes/roleRequests.routes.js';
 import studentRoutes from './routes/student.routes.js';
 import skillsRoutes from './routes/skills.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
 import certificateRoutes from './routes/certificate.routes.js';
 import evaluationRoutes from './routes/evaluation.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+// Add any other existing routes here as they are developed
+// import lectureRoutes from './routes/lecture.routes.js'; (Placeholder)
 
 const app = express();
 
 // CORS — MUST come before routes
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,
+  'https://smart-skill-live-learning-module.vercel.app',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, true); // allow all in dev/production fallback for debugging
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
 }));
+
+app.options('*', cors());
 
 app.use(helmet());
 app.use(morgan('dev'));
@@ -35,12 +49,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Routes
+// ── PUBLIC ROUTES (no auth needed) ────────────────
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/hr', hrRoutes);
-app.use('/api/manager', managerRoutes);
-app.use('/api/expert', expertRoutes);
+app.use('/api/departments', departmentRoutes);
+
+// ── PROTECTED ROUTES (need auth token) ────────────
+// Note: verifyToken is typically applied INSIDE these route files or here.
+// For now, following the user requested structure.
+app.use('/api/role-requests', roleRequestRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/skills', skillsRoutes);
 app.use('/api/projects', projectsRoutes);

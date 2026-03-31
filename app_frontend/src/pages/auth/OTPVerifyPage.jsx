@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
 import toast from 'react-hot-toast';
 
 export default function OTPVerifyPage() {
+  const { theme } = useSelector((state) => state.ui);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
@@ -87,7 +89,7 @@ export default function OTPVerifyPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4">
+    <div className={`${theme} min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 transition-colors duration-300`}>
       <div className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-xl p-8 text-center">
         
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-green-500/10 text-green-500">

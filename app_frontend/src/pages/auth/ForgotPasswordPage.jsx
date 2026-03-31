@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function ForgotPasswordPage() {
+  const { theme } = useSelector((state) => state.ui);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +20,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4">
+    <div className={`${theme} min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 transition-colors duration-300`}>
       <div className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-xl p-8 text-center">
         
         <h1 className="text-xl font-bold font-sora text-[var(--color-text-primary)] mb-2">Forgot Password</h1>

@@ -109,6 +109,13 @@ export default function App() {
             </ProtectedRoute>
           } />
 
+          {/* Placeholder/Sub-routes to prevent 404s */}
+          <Route path="/student/*" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+          <Route path="/manager/*" element={<ProtectedRoute allowedRoles={['manager', 'super_admin']}><ManagerDashboard /></ProtectedRoute>} />
+          <Route path="/hr/*" element={<ProtectedRoute allowedRoles={['hr_admin', 'super_admin']}><HRDashboard /></ProtectedRoute>} />
+          <Route path="/expert/*" element={<ProtectedRoute allowedRoles={['expert', 'super_admin']}><ExpertDashboard /></ProtectedRoute>} />
+          <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['super_admin']}><AdminDashboard /></ProtectedRoute>} />
+
           {/* Catch All 404 */}
           <Route path="*" element={
             <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-bg)]">
