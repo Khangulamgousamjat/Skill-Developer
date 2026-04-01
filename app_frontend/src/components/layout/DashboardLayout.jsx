@@ -15,6 +15,7 @@ import {
 import { setTheme } from '../../store/slices/uiSlice';
 import { applyTheme } from '../../utils/applyTheme';
 import { useLanguage } from '../../contexts/LanguageContext';
+import AIChatbot from '../shared/AIChatbot';
 
 const NAV_KEYS_ROLES = {
   student: [
@@ -254,6 +255,9 @@ export default function DashboardLayout({ children }) {
             {children}
           </div>
         </main>
+
+        {/* AI Chatbot - Student Only */}
+        {user?.role === 'student' && <AIChatbot />}
       </div>
     </div>
   );

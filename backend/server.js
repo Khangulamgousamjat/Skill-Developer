@@ -104,13 +104,51 @@ async function createTablesIfNotExist() {
 
     await db.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token_hash   VARCHAR(255) NOT NULL UNIQUE,
+        expires_at   TIMESTAMP NOT NULL,
+        is_revoked   BOOLEAN DEFAULT FALSE,
+        created_at   TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    // --- STUDENT DASHBOARD TABLES ---
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS personal_projects (
         id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        user_id     UUID NOT NULL REFERENCES users(id)
-                    ON DELETE CASCADE,
-        token_hash  VARCHAR(255) NOT NULL UNIQUE,
-        expires_at  TIMESTAMP NOT NULL,
-        is_revoked  BOOLEAN DEFAULT FALSE,
-        created_at  TIMESTAMP DEFAULT NOW()
+        user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title       VARCHAR(255) NOT NULL,
+        description TEXT,
+        link        VARCHAR(500),
+        status      VARCHAR(50) DEFAULT 'In Progress',
+        created_at  TIMESTAMP DEFAULT NOW(),
+        updated_at  TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS learning_roadmaps (
+        id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        topic_name  VARCHAR(100) NOT NULL,
+        roadmap_json JSONB NOT NULL,
+        status      VARCHAR(50) DEFAULT 'Not Started',
+        created_at  TIMESTAMP DEFAULT NOW(),
+        updated_at  TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS gamification (
+        id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id              UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        total_xp             INTEGER DEFAULT 0,
+        current_level        INTEGER DEFAULT 1,
+        current_streak_days  INTEGER DEFAULT 0,
+        last_activity_at     TIMESTAMP DEFAULT NOW(),
+        badges               JSONB DEFAULT '[]',
+        updated_at           TIMESTAMP DEFAULT NOW()
       )
     `);
 

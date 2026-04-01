@@ -189,3 +189,114 @@ export const submitProject = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to submit project.' });
   }
 };
+
+// ─── PERSONAL PROJECTS CRUD ────────────────────────────────────────
+
+export const getPersonalProjects = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const result = await pool.query(
+      'SELECT * FROM personal_projects WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching personal projects' });
+  }
+};
+
+export const createPersonalProject = async (req, res) => {
+  const userId = req.user.id;
+  const { title, description, link } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO personal_projects (user_id, title, description, link) VALUES ($1, $2, $3, $4) RETURNING *',
+      [userId, title, description, link]
+    );
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error creating project' });
+  }
+};
+
+export const updatePersonalProject = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, link, status } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE personal_projects 
+       SET title = $1, description = $2, link = $3, status = $4, updated_at = NOW() 
+       WHERE id = $5 AND user_id = $6 RETURNING *`,
+      [title, description, link, status, id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ success: false, message: 'Project not found' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error updating project' });
+  }
+};
+
+export const deletePersonalProject = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      'DELETE FROM personal_projects WHERE id = $1 AND user_id = $2',
+      [id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ success: false, message: 'Project not found' });
+    res.json({ success: true, message: 'Project deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error deleting project' });
+  }
+};
+
+// ─── ROADMAP GENERATION ───────────────────────────────────────────
+
+export const generateRoadmap = async (req, res) => {
+  const userId = req.user.id;
+  const { topic } = req.body;
+  
+  // Mock roadmap generation logic for 20+ topics
+  const mockRoadmap = [
+    { step: 1, title: `Introduction to ${topic}`, status: 'Not Started' },
+    { step: 2, title: `Core Concepts of ${topic}`, status: 'Locked' },
+    { step: 3, title: `Advanced Techniques`, status: 'Locked' },
+    { step: 4, title: `Final Project`, status: 'Locked' }
+  ];
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO learning_roadmaps (user_id, topic_name, roadmap_json) VALUES ($1, $2, $3) RETURNING *',
+      [userId, topic, JSON.stringify(mockRoadmap)]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error generating roadmap' });
+  }
+};
+
+export const getMyRoadmaps = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const result = await pool.query(
+      'SELECT * FROM learning_roadmaps WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching roadmaps' });
+  }
+};
+
+export const getMyCertificates = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const result = await pool.query(
+      'SELECT * FROM certificates WHERE intern_id = $1 ORDER BY issued_at DESC',
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching certificates' });
+  }
+};
