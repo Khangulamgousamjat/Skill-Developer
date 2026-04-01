@@ -10,7 +10,7 @@ import {
   ChevronLeft, ChevronRight, LogOut, Sun, Moon,
   BarChart2, Target, CheckSquare, Megaphone,
   ClipboardList, Building2, Lightbulb, GraduationCap,
-  Menu, X
+  Menu, X, Trophy
 } from 'lucide-react';
 import { setTheme } from '../../store/slices/uiSlice';
 import { applyTheme } from '../../utils/applyTheme';
@@ -25,6 +25,7 @@ const NAV_KEYS_ROLES = {
     { labelKey: 'lectures',       icon: BookOpen,        path: '/student/lectures' },
     { labelKey: 'learningPath',  icon: Lightbulb,       path: '/student/learning-path' },
     { labelKey: 'certificates',   icon: Award,           path: '/student/certificates' },
+    { labelKey: 'leaderboard',    icon: Trophy,          path: '/leaderboard' },
     { labelKey: 'messages',       icon: MessageSquare,   path: '/student/messages' },
     { labelKey: 'profile',        icon: User,            path: '/student/profile' },
     { labelKey: 'settings',       icon: Settings,        path: '/student/settings' },

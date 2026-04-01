@@ -87,3 +87,94 @@ export const getUserById = async (req, res) => {
     });
   }
 };
+
+/**
+ * Update user profile (bio, phone, photo)
+ * PUT /api/users/profile
+ */
+export const updateProfile = async (req, res) => {
+  const userId = req.user.id;
+  const { bio, phone, profile_photo_url } = req.body;
+
+  try {
+    const result = await db.query(
+      `UPDATE users 
+       SET bio = COALESCE($1, bio), 
+           phone = COALESCE($2, phone), 
+           profile_photo_url = COALESCE($3, profile_photo_url),
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING id, full_name, email, role, bio, phone, profile_photo_url`,
+      [bio, phone, profile_photo_url, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update profile' });
+  }
+};
+
+/**
+ * Get public profile logic
+ * GET /api/users/public/:id
+ */
+export const getPublicProfile = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const userResult = await db.query(
+      `SELECT u.id, u.full_name, u.role, u.bio, u.profile_photo_url, d.name as department_name,
+              g.total_xp, g.current_level, g.badges
+       FROM users u
+       LEFT JOIN departments d ON u.department_id = d.id
+       LEFT JOIN gamification g ON u.id = g.user_id
+       WHERE u.id = $1`,
+      [id]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      data: userResult.rows[0]
+    });
+  } catch (error) {
+    console.error('Get public profile error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch public profile' });
+  }
+};
+
+/**
+ * Get Global Leaderboard
+ * GET /api/users/leaderboard
+ */
+export const getLeaderboard = async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT u.id, u.full_name, u.profile_photo_url, d.name as department_name,
+              g.total_xp, g.current_level
+       FROM gamification g
+       JOIN users u ON g.user_id = u.id
+       LEFT JOIN departments d ON u.department_id = d.id
+       ORDER BY g.total_xp DESC
+       LIMIT 10`
+    );
+
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('Get leaderboard error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch leaderboard' });
+  }
+};

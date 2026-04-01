@@ -152,6 +152,30 @@ async function createTablesIfNotExist() {
       )
     `);
 
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS user_badges (
+        id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        badge_name  VARCHAR(100) NOT NULL,
+        badge_icon  VARCHAR(100),
+        earned_at   TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title             VARCHAR(255) NOT NULL,
+        message           TEXT NOT NULL,
+        notification_type VARCHAR(50) NOT NULL,
+        is_read           BOOLEAN DEFAULT FALSE,
+        read_at           TIMESTAMP,
+        action_url        VARCHAR(500),
+        created_at        TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
     // After creating departments table:
     const deptCheck = await db.query(
       'SELECT COUNT(*) FROM departments'

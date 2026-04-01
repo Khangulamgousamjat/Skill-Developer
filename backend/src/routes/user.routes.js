@@ -1,11 +1,24 @@
 import express from 'express';
-import { getUsers, getUserById } from '../controllers/user.controller.js';
-// verifyToken and checkRole would be used here in a real app
-// For now, following the pattern of providing the route
+import { 
+  getUsers, 
+  getUserById, 
+  updateProfile, 
+  getPublicProfile, 
+  getLeaderboard 
+} from '../controllers/user.controller.js';
+import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-router.get('/', getUsers);
-router.get('/:id', getUserById);
+// Publicly available within app
+router.get('/leaderboard', verifyToken, getLeaderboard);
+router.get('/public/:id',  verifyToken, getPublicProfile);
+
+// Profile management
+router.put('/profile',     verifyToken, updateProfile);
+
+// Admin / General User views
+router.get('/',            getUsers);
+router.get('/:id',         getUserById);
 
 export default router;

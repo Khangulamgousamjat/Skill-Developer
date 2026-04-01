@@ -114,6 +114,8 @@ import LandingPage
 import NotFoundPage
   from './pages/public/NotFoundPage';
 import SettingsPage from './pages/shared/SettingsPage';
+import PublicProfile from './pages/shared/PublicProfile';
+import Leaderboard from './pages/shared/Leaderboard';
 
 // ── PROTECTED ROUTE ───────────────────────────────
 function ProtectedRoute({ children, allowedRoles }) {
@@ -421,6 +423,18 @@ export default function App() {
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <DashboardRedirect />
+          </ProtectedRoute>
+        } />
+
+        {/* ── SHARED ───────────────────────────── */}
+        <Route path="/profile/:id" element={
+          <ProtectedRoute>
+            <PublicProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="/leaderboard" element={
+          <ProtectedRoute>
+            <Leaderboard />
           </ProtectedRoute>
         } />
 
