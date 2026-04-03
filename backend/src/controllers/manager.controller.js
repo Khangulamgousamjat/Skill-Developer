@@ -145,9 +145,9 @@ export const getDepartmentLectures = async (req, res) => {
     const result = await pool.query(`
       SELECT 
         l.id, l.title, l.description, l.scheduled_at, l.meeting_link, l.status,
-        u.full_name as expert_name
+        u.full_name as teacher_name
       FROM lectures l
-      JOIN users u ON l.expert_id = u.id
+      JOIN users u ON l.teacher_id = u.id
       WHERE l.department_id = (SELECT department_id FROM users WHERE id = $1)
       OR l.department_id IS NULL
       ORDER BY l.scheduled_at DESC
@@ -162,7 +162,7 @@ export const getDepartmentLectures = async (req, res) => {
 // ─── POST /api/manager/lectures ────────────────────────────────────
 export const scheduleLecture = async (req, res) => {
   const managerId = req.user.id;
-  const { title, description, scheduledAt, meetingLink, expertId } = req.body;
+  const { title, description, scheduledAt, meetingLink, teacherId } = req.body;
   
   try {
     // Get manager's department
@@ -170,10 +170,10 @@ export const scheduleLecture = async (req, res) => {
     const deptId = deptRes.rows[0]?.department_id;
 
     const result = await pool.query(`
-      INSERT INTO lectures (title, description, scheduled_at, meeting_link, expert_id, department_id, status)
+      INSERT INTO lectures (title, description, scheduled_at, meeting_link, teacher_id, department_id, status)
       VALUES ($1, $2, $3, $4, $5, $6, 'upcoming')
       RETURNING *
-    `, [title, description, scheduledAt, meetingLink, expertId || managerId, deptId]);
+    `, [title, description, scheduledAt, meetingLink, teacherId || managerId, deptId]);
 
     res.status(201).json({ success: true, message: 'Lecture scheduled successfully', data: result.rows[0] });
   } catch (err) {

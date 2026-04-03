@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useAppLogic } from '../hooks/useAppLogic';
 
 const AppContext = createContext(null);

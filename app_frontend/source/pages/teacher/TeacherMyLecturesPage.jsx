@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Video, Calendar, Clock, Plus, 
   ExternalLink, Users, MessageSquare, 
@@ -9,7 +9,7 @@ import api from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import { useAppContext } from '../../context/AppContext';
 
-export const ExpertMyLecturesPage = () => {
+export const TeacherMyLecturesPage = () => {
   const { t, isDarkMode } = useAppContext();
   const [lectures, setLectures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ export const ExpertMyLecturesPage = () => {
   const fetchLectures = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/expert/lectures');
+      const res = await api.get('/Teacher/lectures');
       if (res.data.success) {
         setLectures(res.data.data);
       }
@@ -43,7 +43,7 @@ export const ExpertMyLecturesPage = () => {
     e.preventDefault();
     try {
       toast.loading('Scheduling your session...', { id: 'schedule' });
-      await api.post('/expert/lectures', form);
+      await api.post('/Teacher/lectures', form);
       toast.success('Lecture broadcast scheduled!', { id: 'schedule' });
       setIsModalOpen(false);
       setForm({ title: '', description: '', scheduledTime: '', link: '' });
@@ -70,7 +70,7 @@ export const ExpertMyLecturesPage = () => {
             <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
               <Video className="w-5 h-5 text-indigo-500" />
             </div>
-            Expert Broadcasts
+            Teacher Broadcasts
           </h2>
           <p className={`text-sm ${t.textMuted} mt-1`}>Scale your knowledge globally. Schedule and manage your live technical sessions.</p>
         </div>
@@ -163,7 +163,7 @@ export const ExpertMyLecturesPage = () => {
                     <h3 className={`text-2xl font-bold font-sora ${t.textMain}`}>Schedule Broadcast</h3>
                     <p className={`text-xs ${t.textMuted} mt-1`}>Define the parameters for your technical knowledge scale.</p>
                  </div>
-                 <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">âœ•</button>
+                 <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">✕</button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -204,7 +204,7 @@ export const ExpertMyLecturesPage = () => {
 
                  <div className="pt-4">
                     <button type="submit" className="w-full py-4 bg-indigo-600 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-indigo-500 transition-all active:scale-[0.98]">
-                       Commit to Calendar â†’
+                       Commit to Calendar →
                     </button>
                  </div>
               </form>
@@ -215,5 +215,5 @@ export const ExpertMyLecturesPage = () => {
   );
 };
 
-export default ExpertMyLecturesPage;
+export default TeacherMyLecturesPage;
 

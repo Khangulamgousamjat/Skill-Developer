@@ -22,6 +22,7 @@ import MyCertificates from './pages/student/MyCertificates';
 import StudentMessages from './pages/student/StudentMessages';
 import StudentProfile from './pages/student/StudentProfile';
 import LanguageSection from './pages/student/LanguageSection';
+import StudentVideosPage from './pages/student/StudentVideosPage';
 
 // -- MANAGER --
 import ManagerDashboard from './pages/manager/ManagerDashboard';
@@ -43,13 +44,14 @@ import HREvaluations from './pages/hr/HREvaluations';
 import HRMessages from './pages/hr/HRMessages';
 import HRProfile from './pages/hr/HRProfile';
 
-// -- EXPERT --
-import ExpertDashboard from './pages/expert/ExpertDashboard';
-import ExpertLectures from './pages/expert/ExpertLectures';
-import ExpertResources from './pages/expert/ExpertResources';
-import ExpertQnA from './pages/expert/ExpertQnA';
-import ExpertMessages from './pages/expert/ExpertMessages';
-import ExpertProfile from './pages/expert/ExpertProfile';
+// -- TEACHER --
+import TeacherDashboard from './pages/teacher/TeacherDashboard';
+import TeacherLectures from './pages/teacher/TeacherLectures';
+import TeacherResources from './pages/teacher/TeacherResources';
+import TeacherVideosPage from './pages/teacher/TeacherVideosPage';
+import TeacherQnA from './pages/teacher/TeacherQnA';
+import TeacherMessages from './pages/teacher/TeacherMessages';
+import TeacherProfile from './pages/teacher/TeacherProfile';
 
 // -- ADMIN --
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -86,7 +88,7 @@ function DashboardRedirect() {
     super_admin: '/admin/dashboard',
     hr_admin: '/hr/dashboard',
     manager: '/manager/dashboard',
-    expert: '/expert/dashboard',
+    teacher: '/teacher/dashboard',
     student: '/student/dashboard',
   };
   return <Navigate to={homes[user?.role] || '/login'} replace />;
@@ -121,6 +123,7 @@ export default function App() {
         <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['student']}><StudentMessages /></ProtectedRoute>} />
         <Route path="/student/profile" element={<ProtectedRoute allowedRoles={['student']}><StudentProfile /></ProtectedRoute>} />
         <Route path="/student/languages" element={<ProtectedRoute allowedRoles={['student']}><LanguageSection /></ProtectedRoute>} />
+        <Route path="/student/videos" element={<ProtectedRoute allowedRoles={['student']}><StudentVideosPage /></ProtectedRoute>} />
         <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><SettingsPage /></ProtectedRoute>} />
 
         {/* Manager */}
@@ -132,6 +135,7 @@ export default function App() {
         <Route path="/manager/skills" element={<ProtectedRoute allowedRoles={['manager']}><SkillHeatMap /></ProtectedRoute>} />
         <Route path="/manager/messages" element={<ProtectedRoute allowedRoles={['manager']}><ManagerMessages /></ProtectedRoute>} />
         <Route path="/manager/profile" element={<ProtectedRoute allowedRoles={['manager']}><ManagerProfile /></ProtectedRoute>} />
+        <Route path="/manager/approvals" element={<ProtectedRoute allowedRoles={['manager']}><ApprovalRequests /></ProtectedRoute>} />
         <Route path="/manager/settings" element={<ProtectedRoute allowedRoles={['manager']}><SettingsPage /></ProtectedRoute>} />
 
         {/* HR */}
@@ -145,14 +149,15 @@ export default function App() {
         <Route path="/hr/profile" element={<ProtectedRoute allowedRoles={['hr_admin']}><HRProfile /></ProtectedRoute>} />
         <Route path="/hr/settings" element={<ProtectedRoute allowedRoles={['hr_admin']}><SettingsPage /></ProtectedRoute>} />
 
-        {/* Expert */}
-        <Route path="/expert/dashboard" element={<ProtectedRoute allowedRoles={['expert']}><ExpertDashboard /></ProtectedRoute>} />
-        <Route path="/expert/lectures" element={<ProtectedRoute allowedRoles={['expert']}><ExpertLectures /></ProtectedRoute>} />
-        <Route path="/expert/resources" element={<ProtectedRoute allowedRoles={['expert']}><ExpertResources /></ProtectedRoute>} />
-        <Route path="/expert/qna" element={<ProtectedRoute allowedRoles={['expert']}><ExpertQnA /></ProtectedRoute>} />
-        <Route path="/expert/messages" element={<ProtectedRoute allowedRoles={['expert']}><ExpertMessages /></ProtectedRoute>} />
-        <Route path="/expert/profile" element={<ProtectedRoute allowedRoles={['expert']}><ExpertProfile /></ProtectedRoute>} />
-        <Route path="/expert/settings" element={<ProtectedRoute allowedRoles={['expert']}><SettingsPage /></ProtectedRoute>} />
+        {/* Teacher */}
+        <Route path="/teacher/dashboard" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherDashboard /></ProtectedRoute>} />
+        <Route path="/teacher/lectures" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherLectures /></ProtectedRoute>} />
+        <Route path="/teacher/resources" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherResources /></ProtectedRoute>} />
+        <Route path="/teacher/videos" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherVideosPage /></ProtectedRoute>} />
+        <Route path="/teacher/qna" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherQnA /></ProtectedRoute>} />
+        <Route path="/teacher/messages" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherMessages /></ProtectedRoute>} />
+        <Route path="/teacher/profile" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherProfile /></ProtectedRoute>} />
+        <Route path="/teacher/settings" element={<ProtectedRoute allowedRoles={['teacher']}><SettingsPage /></ProtectedRoute>} />
 
         {/* Admin */}
         <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['super_admin']}><AdminDashboard /></ProtectedRoute>} />

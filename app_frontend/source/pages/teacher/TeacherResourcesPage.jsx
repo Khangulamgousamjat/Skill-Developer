@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FileText, Plus, Download, Trash2, 
   ExternalLink, Search, Filter, Loader2,
@@ -9,7 +9,7 @@ import api from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import { useAppContext } from '../../context/AppContext';
 
-export const ExpertResourcesPage = () => {
+export const TeacherResourcesPage = () => {
   const { t, isDarkMode } = useAppContext();
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ export const ExpertResourcesPage = () => {
   const fetchResources = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/expert/resources');
+      const res = await api.get('/Teacher/resources');
       if (res.data.success) {
         setResources(res.data.data);
       }
@@ -38,7 +38,7 @@ export const ExpertResourcesPage = () => {
     e.preventDefault();
     try {
       toast.loading('Sharing asset...', { id: 'share' });
-      await api.post('/expert/resources', form);
+      await api.post('/Teacher/resources', form);
       toast.success('Technical asset added to library!', { id: 'share' });
       setIsModalOpen(false);
       setForm({ title: '', type: 'Document', url: '' });
@@ -138,7 +138,7 @@ export const ExpertResourcesPage = () => {
                     <h3 className={`text-2xl font-bold font-sora ${t.textMain}`}>Share Technical Asset</h3>
                     <p className={`text-xs ${t.textMuted} mt-1`}>Add high-value resources to the secure intern cloud.</p>
                  </div>
-                 <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">âœ•</button>
+                 <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">✕</button>
               </div>
 
               <form onSubmit={handleSubmit} className="bottom-space-5 space-y-5">
@@ -173,7 +173,7 @@ export const ExpertResourcesPage = () => {
 
                  <div className="pt-4">
                     <button type="submit" className="w-full py-4 bg-emerald-600 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-emerald-500 transition-all active:scale-[0.98]">
-                       Broadcast Asset â†’
+                       Broadcast Asset →
                     </button>
                  </div>
               </form>
@@ -184,5 +184,5 @@ export const ExpertResourcesPage = () => {
   );
 };
 
-export default ExpertResourcesPage;
+export default TeacherResourcesPage;
 

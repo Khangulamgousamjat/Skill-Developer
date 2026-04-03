@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { MessageSquare, Plus, User, Clock, ChevronRight, Loader2, Send, MessageCircle } from 'lucide-react';

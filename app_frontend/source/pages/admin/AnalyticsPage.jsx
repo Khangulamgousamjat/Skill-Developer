@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import api from '../../api/axios';
 import { 
@@ -14,7 +14,7 @@ import {
 
 const COLORS = {
   student:    '#22C55E',
-  expert:     '#3B82F6',
+  Teacher:     '#3B82F6',
   manager:    '#F4A100',
   hr_admin:   '#8B5CF6',
   super_admin:'#EF4444',

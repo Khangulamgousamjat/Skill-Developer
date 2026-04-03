@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Globe, Moon, Sun, Check, Laptop } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -8,11 +8,11 @@ import { applyTheme } from '../../utils/applyTheme';
 import toast from 'react-hot-toast';
 
 const LANGUAGES = [
-  { code: 'en', name: 'English', flag: 'ðŸ‡ºðŸ‡¸' },
-  { code: 'hi', name: 'à¤¹à¤¿à¤¨à¥à¤¦à¥€', flag: 'ðŸ‡®ðŸ‡³' },
-  { code: 'mr', name: 'à¤®à¤°à¤¾à¤ à¥€', flag: 'ðŸ‡®ðŸ‡³' },
-  { code: 'fr', name: 'FranÃ§ais', flag: 'ðŸ‡«ðŸ‡·' },
-  { code: 'ru', name: 'Ð ÑƒÑÑÐºÐ¸Ð¹', flag: 'ðŸ‡·ðŸ‡º' },
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
+  { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ];
 
 export default function SettingsPage() {

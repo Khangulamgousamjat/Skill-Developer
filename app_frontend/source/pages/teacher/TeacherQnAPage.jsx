@@ -1,10 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { MessageSquare, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 
-export const ExpertQnAPage = () => {
+export const TeacherQnAPage = () => {
   const { t, isDarkMode } = useAppContext();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ export const ExpertQnAPage = () => {
   const fetchQuestions = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/expert/qna');
+      const res = await axios.get('/Teacher/qna');
       if (res.data.success) {
         setQuestions(res.data.data);
       }
@@ -34,7 +34,7 @@ export const ExpertQnAPage = () => {
     if (!reply.trim() || !activeQuestion) return;
     try {
       setIsSubmitting(true);
-      const res = await axios.post(`/expert/qna/${activeQuestion.id}/answer`, { answer: reply });
+      const res = await axios.post(`/Teacher/qna/${activeQuestion.id}/answer`, { answer: reply });
       if (res.data.success) {
         toast.success('Answer sent to student!');
         setReply('');
@@ -94,7 +94,7 @@ export const ExpertQnAPage = () => {
                 <textarea 
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
-                  placeholder="Type your expert answer here..."
+                  placeholder="Type your Teacher answer here..."
                   className={`w-full h-32 p-3 rounded-xl border resize-none focus:ring-2 focus:ring-amber-500 outline-none ${t.input}`}
                 ></textarea>
                 <button 
@@ -125,5 +125,5 @@ export const ExpertQnAPage = () => {
   );
 };
 
-export default ExpertQnAPage;
+export default TeacherQnAPage;
 

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
@@ -47,7 +47,7 @@ export default function StaffRegisterPage() {
     }
   };
 
-  // Hardcoded fallback â€” always works even if API fails
+  // Hardcoded fallback — always works even if API fails
   const FALLBACK_DEPARTMENTS = [
     { id: 'cs',   name: 'Computer Science' },
     { id: 'it',   name: 'Information Technology' },
@@ -81,7 +81,7 @@ export default function StaffRegisterPage() {
     }
   };
 
-  const needsDepartment = ['manager', 'expert'].includes(formData.requested_role);
+  const needsDepartment = ['manager', 'teacher'].includes(formData.requested_role);
 
   return (
     <div className={`${theme} min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 py-8 transition-colors duration-300`}>
@@ -129,7 +129,7 @@ export default function StaffRegisterPage() {
                 <option value="" className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">Select Role</option>
                 <option value="manager" className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">Manager</option>
                 <option value="hr_admin" className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">HR Admin</option>
-                <option value="expert" className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">Expert</option>
+                <option value="teacher" className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">Teacher</option>
               </select>
             </div>
             <div>
@@ -169,7 +169,7 @@ export default function StaffRegisterPage() {
               </select>
               {deptError && (
                 <p className="text-xs text-amber-500 mt-1">
-                  Using offline list â€”
+                  Using offline list —
                   <button
                     type="button"
                     onClick={fetchDepartments}

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Video, BookMarked, HelpCircle } from 'lucide-react';
 import { GlareHover } from '../ui/GlareHover';
 import { useAppContext } from '../../context/AppContext';
@@ -10,7 +10,7 @@ export const LecturesTab = () => {
   return (
     <div className="space-y-6">
       <h2 className={`text-2xl font-bold ${t.textMain}`}>Live Lecture Integration</h2>
-      <p className={t.textMuted}>Join weekly sessions by company experts based on real needs.</p>
+      <p className={t.textMuted}>Join weekly sessions by company Teachers based on real needs.</p>
       
       <div className={`space-y-4 ${appSettings.compactView ? 'space-y-2' : 'space-y-4'}`}>
         {upcomingLectures.map(lecture => (
@@ -28,7 +28,7 @@ export const LecturesTab = () => {
                   </div>
                   <div>
                     <h3 className={`font-bold text-lg ${t.textMain}`}>{lecture.title}</h3>
-                    <p className={`text-sm mt-1 ${t.textMuted}`}>Expert: {lecture.expert}</p>
+                    <p className={`text-sm mt-1 ${t.textMuted}`}>Teacher: {lecture.Teacher}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -46,7 +46,7 @@ export const LecturesTab = () => {
                     onClick={() => handleLecturePrereqs(lecture)}
                     className={`flex items-center w-max text-sm font-medium transition-colors relative z-20 ${isDarkMode ? 'text-teal-400 hover:text-teal-300' : 'text-teal-600 hover:text-teal-800'}`}
                   >
-                    âœ¨ What should I know before attending? (AI Pre-Brief)
+                    ✨ What should I know before attending? (AI Pre-Brief)
                   </button>
                 ) : (
                   <div className={`p-4 rounded-lg shadow-sm mb-2 border ${isDarkMode ? 'bg-teal-900/20 border-teal-500/20' : 'bg-teal-50 border-teal-100'}`}>
@@ -71,7 +71,7 @@ export const LecturesTab = () => {
                     onClick={() => handleLecturePrep(lecture)}
                     className={`flex items-center w-max text-sm font-medium transition-colors relative z-20 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}
                   >
-                    âœ¨ Generate Q&A Ideas for this session
+                    ✨ Generate Q&A Ideas for this session
                   </button>
                 ) : (
                   <div className={`p-4 rounded-lg shadow-sm border ${isDarkMode ? 'bg-blue-900/20 border-blue-500/20' : 'bg-blue-50 border-blue-100'}`}>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Award, Download, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Sparkles, Map, ChevronRight, CheckCircle2, Circle, Loader2, Plus } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';

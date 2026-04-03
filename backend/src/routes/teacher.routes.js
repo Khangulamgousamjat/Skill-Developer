@@ -5,16 +5,23 @@ import {
   getMyResources,
   uploadResource,
   getPendingQuestions,
-  answerQuestion
-} from '../controllers/expert.controller.js';
+  answerQuestion,
+  getMyVideos,
+  uploadVideo,
+  updateVideo,
+  deleteVideo,
+  getDashboardStats
+} from '../controllers/teacher.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 import { checkRole } from '../middleware/roleCheck.middleware.js';
 
 const router = express.Router();
 
-// All expert routes require authentication and the 'expert' role
+// All teacher routes require authentication and the 'teacher' role
 router.use(verifyToken);
-router.use(checkRole(['expert', 'super_admin'])); // Super admins can also view this logic if needed
+router.use(checkRole(['teacher', 'super_admin'])); // Super admins can also view this logic if needed
+
+router.get('/dashboard/stats', getDashboardStats);
 
 router.route('/lectures')
   .get(getMyLectures)
@@ -24,9 +31,15 @@ router.route('/resources')
   .get(getMyResources)
   .post(uploadResource);
 
-router.route('/qna')
-  .get(getPendingQuestions);
-
 router.post('/qna/:qaId/answer', answerQuestion);
+
+// Video Management
+router.route('/videos')
+  .get(getMyVideos)
+  .post(uploadVideo);
+
+router.route('/videos/:id')
+  .put(updateVideo)
+  .delete(deleteVideo);
 
 export default router;

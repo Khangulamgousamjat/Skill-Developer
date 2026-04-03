@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Award, Shield, Target, ExternalLink, Mail, Loader2, User as UserIcon } from 'lucide-react';
@@ -95,7 +95,7 @@ export default function PublicProfile() {
                    <div className="flex flex-wrap gap-4">
                       {profile.badges?.length > 0 ? profile.badges.map((b, i) => (
                         <div key={i} className="flex flex-col items-center gap-2 p-3 bg-[var(--color-surface-2)] rounded-2xl border border-transparent hover:border-[var(--color-accent)] transition-all">
-                          <div className="text-2xl">{b.icon || 'ðŸ…'}</div>
+                          <div className="text-2xl">{b.icon || '🏅'}</div>
                           <span className="text-[8px] font-bold uppercase tracking-tighter">{b.name}</span>
                         </div>
                       )) : (

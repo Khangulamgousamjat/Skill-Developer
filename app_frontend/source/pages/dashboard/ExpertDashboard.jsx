@@ -1,9 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, MessageSquare, UploadCloud, Zap, Target, Loader2 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import api from '../../api/axios';
 
-export const ExpertDashboard = () => {
+export const TeacherDashboard = () => {
   const { t, isDarkMode } = useAppContext();
   const [advice, setAdvice] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ export const ExpertDashboard = () => {
   const fetchAdvice = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/ai/expert-lecture-advice');
+      const res = await api.get('/ai/Teacher-lecture-advice');
       if (res.data.success) {
         setAdvice(res.data.data);
       }
@@ -30,7 +30,7 @@ export const ExpertDashboard = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className={`text-2xl font-bold font-sora ${t.textMain}`}>Expert Studio</h2>
+          <h2 className={`text-2xl font-bold font-sora ${t.textMain}`}>Teacher Studio</h2>
           <p className={t.textMuted}>Manage your lectures, resources, and intern Q&A sessions.</p>
         </div>
       </div>

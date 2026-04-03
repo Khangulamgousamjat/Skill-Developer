@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Bot, X, MessageSquare, Send, Zap } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 

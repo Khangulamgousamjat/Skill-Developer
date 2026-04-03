@@ -1,11 +1,11 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   User, Settings, Bot, FileText, Coffee, Users,
   ShieldAlert, BarChart3, LayoutDashboard,
   BookOpen, Video, Briefcase, TrendingUp, Award,
   Laptop2, MessageSquare, UploadCloud,
   CalendarCheck, FileUser, Building2,
-  Target, LayoutList, LogOut
+  Target, LayoutList, LogOut, PlayCircle
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useSelector, useDispatch } from 'react-redux';
@@ -40,16 +40,18 @@ const NAV_KEYS = {
     { id: 'projects',      key: 'projects',          icon: Target,          path: '/manager/projects' },
     { id: 'lectures',      key: 'lectures',          icon: Video,           path: '/manager/lectures' },
     { id: 'skills',        key: 'skillHeatMap',    icon: TrendingUp,      path: '/manager/skills' },
+    { id: 'approvals',     key: 'approvals',  icon: ShieldAlert,     path: '/manager/approvals' },
     { id: 'messages',      key: 'messages',          icon: MessageSquare,   path: '/manager/messages' },
     { id: 'profile',       key: 'profile',           icon: User,            path: '/manager/profile' },
   ],
-  expert: [
-    { id: 'overview',      key: 'dashboard',  icon: LayoutDashboard, path: '/expert/dashboard' },
-    { id: 'lectures',      key: 'lectures',       icon: Video,           path: '/expert/lectures' },
-    { id: 'resources',     key: 'uploadVideos',         icon: UploadCloud,     path: '/expert/resources' },
-    { id: 'qna',           key: 'qna',         icon: MessageSquare,   path: '/expert/qna' },
-    { id: 'messages',      key: 'messages',          icon: MessageSquare,   path: '/expert/messages' },
-    { id: 'profile',       key: 'profile',           icon: User,            path: '/expert/profile' },
+  teacher: [
+    { id: 'overview',      key: 'dashboard',  icon: LayoutDashboard, path: '/teacher/dashboard' },
+    { id: 'lectures',      key: 'lectures',       icon: Video,           path: '/teacher/lectures' },
+    { id: 'videos',        key: 'videos',         icon: PlayCircle,      path: '/teacher/videos' },
+    { id: 'resources',     key: 'uploadVideos',         icon: UploadCloud,     path: '/teacher/resources' },
+    { id: 'qna',           key: 'qna',         icon: MessageSquare,   path: '/teacher/qna' },
+    { id: 'messages',      key: 'messages',          icon: MessageSquare,   path: '/teacher/messages' },
+    { id: 'profile',       key: 'profile',           icon: User,            path: '/teacher/profile' },
   ],
   student: [
     { id: 'overview',      key: 'dashboard', icon: LayoutDashboard, path: '/student/dashboard' },
@@ -57,6 +59,7 @@ const NAV_KEYS = {
     { id: 'projects',      key: 'myProjects',       icon: Briefcase,       path: '/student/projects' },
     { id: 'lectures',      key: 'lectures',     icon: Video,           path: '/student/lectures' },
     { id: 'path',          key: 'learningPath',     icon: Target,          path: '/student/learning-path' },
+    { id: 'videos',        key: 'videos',           icon: PlayCircle,      path: '/student/videos' },
     { id: 'certificates',  key: 'certificates',      icon: Award,           path: '/student/certificates' },
     { id: 'messages',      key: 'messages',          icon: MessageSquare,   path: '/student/messages' },
     { id: 'profile',       key: 'profile',           icon: User,            path: '/student/profile' },
@@ -67,7 +70,7 @@ const ROLE_LABELS = {
   super_admin: 'Super Admin',
   hr_admin: 'HR Administrator',
   manager: 'Manager',
-  expert: 'Expert',
+  teacher: 'Teacher',
   student: 'Student Intern',
 };
 
@@ -75,7 +78,7 @@ const ROLE_COLORS = {
   super_admin: 'text-red-400',
   hr_admin: 'text-purple-400',
   manager: 'text-amber-400',
-  expert: 'text-blue-400',
+  teacher: 'text-blue-400',
   student: 'text-emerald-400',
 };
 
@@ -127,7 +130,7 @@ export const Sidebar = () => {
 
       <div className={`
         w-64 flex flex-col border-r shrink-0 transition-all duration-300
-        fixed inset-y-0 left-0 z-[101] lg:static lg:flex
+        fixed inset-y-0 left-0 z-[101] lg:static lg:flex sidebar-container
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${themeStyles.sidebar}
       `}>
@@ -160,8 +163,8 @@ export const Sidebar = () => {
               onClick={() => handleNav(item.path)}
               className={`w-full flex items-center px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200 ${
                 active
-                  ? 'font-semibold shadow-inner border'
-                  : `${themeStyles.textMuted} ${themeStyles.hover}`
+                  ? 'font-semibold shadow-inner border text-white bg-white/10 border-white/20'
+                  : `${themeStyles.sidebarTextMuted} ${themeStyles.sidebarHover}`
               }`}
               style={active ? {
                 backgroundColor: 'rgba(244, 161, 0, 0.12)',
@@ -173,7 +176,7 @@ export const Sidebar = () => {
                 className="w-4 h-4 mr-3 flex-shrink-0"
                 style={active ? { color: '#F4A100' } : {}}
               />
-              {item.key ? t(item.key) : item.label}
+              <span className="truncate">{item.key ? t(item.key) : item.label}</span>
             </button>
           );
         })}
@@ -181,8 +184,8 @@ export const Sidebar = () => {
 
       {/* AI Toolkit (student only) */}
       {showAIToolkit && (
-        <div className={`px-3 pb-2 pt-1 border-t ${themeStyles.border}`}>
-          <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 px-1 ${themeStyles.textMuted}`}>AI Toolkit</p>
+        <div className={`px-3 pb-2 pt-1 border-t border-white/10`}>
+          <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 px-1 text-white/40`}>AI Toolkit</p>
           <div className="grid grid-cols-2 gap-1.5 w-full">
             <button
               onClick={handleCareerCoach}
@@ -231,7 +234,7 @@ export const Sidebar = () => {
               {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div className="ml-2.5 min-w-0">
-              <p className={`text-sm font-medium leading-tight truncate ${themeStyles.textMain}`}>
+              <p className={`text-sm font-medium leading-tight truncate text-[#F1F5F9]`}>
                 {user?.full_name || 'User'}
               </p>
               <p className={`text-[10px] mt-0.5 font-semibold ${roleColor}`}>{roleLabel}</p>

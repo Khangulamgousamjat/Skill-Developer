@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import {
   Video, Calendar, User2, Clock, Loader2,
@@ -32,7 +32,7 @@ const LectureCard = ({ lecture, t, isDarkMode }) => {
         <div className="space-y-1.5 mb-4">
           <div className={`flex items-center gap-2 text-sm ${t.textMuted}`}>
             <User2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F4A100' }} />
-            {lecture.expert_name}
+            {lecture.Teacher_name}
           </div>
           <div className={`flex items-center gap-2 text-sm ${t.textMuted}`}>
             <Clock className="w-4 h-4 flex-shrink-0" style={{ color: '#F4A100' }} />
@@ -102,7 +102,7 @@ const LectureCard = ({ lecture, t, isDarkMode }) => {
           <p className={`text-xs font-bold uppercase tracking-wider py-3 ${t.textMuted}`}>AI-Generated Smart Questions</p>
           {qData?.loading ? (
             <div className="flex items-center gap-2 text-sm text-indigo-400">
-              <Loader2 className="w-4 h-4 animate-spin" /> Generating questionsâ€¦
+              <Loader2 className="w-4 h-4 animate-spin" /> Generating questions…
             </div>
           ) : qData?.text ? (
             <div className={`text-sm leading-relaxed whitespace-pre-line rounded-xl p-3 ${
@@ -121,7 +121,7 @@ const LectureCard = ({ lecture, t, isDarkMode }) => {
           <p className={`text-xs font-bold uppercase tracking-wider py-3 ${t.textMuted}`}>Pre-Lecture Prerequisites</p>
           {pData?.loading ? (
             <div className="flex items-center gap-2 text-sm text-amber-400">
-              <Loader2 className="w-4 h-4 animate-spin" /> Generating briefingâ€¦
+              <Loader2 className="w-4 h-4 animate-spin" /> Generating briefing…
             </div>
           ) : pData?.text ? (
             <div className={`text-sm leading-relaxed whitespace-pre-line rounded-xl p-3 ${
@@ -160,7 +160,7 @@ const LecturesPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className={`text-2xl font-bold font-sora ${t.textMain}`}>Live Lectures</h2>
-          <p className={t.textMuted}>Company expert sessions with AI preparation tools.</p>
+          <p className={t.textMuted}>Company Teacher sessions with AI preparation tools.</p>
         </div>
         <div className={`flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl ${
           isDarkMode ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-100'

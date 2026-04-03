@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Bell, X, Check, Info, AlertTriangle, Zap } from 'lucide-react';
 

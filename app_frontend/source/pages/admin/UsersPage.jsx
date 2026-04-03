@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import EmptyState from '../../components/shared/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
 
-const ROLES = ['all', 'student', 'expert', 'manager', 'hr_admin', 'super_admin'];
+const ROLES = ['all', 'student', 'Teacher', 'manager', 'hr_admin', 'super_admin'];
 const STATUSES = ['all', 'active', 'pending_email', 'pending_approval', 'rejected', 'deactivated'];
 
 const STATUS_CONFIG = {
@@ -28,7 +28,7 @@ const STATUS_CONFIG = {
 
 const ROLE_CONFIG = {
   student:     { color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  expert:      { color: 'text-blue-500',    bg: 'bg-blue-500/10' },
+  Teacher:      { color: 'text-blue-500',    bg: 'bg-blue-500/10' },
   manager:     { color: 'text-amber-500',   bg: 'bg-amber-500/10' },
   hr_admin:    { color: 'text-purple-500',  bg: 'bg-purple-500/10' },
   super_admin: { color: 'text-red-500',     bg: 'bg-red-500/10' },

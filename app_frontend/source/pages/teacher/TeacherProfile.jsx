@@ -3,7 +3,7 @@ import ProfilePageTemplate from '../../components/profile/ProfilePageTemplate';
 import { BookOpen, Users, Video } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-export default function ExpertProfile() {
+export default function TeacherProfile() {
   const { t } = useLanguage();
 
   return (
@@ -13,11 +13,11 @@ export default function ExpertProfile() {
            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
               <h2 className="text-sm font-bold text-[var(--color-text-primary)] mb-6 font-sora flex items-center gap-2">
                 <Video size={18} className="text-[var(--color-primary)]" />
-                {t('expertActivity') || "Expert Teaching Activity"}
+                {t('TeacherActivity') || "Teacher Teaching Activity"}
               </h2>
               <div className="space-y-4">
                  <p className="text-[var(--color-text-muted)] text-xs italic">
-                   Manage your lectures and interact with students through the Expert Console.
+                   Manage your lectures and interact with students through the Teacher Console.
                  </p>
                  <div className="flex gap-4">
                     <div className="flex-1 bg-[var(--color-surface-2)] p-4 rounded-xl border border-[var(--color-border)]">

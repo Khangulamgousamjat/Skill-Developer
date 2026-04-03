@@ -14,6 +14,14 @@ const LANGUAGE_OPTS = [
   { id: 'ru', name: 'Russian', icon: '🇷🇺' }
 ];
 
+const ROADMAPS = {
+  en: { name: 'English' },
+  hi: { name: 'Hindi' },
+  mr: { name: 'Marathi' },
+  fr: { name: 'French' },
+  ru: { name: 'Russian' }
+};
+
 export default function LanguageSection() {
   const { t } = useLanguage();
   const [selectedLang, setSelectedLang] = useState('en');

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Settings, X, Moon, Sun, Bell, LayoutTemplate, ShieldCheck, Bot, FileText, Coffee, Users, Mail, Award } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { internData } from '../../data/mockData';
@@ -186,7 +186,7 @@ export const AllModals = () => {
             {!profileBio.loading && (
               <div className={`p-4 flex justify-between items-center border-t ${t.border} ${isDarkMode ? 'bg-[var(--color-surface)]/5' : 'bg-[var(--color-surface-2)]'}`}>
                 <button onClick={handleCopyBio} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDarkMode ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30' : 'text-blue-600 bg-blue-50 hover:bg-blue-100'}`}>
-                  {profileBio.copied ? "Copied! âœ“" : "Copy to Clipboard"}
+                  {profileBio.copied ? "Copied! ✓" : "Copy to Clipboard"}
                 </button>
               </div>
             )}
@@ -229,7 +229,7 @@ export const AllModals = () => {
             {!standupPrep.loading && (
               <div className={`p-4 flex justify-between items-center border-t ${t.border} ${isDarkMode ? 'bg-[var(--color-surface)]/5' : 'bg-[var(--color-surface-2)]'}`}>
                 <button onClick={handleCopyStandup} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDarkMode ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30' : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'}`}>
-                  {standupPrep.copied ? "Copied! âœ“" : "Copy for Slack/Teams"}
+                  {standupPrep.copied ? "Copied! ✓" : "Copy for Slack/Teams"}
                 </button>
               </div>
             )}
@@ -272,7 +272,7 @@ export const AllModals = () => {
             {!oneOnOnePrep.loading && (
               <div className={`p-4 flex justify-between items-center border-t ${t.border} ${isDarkMode ? 'bg-[var(--color-surface)]/5' : 'bg-[var(--color-surface-2)]'}`}>
                 <button onClick={handleCopyOneOnOne} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDarkMode ? 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/30' : 'text-rose-600 bg-rose-50 hover:bg-rose-100'}`}>
-                  {oneOnOnePrep.copied ? "Copied! âœ“" : "Copy to Notes"}
+                  {oneOnOnePrep.copied ? "Copied! ✓" : "Copy to Notes"}
                 </button>
               </div>
             )}
@@ -315,7 +315,7 @@ export const AllModals = () => {
             {!progressEmail.loading && (
               <div className={`p-4 flex justify-between items-center border-t ${t.border} ${isDarkMode ? 'bg-[var(--color-surface)]/5' : 'bg-[var(--color-surface-2)]'}`}>
                 <button onClick={handleCopyEmail} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDarkMode ? 'bg-[var(--color-surface)]/10 text-white hover:bg-[var(--color-surface)]/20' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
-                  {progressEmail.copied ? "Copied! âœ“" : "Copy to Email Client"}
+                  {progressEmail.copied ? "Copied! ✓" : "Copy to Email Client"}
                 </button>
               </div>
             )}
@@ -334,7 +334,7 @@ export const AllModals = () => {
               
               <Award className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
               <h2 className="text-3xl font-serif font-bold tracking-wide uppercase">Certificate of Achievement</h2>
-              <p className="text-[var(--color-text-muted)] mt-2 uppercase tracking-widest text-sm">Smart Skill & Live Learning Module â€” Gous org</p>
+              <p className="text-[var(--color-text-muted)] mt-2 uppercase tracking-widest text-sm">Smart Skill & Live Learning Module — Gous org</p>
               
               <div className="my-8">
                 <p className="text-[var(--color-text-secondary)] italic mb-2">This certifies that</p>

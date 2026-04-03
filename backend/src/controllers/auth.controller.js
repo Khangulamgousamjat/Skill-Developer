@@ -121,7 +121,7 @@ export const registerStaff = async (req, res) => {
       });
     }
 
-    const validRoles = ['manager', 'hr_admin', 'expert'];
+    const validRoles = ['manager', 'hr_admin', 'teacher'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
         success: false,
@@ -172,18 +172,25 @@ export const registerStaff = async (req, res) => {
 
     const newUser = result.rows[0];
 
+    // Determine approver role
+    let approverRole = 'super_admin';
+    if (role === 'teacher' || role === 'hr_admin') {
+      approverRole = 'manager';
+    }
+
     // Create role request record
     await db.query(
       `INSERT INTO role_requests
        (user_id, requested_role, department_id,
-        employee_id, reason)
-       VALUES ($1, $2, $3, $4, $5)`,
+        employee_id, reason, approver_role)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         newUser.id,
         role,
         department_id || null,
         employee_id.trim(),
         reason.trim(),
+        approverRole
       ]
     );
 

@@ -27,7 +27,7 @@ export default function ManagerLectures() {
     description: '',
     scheduledAt: '',
     meetingLink: '',
-    expertId: ''
+    TeacherId: ''
   });
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function ManagerLectures() {
       setLoading(true);
       const [lectRes, usersRes] = await Promise.all([
         api.get('/manager/lectures'),
-        api.get('/api/users?role=expert') // Assuming this works or I'll just filter
+        api.get('/api/users?role=Teacher') // Assuming this works or I'll just filter
       ]);
       
       if (lectRes.data.success) {
@@ -47,8 +47,8 @@ export default function ManagerLectures() {
       }
       
       // If users endpoint doesn't support filtering yet, I'll filter here
-      const expertUsers = (usersRes.data.data || []).filter(u => u.role === 'expert' || u.role === 'teacher');
-      setTeachers(expertUsers);
+      const TeacherUsers = (usersRes.data.data || []).filter(u => u.role === 'Teacher' || u.role === 'teacher');
+      setTeachers(TeacherUsers);
     } catch (err) {
       toast.error('Failed to synchronize lecture schedule');
     } finally {
@@ -64,7 +64,7 @@ export default function ManagerLectures() {
       if (res.data.success) {
         toast.success('Lecture successfully scheduled');
         setShowScheduleModal(false);
-        setFormData({ title: '', description: '', scheduledAt: '', meetingLink: '', expertId: '' });
+        setFormData({ title: '', description: '', scheduledAt: '', meetingLink: '', TeacherId: '' });
         fetchData();
       }
     } catch (err) {
@@ -107,7 +107,7 @@ export default function ManagerLectures() {
           <div className="py-32 text-center bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[3rem]">
              <Calendar className="w-20 h-20 mx-auto mb-6 text-[var(--color-text-muted)] opacity-20" />
              <h3 className="text-2xl font-bold text-[var(--color-text-primary)]">Calendar empty</h3>
-             <p className="text-[var(--color-text-muted)] mt-2">Start by scheduling your department's first expert session</p>
+             <p className="text-[var(--color-text-muted)] mt-2">Start by scheduling your department's first Teacher session</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -153,8 +153,8 @@ export default function ManagerLectures() {
                              <Users size={18} />
                           </div>
                           <div>
-                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Session Expert</p>
-                             <p className="text-xs font-bold text-[var(--color-text-primary)] mt-0.5">{lecture.expert_name}</p>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Session Teacher</p>
+                             <p className="text-xs font-bold text-[var(--color-text-primary)] mt-0.5">{lecture.Teacher_name}</p>
                           </div>
                        </div>
                     </div>
@@ -214,14 +214,14 @@ export default function ManagerLectures() {
 
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text-muted)] ml-1">Session Expert</label>
+                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text-muted)] ml-1">Session Teacher</label>
                              <select 
                                required
-                               value={formData.expertId}
-                               onChange={(e) => setFormData({...formData, expertId: e.target.value})}
+                               value={formData.TeacherId}
+                               onChange={(e) => setFormData({...formData, TeacherId: e.target.value})}
                                className="w-full px-6 py-4 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 transition-all text-[var(--color-text-primary)] text-sm shadow-sm"
                              >
-                                <option value="">Select Domain Expert</option>
+                                <option value="">Select Domain Teacher</option>
                                 {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
                              </select>
                           </div>

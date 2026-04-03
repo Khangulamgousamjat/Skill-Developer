@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 export default function NotFoundPage() {
@@ -10,7 +10,7 @@ export default function NotFoundPage() {
       super_admin : '/admin/dashboard',
       hr_admin    : '/hr/dashboard',
       manager     : '/manager/dashboard',
-      expert      : '/expert/dashboard',
+      Teacher      : '/Teacher/dashboard',
       student     : '/student/dashboard',
     };
     return homes[user?.role] || '/login';
@@ -30,7 +30,7 @@ export default function NotFoundPage() {
         </p>
         <p className="text-[var(--color-text-muted)]
                       text-sm mt-1 mb-6">
-          Smart Skill & Live Learning Module â€” Gous org
+          Smart Skill & Live Learning Module — Gous org
         </p>
         <button
           onClick={() => navigate(getHome())}

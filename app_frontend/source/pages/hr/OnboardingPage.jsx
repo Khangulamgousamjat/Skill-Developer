@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, Clock, ShieldAlert, ArrowRight, 
   Loader2, ClipboardList, Target, UserCheck,

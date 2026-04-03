@@ -210,3 +210,20 @@ textarea::placeholder {
 .dark .bg-red-100    { background-color: rgba(239,68,68,0.15) !important; }
 .dark .bg-purple-100 { background-color: rgba(168,85,247,0.15) !important; }
 .dark .bg-slate-100  { background-color: rgba(148,163,184,0.15) !important; }
+
+/* ── SIDEBAR VISIBILITY FIX ───────────────────────────── */
+.sidebar-container p, 
+.sidebar-container span, 
+.sidebar-container label, 
+.sidebar-container button {
+  color: var(--color-sidebar-text) !important;
+}
+
+.sidebar-container .text-white\/40 {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.sidebar-container .text-\[\#F1F5F9\] {
+  color: #F1F5F9 !important;
+}
+

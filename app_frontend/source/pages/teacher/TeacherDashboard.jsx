@@ -14,12 +14,31 @@ export default function TeacherDashboard() {
   const { t } = useLanguage();
   const { user } = useSelector((s) => s.auth);
   const [stats, setStats] = useState({
-    totalStudents: 156,
-    totalLectures: 24,
-    avgRating: 4.8,
-    pendingQna: 12
+    totalStudents: 0,
+    totalLectures: 0,
+    totalVideos: 0,
+    pendingQna: 0,
+    avgRating: 0
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/teacher/dashboard/stats');
+      if (res.data.success) {
+        setStats(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch teacher stats');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Mock Upcoming Lectures
   const upcomingLectures = [
@@ -72,14 +91,14 @@ export default function TeacherDashboard() {
             icon={BookOpen} 
             label="Lectures" 
             value={stats.totalLectures} 
-            trend="+2 this week" 
+            trend="Total Sessions" 
             color="indigo" 
           />
           <StatCard 
-            icon={Award} 
-            label="Avg Rating" 
-            value={stats.avgRating} 
-            trend="Top 5%" 
+            icon={Video} 
+            label="Videos" 
+            value={stats.totalVideos} 
+            trend="Learning Modules" 
             color="amber" 
           />
           <StatCard 

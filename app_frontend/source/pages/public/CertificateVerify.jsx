@@ -1,4 +1,4 @@
-﻿import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Construction, CheckCircle, ShieldCheck } from 'lucide-react';
 
 export default function CertificateVerify() {

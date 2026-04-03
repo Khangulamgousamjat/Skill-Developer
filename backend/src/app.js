@@ -22,7 +22,7 @@ import helpRoutes from './routes/help.routes.js';
 import hrRoutes from './routes/hr.routes.js';
 import managerRoutes from './routes/manager.routes.js';
 import adminRoutes from './routes/admin.routes.js';
-import expertRoutes from './routes/expert.routes.js';
+import teacherRoutes from './routes/teacher.routes.js';
 
 // Add any other existing routes here as they are developed
 // import lectureRoutes from './routes/lecture.routes.js'; (Placeholder)
@@ -79,7 +79,7 @@ app.use('/api/help-board', helpRoutes);
 app.use('/api/hr', hrRoutes);
 app.use('/api/manager', managerRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/expert', expertRoutes);
+app.use('/api/teacher', teacherRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -285,7 +285,7 @@ export default function ManageAnnouncements() {
                              <option value="all">Global (All Users)</option>
                              <option value="student">Interns Only</option>
                              <option value="manager">Managers Only</option>
-                             <option value="expert">Teachers Only</option>
+                             <option value="Teacher">Teachers Only</option>
                           </select>
                        </div>
                     </div>

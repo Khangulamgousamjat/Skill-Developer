@@ -59,7 +59,7 @@ export default function HRCertificates() {
               </div>
               Verified Certificates
             </h1>
-            <p className="text-[var(--color-text-muted)] mt-1">Registry of all digital credentials and expert recognitions issued</p>
+            <p className="text-[var(--color-text-muted)] mt-1">Registry of all digital credentials and Teacher recognitions issued</p>
           </div>
           <div className="flex items-center gap-3">
              <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center gap-2">

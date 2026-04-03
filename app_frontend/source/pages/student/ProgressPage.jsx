@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { skillGaps, activeProjects } from '../../data/mockData';
 import {
@@ -92,7 +92,7 @@ const ProgressPage = () => {
             className="flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
             style={{ background: '#F4A100', color: '#0F172A' }}
           >
-            {progressSummary.loading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'âœ¨'}
+            {progressSummary.loading ? <Loader2 className="w-3 h-3 animate-spin" /> : '✨'}
             {progressSummary.text ? 'Regenerate' : 'Generate Summary'}
           </button>
         </div>
@@ -100,7 +100,7 @@ const ProgressPage = () => {
         {progressSummary.loading ? (
           <div className={`flex items-center gap-3 p-4 rounded-xl text-sm ${isDarkMode ? 'bg-[var(--color-surface)]/5 text-slate-400' : 'bg-[var(--color-surface-2)] text-[var(--color-text-muted)]'}`}>
             <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-            Generating your AI progress reviewâ€¦
+            Generating your AI progress review…
           </div>
         ) : progressSummary.text ? (
           <div className={`p-4 rounded-xl text-sm leading-relaxed ${

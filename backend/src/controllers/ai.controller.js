@@ -288,13 +288,13 @@ export const generatePersonalizedTutorInsight = async (req, res) => {
     }
 };
 
-// ─── GET /api/ai/expert-lecture-advice ────────────────────────────
-export const generateExpertLectureAdvice = async (req, res) => {
-    const expertId = req.user.id;
+// ─── GET /api/ai/teacher-lecture-advice ────────────────────────────
+export const generateTeacherLectureAdvice = async (req, res) => {
+    const teacherId = req.user.id;
 
     try {
-        // Find Expert's Department
-        const userResult = await pool.query('SELECT department_id FROM users WHERE id = $1', [expertId]);
+        // Find Teacher's Department
+        const userResult = await pool.query('SELECT department_id FROM users WHERE id = $1', [teacherId]);
         const deptId = userResult.rows[0].department_id;
 
         // Fetch Avg Skill Gaps for the department
@@ -316,7 +316,7 @@ export const generateExpertLectureAdvice = async (req, res) => {
             Department Statistics (Avg Skill Levels): ${JSON.stringify(gaps)}
             
             Based on these weaknesses, suggest 3 highly specialized lecture topics.
-            Also, provide a 1-sentence "Focus Recommendation" for the Expert to help the students.
+            Also, provide a 1-sentence "Focus Recommendation" for the Teacher to help the students.
             Format: {"suggestions": ["Topic 1", "Topic 2", "Topic 3"], "tutorTip": "focus recommendation text"}
         `;
 
@@ -328,7 +328,7 @@ export const generateExpertLectureAdvice = async (req, res) => {
 
         res.json({ success: true, data: JSON.parse(response.text) });
     } catch (error) {
-        console.error('Expert Advice Error:', error);
+        console.error('Teacher Advice Error:', error);
         res.status(500).json({ success: false, message: 'Failed to generate lecture advice.' });
     }
 };

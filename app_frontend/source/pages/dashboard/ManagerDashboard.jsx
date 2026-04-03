@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, Users, LayoutList, Zap, ShieldAlert, Heart, Loader2 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import api from '../../api/axios';

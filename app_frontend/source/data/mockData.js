@@ -16,8 +16,8 @@ export const skillGaps = [
 ];
 
 export const upcomingLectures = [
-  { id: 1, title: "How we built our company dashboard", expert: "Sarah Jenkins (Lead Frontend)", time: "Today, 3:00 PM" },
-  { id: 2, title: "Real client project walkthrough", expert: "Raj Patel (Product Manager)", time: "Thursday, 11:00 AM" }
+  { id: 1, title: "How we built our company dashboard", Teacher: "Sarah Jenkins (Lead Frontend)", time: "Today, 3:00 PM" },
+  { id: 2, title: "Real client project walkthrough", Teacher: "Raj Patel (Product Manager)", time: "Thursday, 11:00 AM" }
 ];
 
 export const activeProjects = [

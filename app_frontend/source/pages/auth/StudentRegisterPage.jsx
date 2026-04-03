@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
@@ -45,7 +45,7 @@ export default function StudentRegisterPage() {
     }
   };
 
-  // Hardcoded fallback â€” always works even if API fails
+  // Hardcoded fallback — always works even if API fails
   const FALLBACK_DEPARTMENTS = [
     { id: 'cs',   name: 'Computer Science' },
     { id: 'it',   name: 'Information Technology' },
@@ -115,13 +115,13 @@ export default function StudentRegisterPage() {
               <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1.5">Password</label>
               <input required type="password" name="password" value={formData.password} onChange={handleChange}
                      className="w-full px-3 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-primary)]"
-                     placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                     placeholder="••••••••" />
             </div>
             <div>
               <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1.5">Confirm Password</label>
               <input required type="password" name="confirm_password" value={formData.confirm_password} onChange={handleChange}
                      className="w-full px-3 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-                     placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                     placeholder="••••••••" />
             </div>
           </div>
 
@@ -155,7 +155,7 @@ export default function StudentRegisterPage() {
               </select>
               {deptError && (
                 <p className="text-xs text-amber-500 mt-1">
-                  Using offline list â€”
+                  Using offline list —
                   <button
                     type="button"
                     onClick={fetchDepartments}

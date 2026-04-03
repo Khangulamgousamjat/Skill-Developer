@@ -6,8 +6,9 @@ import {
 
 // ─── GET /api/admin/role-requests ─────────────────────────────────
 export const getPendingRoleRequests = async (req, res) => {
-  try {
-    const result = await pool.query(`
+    const { role: userRole } = req.user;
+    try {
+        const result = await pool.query(`
       SELECT
         rr.id,
         rr.requested_role,
@@ -15,6 +16,7 @@ export const getPendingRoleRequests = async (req, res) => {
         rr.reason,
         rr.status,
         rr.requested_at,
+        rr.approver_role,
         u.full_name,
         u.email,
         u.profile_photo_url,
@@ -23,8 +25,9 @@ export const getPendingRoleRequests = async (req, res) => {
       JOIN users u ON rr.user_id = u.id
       LEFT JOIN departments d ON rr.department_id = d.id
       WHERE rr.status = 'pending'
+      AND rr.approver_role = $1
       ORDER BY rr.requested_at DESC
-    `);
+    `, [userRole]);
     res.json({ success: true, data: result.rows });
   } catch (err) {
     console.error(err);

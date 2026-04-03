@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Zap, FolderOpen, Video, Award, TrendingUp, Calendar, ArrowRight, Loader2 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { SkillRadarChart } from '../../components/charts/SkillRadarChart';
@@ -104,9 +104,9 @@ export const StudentDashboard = () => {
                         <p className={`text-2xl font-bold font-sora ${t.textMain} leading-tight`}>{studentOverview.nextLecture.title}</p>
                         <div className="flex items-center gap-2 mt-2">
                            <div className="w-6 h-6 rounded-full bg-[var(--color-surface)]/10 flex items-center justify-center text-[10px] font-bold">
-                              {studentOverview.nextLecture.expert?.charAt(0)}
+                              {studentOverview.nextLecture.Teacher?.charAt(0)}
                            </div>
-                           <p className={`text-sm font-medium ${t.textMuted}`}>Managed by <strong>{studentOverview.nextLecture.expert}</strong></p>
+                           <p className={`text-sm font-medium ${t.textMuted}`}>Managed by <strong>{studentOverview.nextLecture.Teacher}</strong></p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ export const StudentDashboard = () => {
                {studentOverview.recentBadges?.length > 0 ? studentOverview.recentBadges.map((badge, idx) => (
                  <div key={idx} className="group relative flex flex-col items-center">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg transform transition-all group-hover:scale-110 group-hover:rotate-6">
-                       <span className="text-2xl">ðŸ†</span>
+                       <span className="text-2xl">🏆</span>
                     </div>
                     <p className={`text-[10px] font-bold mt-2 truncate max-w-[64px] ${t.textMain}`}>{badge.badge_name}</p>
                  </div>
@@ -147,7 +147,7 @@ export const StudentDashboard = () => {
                  <div className="flex gap-4">
                     {[1,2,3].map(i => (
                        <div key={i} className="w-16 h-16 rounded-2xl bg-[var(--color-surface)]/5 border border-dashed border-white/10 flex items-center justify-center opacity-50">
-                         <span className="text-xl">ðŸ”’</span>
+                         <span className="text-xl">🔒</span>
                        </div>
                     ))}
                  </div>

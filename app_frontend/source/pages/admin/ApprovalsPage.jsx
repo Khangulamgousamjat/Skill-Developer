@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
@@ -9,7 +9,7 @@ import {
 
 const ROLE_COLOR = {
   manager:   { text: 'text-amber-400',  bg: 'bg-amber-500/10',  border: 'border-amber-500/20' },
-  expert:    { text: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
+  Teacher:    { text: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
   hr_admin:  { text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
   super_admin:{ text:'text-red-400',    bg: 'bg-red-500/10',    border:'border-red-500/20' },
 };

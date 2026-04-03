@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Search, Command, X, User, Briefcase, Bot, ArrowRight, Loader2 } from 'lucide-react';
 import axios from '../../api/axios';
@@ -171,11 +171,11 @@ export const CommandPalette = () => {
           </p>
           <div className="flex gap-4">
              <div className="flex items-center gap-1.5">
-                <kbd className="font-mono bg-[var(--color-surface)]/5 border border-white/10 px-1 rounded text-[10px] text-slate-400">âŽ</kbd>
+                <kbd className="font-mono bg-[var(--color-surface)]/5 border border-white/10 px-1 rounded text-[10px] text-slate-400">⏎</kbd>
                 <span className="text-[10px] text-slate-500">Select</span>
              </div>
              <div className="flex items-center gap-1.5">
-                <kbd className="font-mono bg-[var(--color-surface)]/5 border border-white/10 px-1 rounded text-[10px] text-slate-400">â†‘â†“</kbd>
+                <kbd className="font-mono bg-[var(--color-surface)]/5 border border-white/10 px-1 rounded text-[10px] text-slate-400">↑↓</kbd>
                 <span className="text-[10px] text-slate-500">Navigate</span>
              </div>
           </div>

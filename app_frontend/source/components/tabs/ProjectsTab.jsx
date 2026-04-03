@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Bot, MessageSquareQuote } from 'lucide-react';
 import { GlareHover } from '../ui/GlareHover';
 import { useAppContext } from '../../context/AppContext';
@@ -59,7 +59,7 @@ export const ProjectsTab = () => {
                     onClick={() => handleProjectBreakdown(project)}
                     className={`flex items-center text-sm font-medium transition-colors mb-3 relative z-20 ${isDarkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'}`}
                   >
-                    âœ¨ Ask AI Mentor to break down this project
+                    ✨ Ask AI Mentor to break down this project
                   </button>
                 ) : (
                   <div className={`mt-3 mb-4 p-4 rounded-lg shadow-sm border ${isDarkMode ? 'bg-indigo-900/20 border-indigo-500/20' : 'bg-indigo-50 border-indigo-100'}`}>
@@ -97,7 +97,7 @@ export const ProjectsTab = () => {
                     disabled={!approachInputs[project.id] || approachReviews[project.id]?.loading}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center relative z-20 ${isDarkMode ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-slate-800 text-white hover:bg-slate-900'}`}
                   >
-                    {approachReviews[project.id]?.loading ? 'Reviewing...' : 'âœ¨ Submit Approach for AI Review'}
+                    {approachReviews[project.id]?.loading ? 'Reviewing...' : '✨ Submit Approach for AI Review'}
                   </button>
 
                   {approachReviews[project.id] && !approachReviews[project.id].loading && (

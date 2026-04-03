@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
 import axios from '../../api/axios';
@@ -103,7 +103,7 @@ const CertificateVerifyPage = () => {
       </div>
 
       <p className="text-[var(--color-text-muted)] mt-8 text-sm font-medium">
-        &copy; 2026 Smart Skill & Live Learning Module â€” Gous org
+        &copy; 2026 Smart Skill & Live Learning Module — Gous org
       </p>
     </div>
   );

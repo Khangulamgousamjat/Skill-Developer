@@ -7,7 +7,7 @@ import {
   searchUniversally,
   generateAnalyticsInsight,
   generatePersonalizedTutorInsight,
-  generateExpertLectureAdvice,
+  generateTeacherLectureAdvice,
   generateManagerTeamSentiment,
   generatePlatformHealthInsight,
   auditInternPerformance
@@ -21,7 +21,7 @@ router.use(verifyToken);
 
 router.get('/analytics-insight', checkRole(['super_admin', 'hr_admin']), generateAnalyticsInsight);
 router.get('/personalized-tutor', checkRole(['student']), generatePersonalizedTutorInsight);
-router.get('/expert-lecture-advice', checkRole(['expert']), generateExpertLectureAdvice);
+router.get('/teacher-lecture-advice', checkRole(['teacher']), generateTeacherLectureAdvice);
 router.get('/manager-team-sentiment', checkRole(['manager']), generateManagerTeamSentiment);
 router.get('/platform-health', checkRole(['super_admin']), generatePlatformHealthInsight);
 router.post('/audit-intern', checkRole(['manager']), auditInternPerformance);

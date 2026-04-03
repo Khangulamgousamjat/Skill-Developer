@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -31,7 +31,7 @@ export const SocketProvider = ({ children }) => {
       newSocket.on('receive_notification', (data) => {
          // Display a highly visible toast if we get a global real-time event
          toast(data.message, {
-           icon: 'ðŸ””',
+           icon: '🔔',
            style: {
              borderRadius: '10px',
              background: '#333',

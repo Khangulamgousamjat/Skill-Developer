@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Plus, Briefcase, ExternalLink, Edit2, Trash2, X, CheckCircle2, Clock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';

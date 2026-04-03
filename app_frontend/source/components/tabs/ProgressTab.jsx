@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Award, CheckCircle, FileCheck, Mail } from 'lucide-react';
 import { GlareHover } from '../ui/GlareHover';
 import { useAppContext } from '../../context/AppContext';
@@ -75,7 +75,7 @@ export const ProgressTab = () => {
                   onClick={handleProgressSummary}
                   className={`flex items-center text-sm font-medium transition-colors relative z-20 ${isDarkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'}`}
                 >
-                  âœ¨ Generate AI Performance Summary based on current stats
+                  ✨ Generate AI Performance Summary based on current stats
                 </button>
               ) : (
                 <div className={`p-5 rounded-lg shadow-sm border ${isDarkMode ? 'bg-indigo-900/20 border-indigo-500/20' : 'bg-indigo-50 border-indigo-100'}`}>
@@ -102,7 +102,7 @@ export const ProgressTab = () => {
                 className={`mt-4 w-full flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-medium transition-colors shadow-sm relative z-20 ${isDarkMode ? 'bg-[var(--color-surface)] text-slate-900 hover:bg-slate-200' : 'bg-slate-800 hover:bg-slate-900 text-white'}`}
               >
                 <Mail className="w-4 h-4 mr-2" />
-                âœ¨ Draft Progress Update Email to Manager
+                ✨ Draft Progress Update Email to Manager
               </button>
             </div>
           </div>

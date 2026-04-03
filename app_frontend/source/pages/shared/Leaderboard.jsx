@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Trophy, TrendingUp, Users, Award, Shield, Loader2, ArrowUpRight } from 'lucide-react';

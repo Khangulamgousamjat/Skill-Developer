@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Award, Zap } from 'lucide-react';
 import { GlareHover } from '../ui/GlareHover';
 import { useAppContext } from '../../context/AppContext';
@@ -34,7 +34,7 @@ export const TopWelcomeBar = () => {
         </div>
       </div>
 
-      {/* AI Daily Briefing Banner â€” students only */}
+      {/* AI Daily Briefing Banner — students only */}
       {showDailyBriefing && (
         <div className={`pt-6 border-t ${themeStyles.borderSoft} relative z-20 w-full`}>
           {!dailyBriefing.text && !dailyBriefing.loading ? (
@@ -43,7 +43,7 @@ export const TopWelcomeBar = () => {
               className={`w-full flex items-center justify-center p-4 rounded-xl shadow-sm transition-all font-medium ${isDarkMode ? 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30' : 'bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-indigo-700 border border-indigo-100'}`}
             >
               <Zap className="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" />
-              âœ¨ {t('generateAIDailyFocus')}
+              ✨ {t('generateAIDailyFocus')}
             </button>
           ) : (
             <div className={`p-5 rounded-xl shadow-md flex flex-col sm:flex-row gap-4 items-start sm:items-center ${isDarkMode ? 'bg-gradient-to-r from-indigo-900/60 to-blue-900/60 border border-indigo-500/30 text-white' : 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white'}`}>

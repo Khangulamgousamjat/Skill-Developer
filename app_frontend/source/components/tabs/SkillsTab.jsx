@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { CheckCircle, AlertCircle, HelpCircle, Send } from 'lucide-react';
 import { GlareHover } from '../ui/GlareHover';
 import { useAppContext } from '../../context/AppContext';

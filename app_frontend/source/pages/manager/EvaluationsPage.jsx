@@ -204,7 +204,7 @@ export default function EvaluationsPage() {
                         </button>
                         <div className="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-widest">
                           <Star className="w-3.5 h-3.5 fill-current" />
-                          Expert Review
+                          Teacher Review
                         </div>
                      </div>
                   </div>

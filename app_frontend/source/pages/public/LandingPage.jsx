@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Settings2, 
@@ -28,7 +28,7 @@ const LandingPage = () => {
 
   const stats = [
     { val: '500+', label: t('learningResources') },
-    { val: '50+', label: t('expertTeachers') },
+    { val: '50+', label: t('TeacherTeachers') },
     { val: '1000+', label: t('activeStudents') },
     { val: '100%', label: t('freeToJoin') }
   ];
@@ -110,7 +110,7 @@ const LandingPage = () => {
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#F4A100 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-[#F4A100]/10 border border-[#F4A100]/30 text-[#F4A100] text-xs font-medium">
-            ðŸŽ“ {t('heroBadge')}
+            🎓 {t('heroBadge')}
           </div>
           <h1 className="mt-8 font-sora font-extrabold text-5xl md:text-7xl text-white leading-[1.1]">
             {t('heroTitleLine1')}<br />
@@ -163,7 +163,7 @@ const LandingPage = () => {
               { 
                 icon: <Video className="w-6 h-6 text-purple-500" />, 
                 title: t('liveLectureIntegration') || "Live Lecture Integration", 
-                desc: "Attend weekly live sessions by expert teachers. Topics based on real company needs. Watch recordings anytime you miss a session.",
+                desc: "Attend weekly live sessions by Teacher teachers. Topics based on real company needs. Watch recordings anytime you miss a session.",
                 bg: "bg-purple-500/10"
               },
               { 
@@ -231,7 +231,7 @@ const LandingPage = () => {
               onClick={() => navigate('/auth/register/student')}
               className="bg-[#F4A100] text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#FFB733] transition-all"
             >
-              {t('startLearning')} â†’
+              {t('startLearning')} →
             </button>
           </div>
         </div>
@@ -324,7 +324,7 @@ const LandingPage = () => {
                      <ul className="space-y-4">
                         {card.features.map((f, fi) => (
                            <li key={fi} className="flex items-start gap-2 text-sm text-slate-400">
-                              <span className="text-green-500 mt-1">âœ“</span>
+                              <span className="text-green-500 mt-1">✓</span>
                               {f}
                            </li>
                         ))}
@@ -373,8 +373,8 @@ const LandingPage = () => {
                   <li className="flex items-center gap-2 text-sm text-slate-400"><Globe className="w-4 h-4" /> khangulamgousamjat</li>
                </ul>
                <h4 className="font-sora font-semibold text-white mt-10 mb-6 uppercase tracking-wider text-xs">{t('madeBy')}</h4>
-               <div className="text-sm text-slate-400">ðŸ‘¨â€ðŸ’» Gous Khan</div>
-               <div className="text-sm text-slate-400 mt-1">ðŸ¢ Gous org</div>
+               <div className="text-sm text-slate-400">👨‍💻 Gous Khan</div>
+               <div className="text-sm text-slate-400 mt-1">🏢 Gous org</div>
             </div>
 
             <div>
@@ -391,8 +391,8 @@ const LandingPage = () => {
             </div>
          </div>
          <div className="bg-black/30 py-6 border-t border-white/5 text-center">
-            <p className="text-slate-500 text-xs">Â© 2026 {t('orgName')} â€” {t('appTitle')}</p>
-            <p className="text-slate-500 text-[10px] mt-1 uppercase tracking-widest">{t('madeBy')} â¤ï¸ by Gous Khan</p>
+            <p className="text-slate-500 text-xs">© 2026 {t('orgName')} — {t('appTitle')}</p>
+            <p className="text-slate-500 text-[10px] mt-1 uppercase tracking-widest">{t('madeBy')} ❤️ by Gous Khan</p>
          </div>
       </footer>
     </div>

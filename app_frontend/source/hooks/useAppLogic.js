@@ -134,12 +134,15 @@ export const useAppLogic = () => {
   const themeStyles = {
     bg: isDarkMode ? 'bg-[#070D1A] text-[#F1F5F9]' : 'bg-[#F8FAFC] text-[#0F172A]',
     sidebar: isDarkMode ? 'bg-[#050B14] border-white/10' : 'bg-[#1E3A5F] border-gray-200',
+    sidebarText: 'text-[#F1F5F9]',
+    sidebarTextMuted: 'text-[#94A3B8]',
     card: isDarkMode ? 'bg-[#0F1829] backdrop-blur-xl border border-[#1E2D45] shadow-2xl relative' : 'bg-white border border-gray-100 shadow-sm relative',
     textMain: isDarkMode ? 'text-[#F1F5F9]' : 'text-[#0F172A]',
     textMuted: isDarkMode ? 'text-[#94A3B8]' : 'text-[#64748B]',
     border: isDarkMode ? 'border-[#1E2D45]' : 'border-[#E2E8F0]',
     borderSoft: isDarkMode ? 'border-white/5' : 'border-gray-100',
     hover: isDarkMode ? 'hover:bg-white/5' : 'hover:bg-gray-50',
+    sidebarHover: 'hover:bg-white/10',
     input: isDarkMode ? 'bg-[#162033] border-[#1E2D45] text-[#F1F5F9] placeholder-[#94A3B8]' : 'bg-[#F1F5F9] border-[#E2E8F0] text-[#0F172A]',
     modalBg: isDarkMode ? 'bg-[#0F1829]/95 backdrop-blur-2xl border border-[#1E2D45] shadow-2xl' : 'bg-white border border-gray-100 shadow-xl',
     profileSection: isDarkMode ? 'bg-black/20' : 'bg-gray-50'
@@ -158,7 +161,7 @@ export const useAppLogic = () => {
     setProfileBio({ isOpen: true, loading: true, text: '', copied: false });
     const strongSkills = studentSkills.filter(s => s.current >= 60).map(s => s.name).join(', ');
     const projectNames = studentProjects.map(p => p.title).join(', ');
-    const prompt = `Act as an expert career strategist and resume writer. I am ${user.full_name}, an intern at Gous org. I have practical experience in ${strongSkills} and have been actively working on real-world projects like: ${projectNames}. Write a highly professional, engaging 3-sentence LinkedIn "About" section for my profile that highlights my growth and ambition. Keep it punchy and do not use cheesy buzzwords.`;
+    const prompt = `Act as an Teacher career strategist and resume writer. I am ${user.full_name}, an intern at Gous org. I have practical experience in ${strongSkills} and have been actively working on real-world projects like: ${projectNames}. Write a highly professional, engaging 3-sentence LinkedIn "About" section for my profile that highlights my growth and ambition. Keep it punchy and do not use cheesy buzzwords.`;
     const result = await callGemini(prompt);
     setProfileBio({ isOpen: true, loading: false, text: result, copied: false });
   };
@@ -305,14 +308,14 @@ export const useAppLogic = () => {
 
   const handleLecturePrep = async (lecture) => {
     setLectureQuestions(prev => ({ ...prev, [lecture.id]: { loading: true, text: '' } }));
-    const prompt = `I am a ${internData.role} attending an internal company lecture titled "${lecture.title}" hosted by ${lecture.expert}. Generate 3 smart, insightful questions I can ask during the Q&A to show engagement and eagerness to learn. Keep them brief.`;
+    const prompt = `I am a ${internData.role} attending an internal company lecture titled "${lecture.title}" hosted by ${lecture.Teacher}. Generate 3 smart, insightful questions I can ask during the Q&A to show engagement and eagerness to learn. Keep them brief.`;
     const result = await callGemini(prompt);
     setLectureQuestions(prev => ({ ...prev, [lecture.id]: { loading: false, text: result } }));
   };
 
   const handleLecturePrereqs = async (lecture) => {
     setLecturePrereqs(prev => ({ ...prev, [lecture.id]: { loading: true, text: '' } }));
-    const prompt = `I am a ${internData.role} attending an internal company lecture titled "${lecture.title}" hosted by ${lecture.expert}. What are 3 brief prerequisite concepts, terms, or technologies I should quickly Google and brush up on before the session to make the most of it? Keep it very concise.`;
+    const prompt = `I am a ${internData.role} attending an internal company lecture titled "${lecture.title}" hosted by ${lecture.Teacher}. What are 3 brief prerequisite concepts, terms, or technologies I should quickly Google and brush up on before the session to make the most of it? Keep it very concise.`;
     const result = await callGemini(prompt);
     setLecturePrereqs(prev => ({ ...prev, [lecture.id]: { loading: false, text: result } }));
   };

@@ -317,7 +317,7 @@ export default function StudentDashboard() {
                                    <div className="w-1 h-1 bg-[var(--color-border)] rounded-full" />
                                    <p className="text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-2">
                                       <User className="w-3 h-3 text-[var(--color-primary)]" />
-                                      {lecture.expert_name || 'Protocol Expert'}
+                                      {lecture.Teacher_name || 'Protocol Teacher'}
                                    </p>
                                 </div>
                              </div>

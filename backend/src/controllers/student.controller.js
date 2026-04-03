@@ -24,9 +24,9 @@ export const getDashboardOverview = async (req, res) => {
       
       // Next upcoming lecture in their department
       pool.query(`
-        SELECT l.id, l.title, l.scheduled_at as time, u.full_name as expert
+        SELECT l.id, l.title, l.scheduled_at as time, u.full_name as teacher
         FROM lectures l
-        JOIN users u ON l.expert_id = u.id
+        JOIN users u ON l.teacher_id = u.id
         WHERE (l.department_id = (SELECT department_id FROM users WHERE id = $1) OR l.department_id IS NULL)
         AND l.scheduled_at >= NOW()
         ORDER BY l.scheduled_at ASC
@@ -131,10 +131,10 @@ export const getMyLectures = async (req, res) => {
     const result = await pool.query(`
       SELECT 
         l.id, l.title, l.description, l.scheduled_at, l.video_url, l.status,
-        u.full_name as expert_name,
+        u.full_name as teacher_name,
         EXISTS(SELECT 1 FROM lecture_attendance WHERE lecture_id = l.id AND intern_id = $1) as attended
       FROM lectures l
-      JOIN users u ON l.expert_id = u.id
+      JOIN users u ON l.teacher_id = u.id
       WHERE l.department_id = (SELECT department_id FROM users WHERE id = $1)
       OR l.department_id IS NULL
       ORDER BY l.scheduled_at DESC
@@ -293,5 +293,25 @@ export const getMyCertificates = async (req, res) => {
     res.json({ success: true, data: result.rows });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error fetching certificates' });
+  }
+};
+
+// ─── GET /api/student/videos ───────────────────────────────────────
+export const getVideos = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        v.*, 
+        u.full_name as teacher_name, 
+        u.profile_photo_url as teacher_photo
+      FROM teacher_videos v
+      JOIN users u ON v.teacher_id = u.id
+      WHERE v.is_public = true
+      ORDER BY v.created_at DESC
+    `);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('Student get videos error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch videos' });
   }
 };

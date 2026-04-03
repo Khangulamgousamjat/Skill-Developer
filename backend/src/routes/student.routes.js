@@ -11,7 +11,8 @@ import {
   deletePersonalProject,
   generateRoadmap,
   getMyRoadmaps,
-  getMyCertificates
+  getMyCertificates,
+  getVideos
 } from '../controllers/student.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 import { checkRole } from '../middleware/roleCheck.middleware.js';
@@ -27,6 +28,7 @@ router.get('/skills',        getMySkills);
 router.get('/projects',      getMyProjects);
 router.get('/lectures',      getMyLectures);
 router.get('/certificates',  getMyCertificates);
+router.get('/videos',        getVideos);
 
 router.patch('/projects/:assignmentId/submit', submitProject);
 

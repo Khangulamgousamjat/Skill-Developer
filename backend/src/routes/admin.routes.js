@@ -27,14 +27,18 @@ import { checkRole } from '../middleware/roleCheck.middleware.js';
 
 const router = express.Router();
 
-// All admin routes require authentication + super_admin role
+// All admin routes require authentication
 router.use(verifyToken);
+
+// Shared role request management (Super Admin & Manager)
+router.get('/role-requests',               checkRole(['super_admin', 'manager']), getPendingRoleRequests);
+router.patch('/role-requests/:id/approve', checkRole(['super_admin', 'manager']), approveRoleRequest);
+router.patch('/role-requests/:id/reject',  checkRole(['super_admin', 'manager']), rejectRoleRequest);
+
+// Rest require super_admin role
 router.use(checkRole(['super_admin']));
 
-// Role Request Management
-router.get('/role-requests',               getPendingRoleRequests);
-router.patch('/role-requests/:id/approve', approveRoleRequest);
-router.patch('/role-requests/:id/reject',  rejectRoleRequest);
+// Role Request Management (Handled Above)
 
 // User Management
 router.get('/users',                       getAllUsers);

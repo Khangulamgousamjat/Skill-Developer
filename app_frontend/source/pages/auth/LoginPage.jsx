@@ -30,7 +30,7 @@ const LoginPage = () => {
           student: '/student/dashboard',
           manager: '/manager/dashboard',
           hr_admin: '/hr/dashboard',
-          expert: '/expert/dashboard',
+          Teacher: '/Teacher/dashboard',
           super_admin: '/admin/dashboard'
         };
         navigate(roleRedirect[res.data.data.user.role] || '/login');
