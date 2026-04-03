@@ -108,23 +108,22 @@ export default function DashboardLayout({ children }) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-[var(--color-sidebar-bg)] border-r border-[var(--color-border)]">
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-[var(--color-border)]">
+      <div className={`px-4 py-8 border-b ${theme === 'dark' ? 'border-white/10' : 'border-gray-100'}`}>
         {collapsed ? (
           <div className="flex justify-center">
-            <span className="text-[var(--color-accent)] font-bold text-lg font-sora">SS</span>
+            <span className="text-[var(--color-accent)] font-bold text-xl font-sora">SS</span>
           </div>
         ) : (
-          <div>
-            <p className="text-[var(--color-accent)] font-bold font-sora text-sm leading-tight">
-              {t('brandTitleShort')}
-            </p>
-            <p className="text-[var(--color-sidebar-text)] font-bold font-sora text-xs leading-tight mt-0.5">
-              {t('brandTitleLong')}
-            </p>
-            <p className="text-[var(--color-sidebar-text)] opacity-40 text-[10px] uppercase tracking-widest font-bold mt-1.5 flex items-center gap-1.5">
-              <span className="w-1 h-1 rounded-full bg-[var(--color-accent)]"></span>
-              {t('orgName')}
-            </p>
+          <div className="flex flex-col items-center">
+            <span className={`${theme === 'dark' ? 'text-[var(--color-accent)]' : 'text-[var(--color-primary)]'} font-bold text-lg leading-tight text-center font-sora tracking-tight`}>
+              Smart Skill &
+            </span>
+            <span className={`${theme === 'dark' ? 'text-[var(--color-accent)]' : 'text-[var(--color-primary)]'} font-bold text-lg leading-tight text-center font-sora tracking-tight`}>
+              Live Learning
+            </span>
+            <span className={`${theme === 'dark' ? 'text-white/40' : 'text-slate-400'} text-[10px] mt-2 text-center font-black uppercase tracking-[3px]`}>
+              Gous org
+            </span>
           </div>
         )}
       </div>
@@ -145,8 +144,8 @@ export default function DashboardLayout({ children }) {
                 w-full flex items-center gap-3 px-3 py-2.5
                 rounded-lg transition-all duration-200 text-sm font-medium
                 ${active
-                  ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                  : 'text-[var(--color-text-primary)] hover:bg-black/5 dark:hover:bg-[var(--color-surface)]/5 hover:text-[var(--color-primary)]'
+                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold border border-[var(--color-accent)]/20'
+                  : 'text-[var(--color-sidebar-text)] hover:bg-black/5 dark:hover:bg-white/5'
                 }
               `}
             >
@@ -161,24 +160,22 @@ export default function DashboardLayout({ children }) {
 
       {/* User + Logout */}
       <div className="px-2 py-3 border-t border-[var(--color-border)]">
-        {!collapsed && (
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]
-                            flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-bold">
+          <div className={`flex items-center gap-3 px-3 py-2 mb-2 rounded-2xl ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1E3A5F] to-[#2E5490]
+                            flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
+              <span className="text-white text-xs font-bold font-sora">
                 {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[var(--color-text-primary)] text-xs font-semibold truncate">
+              <p className="text-[var(--color-sidebar-text)] text-sm font-bold truncate leading-tight">
                 {user?.full_name || 'User'}
               </p>
-              <p className="text-[var(--color-text-muted)] text-xs truncate capitalize">
+              <p className={`text-[10px] font-black uppercase tracking-widest mt-0.5 ${user?.role === 'student' ? 'text-emerald-500' : 'text-[var(--color-accent)]'}`}>
                 {(user?.role || 'student').replace('_', ' ')}
               </p>
             </div>
           </div>
-        )}
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2

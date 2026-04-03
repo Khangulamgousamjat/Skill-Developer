@@ -1,0 +1,11 @@
+{
+  "name": "ssllm-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm run dev --prefix app_frontend",
+    "build": "npm run build --prefix app_frontend",
+    "install-frontend": "npm install --prefix app_frontend",
+    "install-backend": "npm install --prefix backend"
+  }
+}
