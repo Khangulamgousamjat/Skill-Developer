@@ -135,7 +135,7 @@ export default function TeacherDashboard() {
             value={stats.totalStudents}
             trend="+12%"
             color="blue"
-            isLoading={loading}
+            loading={loading}
           />
           <StatCard
             icon={BookOpen}
@@ -143,7 +143,7 @@ export default function TeacherDashboard() {
             value={stats.totalLectures}
             trend="100% Sync"
             color="indigo"
-            isLoading={loading}
+            loading={loading}
           />
           <StatCard
             icon={Video}
@@ -151,7 +151,7 @@ export default function TeacherDashboard() {
             value={stats.totalVideos}
             trend="Active Modules"
             color="amber"
-            isLoading={loading}
+            loading={loading}
           />
           <StatCard
             icon={MessageSquare}
@@ -159,7 +159,7 @@ export default function TeacherDashboard() {
             value={stats.pendingQna}
             trend="Critical Filter"
             color="rose"
-            isLoading={loading}
+            loading={loading}
           />
         </div>
 
@@ -298,35 +298,3 @@ export default function TeacherDashboard() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, trend, color, isLoading }) {
-  const colorMap = {
-    blue: 'bg-blue-500/10 text-blue-500',
-    indigo: 'bg-indigo-500/10 text-indigo-500',
-    amber: 'bg-amber-500/10 text-amber-500',
-    rose: 'bg-rose-500/10 text-rose-500'
-  };
-
-  if (isLoading) {
-    return <Skeleton className="h-40 rounded-[32px]" />;
-  }
-
-  return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-[40px] shadow-sm hover:translate-y-[-8px] transition-all duration-500 group relative overflow-hidden text-left">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-primary)]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-
-      <div className="flex items-center justify-between mb-8">
-        <div className={`w-14 h-14 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform flex items-center justify-center border border-white/5`}>
-          <Icon size={28} />
-        </div>
-        <div className="flex items-center gap-1 text-[var(--color-success)] text-[9px] font-black uppercase tracking-widest bg-[var(--color-success)]/10 px-3 py-1.5 rounded-lg border border-[var(--color-success)]/10">
-          <TrendingUp size={12} />
-          {trend}
-        </div>
-      </div>
-      <div>
-        <p className="text-3xl font-bold font-sora text-[var(--color-text-primary)]">{value}</p>
-        <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[2px] mt-2 opacity-60">{label}</p>
-      </div>
-    </div>
-  );
-}

@@ -4,7 +4,7 @@ import {
   Bell, Plus, Trash2, Edit, 
   Save, X, Loader2, Megaphone,
   Globe, Info, AlertTriangle, CheckCircle,
-  Shield, Building2, User, SearchX
+  Shield, Building2, User, Search
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import axiosInstance from '../../api/axios';
@@ -285,7 +285,7 @@ export default function ManageAnnouncements() {
                              <option value="all">Global (All Users)</option>
                              <option value="student">Interns Only</option>
                              <option value="manager">Managers Only</option>
-                             <option value="Teacher">Teachers Only</option>
+                             <option value="teacher">Teachers Only</option>
                           </select>
                        </div>
                     </div>

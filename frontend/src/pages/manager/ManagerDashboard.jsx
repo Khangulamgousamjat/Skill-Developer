@@ -9,7 +9,7 @@ import {
    Plus, CheckCircle, XCircle, Clock,
    ExternalLink, Search, Filter, Loader2,
    Briefcase, GraduationCap, Award, Play,
-   Users2, ArrowRight
+   ArrowRight
 } from 'lucide-react';
 import {
    BarChart, Bar, XAxis, YAxis,
@@ -23,76 +23,56 @@ import toast from 'react-hot-toast';
 export default function ManagerDashboard() {
    const { t } = useLanguage();
    const navigate = useNavigate();
-   const { user } = useSelector((s) => s.auth);
-   const [loading, setLoading] = useState(true);
-   const [reviews, setReviews] = useState([]);
-   const [team, setTeam] = useState([]);
+   const { user } = useSelector((state) => state.auth);
    const [stats, setStats] = useState({
       totalTeam: 0,
       pendingReviews: 0,
       avgXP: 0,
-      completionRate: '84%'
+      completionRate: 0
    });
+   const [reviews, setReviews] = useState([]);
+   const [team, setTeam] = useState([]);
+   const [loading, setLoading] = useState(true);
 
    useEffect(() => {
-      fetchData();
+      fetchDashboardData();
    }, []);
 
-   const fetchData = async () => {
-      setLoading(true);
+   const fetchDashboardData = async () => {
       try {
-         const [reviewRes, teamRes] = await Promise.all([
-            axiosInstance.get('/manager/reviews').catch(() => ({ data: { success: false } })),
-            axiosInstance.get('/manager/team').catch(() => ({ data: { success: false } }))
+         setLoading(true);
+         const [statsRes, reviewsRes, teamRes] = await Promise.all([
+            axiosInstance.get('/manager/dashboard/stats'),
+            axiosInstance.get('/manager/dashboard/pending-reviews'),
+            axiosInstance.get('/manager/team')
          ]);
 
-         if (reviewRes.data?.success) {
-            setReviews(reviewRes.data.data);
-            setStats(prev => ({ ...prev, pendingReviews: reviewRes.data.data.length }));
-         }
-
-         if (teamRes.data?.success) {
-            const teamData = teamRes.data.data;
-            setTeam(teamData);
-            setStats(prev => ({
-               ...prev,
-               totalTeam: teamData.length,
-               avgXP: teamData.length > 0
-                  ? Math.round(teamData.reduce((acc, curr) => acc + (curr.total_xp || 0), 0) / teamData.length)
-                  : 0
-            }));
-         }
-
+         if (statsRes.data.success) setStats(statsRes.data.data);
+         if (reviewsRes.data.success) setReviews(reviewsRes.data.data);
+         if (teamRes.data.success) setTeam(teamRes.data.data);
       } catch (err) {
-         toast.error('Failed to load manager oversight data');
+         console.error('Failed to sync manager intelligence');
       } finally {
          setLoading(false);
       }
    };
 
-   const handleReviewAction = async (id, status) => {
+   const handleReview = async (assignmentId, status) => {
       try {
-         const feedback = status === 'completed' ? 'Great work!' : 'Please revise the documentation and resubmit.';
-         const res = await axiosInstance.patch(`/manager/reviews/${id}`, { status, feedback });
-         if (res.data.success) {
-            toast.success(`Project ${status === 'completed' ? 'Approved' : 'Rejected'}`);
-            fetchData();
-         }
+         await axiosInstance.patch(`/manager/assignments/${assignmentId}/review`, { status });
+         toast.success(status === 'approved' ? 'Deployment approved' : 'Revision requested');
+         fetchDashboardData();
       } catch (err) {
-         toast.error('Failed to submit review');
+         toast.error('Protocol failure during review transmission');
       }
    };
 
-   const chartData = team.slice(0, 5).map(member => ({
-      name: member.full_name?.split(' ')[0],
-      xp: member.total_xp || 0
-   }));
-
-   if (loading) {
+   if (loading && !stats.totalTeam) {
       return (
          <DashboardLayout>
-            <div className="flex items-center justify-center py-20 min-h-[50vh]">
-               <div className="w-10 h-10 border-4 rounded-full animate-spin border-[var(--color-primary)] border-t-transparent shadow-lg" />
+            <div className="py-20 flex flex-col items-center justify-center">
+               <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
+               <p className="text-[10px] font-black uppercase tracking-[4px] text-[var(--color-text-muted)] animate-pulse">Syncing Intelligence...</p>
             </div>
          </DashboardLayout>
       );
@@ -118,17 +98,17 @@ export default function ManagerDashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-               <StatCard title="Total Team" value={stats.totalTeam} icon={Users} color="primary" />
-               <StatCard title="Review Queue" value={stats.pendingReviews} icon={ClipboardCheck} color={stats.pendingReviews > 0 ? 'warning' : 'success'} />
-               <StatCard title="Avg Team XP" value={stats.avgXP} icon={GraduationCap} color="indigo" />
-               <StatCard title="Efficiency" value={stats.completionRate} icon={TrendingUp} color="emerald" />
+               <StatCard title="Total Team" value={stats.totalTeam} icon={Users} color="primary" loading={loading} />
+               <StatCard title="Review Queue" value={stats.pendingReviews} icon={ClipboardCheck} color={stats.pendingReviews > 0 ? 'warning' : 'success'} loading={loading} />
+               <StatCard title="Avg Team XP" value={stats.avgXP} icon={GraduationCap} color="indigo" loading={loading} />
+               <StatCard title="Efficiency" value={stats.completionRate} icon={TrendingUp} color="emerald" loading={loading} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
                {/* SUBMISSION REVIEW QUEUE (Left 60%) */}
                <div className="lg:col-span-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] overflow-hidden shadow-sm flex flex-col h-full">
-                  <div className="p-8 border-b border-[var(--color-border)] flex items-center justify-between">
+                  <div className="p-8 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-surface-2)]/30">
                      <div className="flex items-center gap-3">
                         <div className="p-2 rounded-xl bg-orange-500/10 text-orange-600">
                            <Clock size={20} />
@@ -149,7 +129,7 @@ export default function ManagerDashboard() {
                      ) : (
                         <div className="divide-y divide-[var(--color-border)]">
                            <AnimatePresence>
-                              {reviews.map((req) => (
+                              {Array.isArray(reviews) && reviews.map((req) => (
                                  <motion.div
                                     key={req.assignment_id}
                                     initial={{ opacity: 0, x: -20 }}
@@ -176,117 +156,89 @@ export default function ManagerDashboard() {
                                              </div>
                                           </div>
                                        </div>
-                                       <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
+
+                                       <div className="flex items-center gap-2">
                                           <button
-                                             onClick={() => handleReviewAction(req.assignment_id, 'completed')}
-                                             className="px-4 py-2 bg-green-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-500/20 hover:scale-105 active:scale-95 transition-all"
+                                             onClick={() => handleReview(req.assignment_id, 'approved')}
+                                             className="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                                             title="Approve"
                                           >
-                                             Approve
+                                             <CheckCircle size={18} />
                                           </button>
                                           <button
-                                             onClick={() => handleReviewAction(req.assignment_id, 'todo')}
-                                             className="px-4 py-2 bg-[var(--color-surface)] border border-red-500/20 text-red-500 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                             onClick={() => handleReview(req.assignment_id, 'rejected')}
+                                             className="p-2.5 bg-red-500/10 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                             title="Request Revision"
                                           >
-                                             Request Edit
+                                             <XCircle size={18} />
                                           </button>
                                        </div>
                                     </div>
-                                    {req.submission_notes && (
-                                       <div className="mt-4 p-4 bg-[var(--color-surface-2)]/50 rounded-[1.5rem] text-xs text-[var(--color-text-secondary)] italic border border-[var(--color-border)]/50">
-                                          "{req.submission_notes}"
-                                       </div>
-                                    )}
                                  </motion.div>
                               ))}
                            </AnimatePresence>
                         </div>
                      )}
                   </div>
+                  <div className="p-4 bg-[var(--color-surface-2)]/30 border-t border-[var(--color-border)] text-center">
+                     <button onClick={() => navigate('/manager/evaluation')} className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                        View Detailed Evaluation History
+                     </button>
+                  </div>
                </div>
 
-               {/* TEAM PERFORMANCE (Right 40%) */}
+               {/* TEAM OVERVIEW LIST (Right 40%) */}
                <div className="lg:col-span-2 space-y-8">
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] p-8 shadow-sm">
-                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-lg font-bold font-sora text-[var(--color-text-primary)]">Top Learners</h3>
-                        <TrendingUp size={20} className="text-[var(--color-success)]" />
+                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] overflow-hidden shadow-sm flex flex-col">
+                     <div className="p-8 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]/30">
+                        <h2 className="text-xl font-bold font-sora text-[var(--color-text-primary)]">Team Deployment</h2>
                      </div>
-                     <div className="h-[250px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                           <BarChart data={chartData}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#888" strokeOpacity={0.1} vertical={false} />
-                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 'bold' }} dy={10} />
-                              <Tooltip
-                                 contentStyle={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', borderRadius: '16px' }}
-                                 itemStyle={{ color: 'var(--color-primary)', fontWeight: 'bold' }}
-                              />
-                              <Bar dataKey="xp" radius={[8, 8, 0, 0]}>
-                                 {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--color-primary)' : 'var(--color-surface-2)'} />
-                                 ))}
-                              </Bar>
-                           </BarChart>
-                        </ResponsiveContainer>
-                     </div>
-                  </div>
-
-                  {/* QUICK TEAM MANAGEMENT */}
-                  <div className="bg-[#1A1C23] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl group">
-                     <div className="absolute top-0 right-0 p-8 opacity-40 group-hover:scale-110 transition-transform duration-700">
-                        <Users2 size={120} className="text-[var(--color-primary)]" />
-                     </div>
-                     <div className="relative z-10">
-                        <h3 className="text-2xl font-bold font-sora mb-2">Team Sync</h3>
-                        <p className="text-sm text-white/50 mb-8 max-w-[200px]">Quickly assess and manage your {stats.totalTeam} team members.</p>
-
-                        <div className="space-y-4">
-                           <button onClick={() => navigate('/manager/team')} className="w-full py-4 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2">
-                              Manage Profiles <ArrowRight size={14} />
-                           </button>
-                           <button onClick={() => navigate('/manager/evaluation')} className="w-full py-4 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all">
-                              Live Evaluations
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* BOTTOM SECTION: TEAM ROSTER OVERVIEW */}
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] p-8 shadow-sm">
-               <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                     <div className="p-2 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-                        <Users size={20} />
-                     </div>
-                     <h2 className="text-xl font-bold font-sora text-[var(--color-text-primary)]">Current Team Roster</h2>
-                  </div>
-                  <div className="flex items-center gap-3">
-                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={14} />
-                        <input type="text" placeholder="Search team..." className="pl-9 pr-4 py-2 bg-[var(--color-surface-2)]/50 border border-[var(--color-border)] rounded-xl text-xs outline-none focus:ring-1 focus:ring-[var(--color-primary)] w-48" />
-                     </div>
-                  </div>
-               </div>
-
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {team.map(member => (
-                     <div key={member.id} className="p-6 bg-[var(--color-surface-2)]/30 border border-[var(--color-border)]/50 rounded-[2rem] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-surface-2)]/50 transition-all flex items-center gap-4 group cursor-pointer">
-                        <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)] flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-[var(--color-primary)]/20">
-                           {member.full_name?.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                           <h4 className="font-bold text-sm text-[var(--color-text-primary)] truncate">{member.full_name}</h4>
-                           <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase">Lvl {member.current_level || 1}</span>
-                              <span className="text-[10px] font-black text-[var(--color-text-muted)]">{member.total_xp || 0} XP</span>
+                     <div className="p-8 divide-y divide-[var(--color-border)] max-h-[600px] overflow-y-auto">
+                        {Array.isArray(team) && team.map((member) => (
+                           <div key={member.id} className="py-6 flex items-center justify-between group first:pt-0 last:pb-0">
+                              <div className="flex items-center gap-4">
+                                 <div className="w-12 h-12 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-primary)] font-black text-sm group-hover:scale-110 transition-transform overflow-hidden shadow-sm">
+                                    {member.profile_photo_url ? <img src={member.profile_photo_url} alt="" className="w-full h-full object-cover" /> : member.full_name?.charAt(0)}
+                                 </div>
+                                 <div>
+                                    <h4 className="font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">{member.full_name}</h4>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mt-0.5">{member.skill_level || 'Junior'} Intern</p>
+                                 </div>
+                              </div>
+                              <button
+                                 onClick={() => navigate(`/profile/${member.id}`)}
+                                 className="p-3 bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:text-indigo-500 rounded-xl transition-all"
+                              >
+                                 <ArrowRight size={16} />
+                              </button>
                            </div>
-                        </div>
+                        ))}
                      </div>
-                  ))}
+                     <div className="p-4 bg-[var(--color-surface-2)]/30 border-t border-[var(--color-border)] text-center">
+                        <button onClick={() => navigate('/manager/team')} className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                           View Global Team Directory
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* Operational Briefing */}
+                  <div className="bg-gradient-to-br from-[#1E3A5F] to-[#2E5490] rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-700" />
+                     <div className="relative z-10">
+                        <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-6 border border-white/20 shadow-lg">
+                           <Award size={24} className="text-amber-400" />
+                        </div>
+                        <h3 className="font-bold font-sora text-xl mb-4 leading-tight">Insight Engine</h3>
+                        <p className="text-white/70 text-sm leading-relaxed mb-8">
+                           "Three interns have reached **Advanced** proficiency levels. Ready for project higher-tier assignment."
+                        </p>
+                        <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[2px] text-amber-400 hover:text-white transition-all">
+                           ANALYZE FLOW <TrendingUp size={14} />
+                        </button>
+                     </div>
+                  </div>
                </div>
             </div>
-
          </div>
       </DashboardLayout>
    );

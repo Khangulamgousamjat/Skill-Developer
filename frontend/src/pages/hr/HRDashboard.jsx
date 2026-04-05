@@ -5,9 +5,9 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/cards/StatCard';
 import axiosInstance from '../../api/axios';
 import {
-   Users, Award, ClipboardCheck, BookCheck,
-   TrendingUp, Users2, ShieldCheck,
-   ArrowUpRight, Plus, Eye, Clock, Building
+   Users, Award, ClipboardCheck, BookOpen,
+   TrendingUp, ShieldCheck,
+   ArrowUpRight, Plus, Eye, Clock, Building2
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -105,10 +105,10 @@ export default function HRDashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-               <StatCard title="Total Interns" value={stats.totalInterns} icon={Users} color="primary" />
-               <StatCard title="Onboarding" value={stats.pendingOnboarding} icon={ClipboardCheck} color={stats.pendingOnboarding > 0 ? 'warning' : 'success'} subtitle="Pending completion" />
-               <StatCard title="Certs Issued" value={stats.certificatesIssued} icon={Award} color="emerald" />
-               <StatCard title="Avg Attendance" value={stats.avgAttendance} icon={ShieldCheck} color="info" />
+               <StatCard title="Total Interns" value={stats.totalInterns} icon={Users} color="primary" loading={loading} />
+               <StatCard title="Onboarding" value={stats.pendingOnboarding} icon={ClipboardCheck} color={stats.pendingOnboarding > 0 ? 'warning' : 'success'} subtitle="Pending completion" loading={loading} />
+               <StatCard title="Certs Issued" value={stats.certificatesIssued} icon={Award} color="emerald" loading={loading} />
+               <StatCard title="Avg Attendance" value={stats.avgAttendance} icon={ShieldCheck} color="info" loading={loading} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -132,7 +132,7 @@ export default function HRDashboard() {
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--color-border)]">
-                           {interns.map(intern => (
+                           {Array.isArray(interns) && interns.map(intern => (
                               <tr key={intern.id} className="hover:bg-[var(--color-surface-2)]/30 transition-colors cursor-pointer group" onClick={() => navigate(`/profile/${intern.id}`)}>
                                  <td className="px-8 py-5">
                                     <div className="flex items-center gap-3">
@@ -176,14 +176,14 @@ export default function HRDashboard() {
                         </div>
                         <button onClick={() => navigate('/hr/attendance')} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"><ArrowUpRight size={20} /></button>
                      </div>
-                     <div className="space-y-6">
-                        {attendance.length === 0 ? (
+                      <div className="space-y-6">
+                        {!Array.isArray(attendance) || attendance.length === 0 ? (
                            <p className="text-center py-8 text-[var(--color-text-muted)] italic">No attendance records found yet.</p>
                         ) : (
                            attendance.map((log, idx) => (
                               <div key={idx} className="flex gap-4 group">
                                  <div className="w-1.5 h-12 bg-blue-500/10 rounded-full flex flex-col justify-end overflow-hidden group-hover:bg-blue-500/20 transition-colors">
-                                    <div className="w-full bg-blue-500" style={{ height: `${Math.min(log.duration_watched_minutes, 60)}%` }} />
+                                    <div className="w-full bg-blue-500" style={{ height: `${Math.min(log.duration_watched_minutes || 0, 60)}%` }} />
                                  </div>
                                  <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-bold text-[var(--color-text-primary)] truncate">{log.intern_name}</h4>

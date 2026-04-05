@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, X, Moon, Sun, Bell, LayoutTemplate, ShieldCheck, Bot, FileText, Coffee, Users, Mail, Award } from 'lucide-react';
+import { Settings, X, Moon, Sun, Bell, Layout, ShieldCheck, Bot, FileText, Coffee, Users, Mail, Award } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { internData } from '../../data/mockData';
 
@@ -70,7 +70,7 @@ export const AllModals = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-600'}`}>
-                    <LayoutTemplate className="w-5 h-5"/>
+                    <Layout className="w-5 h-5"/>
                   </div>
                   <div>
                     <p className={`font-semibold text-sm ${t.textMain}`}>Compact Layout</p>

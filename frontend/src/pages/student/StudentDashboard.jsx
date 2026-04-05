@@ -7,7 +7,7 @@ import {
   Target, FolderOpen, Video, Award, 
   PlayCircle, Bot, ArrowRight, BookOpen, 
   Flame, TrendingUp, ChevronRight, Zap,
-  CheckCircle2, Clock, Calendar, SearchX, Loader2, User
+  CheckCircle2, Clock, Calendar, Search, Loader2, User
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, 
@@ -291,15 +291,15 @@ export default function StudentDashboard() {
                        </div>
                     ))
                  ) : data.upcomingLectures.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center py-20">
-                       <EmptyState 
-                          icon={Calendar}
-                          title="Null Schedule Detected"
-                          description="No tactical briefings or learning sessions have been synchronized for your sector yet."
-                          actionLabel="Manual Check-In"
-                          onAction={() => fetchData()}
-                       />
-                    </div>
+                     <div className="py-20 flex justify-center">
+                        <EmptyState 
+                           icon={Search}
+                           title="No Lectures Found"
+                           description="Your learning pipeline is currently clear. Sync with your teacher for upcoming sessions."
+                           actionLabel="Refresh Sync"
+                           onAction={() => fetchData()}
+                        />
+                     </div>
                  ) : (
                     data.upcomingLectures.map(lecture => (
                        <div key={lecture.id} className="p-6 bg-[var(--color-surface-2)]/40 hover:bg-[var(--color-surface-2)]/80 border border-transparent hover:border-[var(--color-primary)]/20 rounded-[2rem] transition-all flex items-center justify-between group">
