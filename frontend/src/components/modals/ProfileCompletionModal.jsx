@@ -204,6 +204,8 @@ export default function ProfileCompletionModal({ onClose }) {
   const [showAddEdu, setShowAddEdu] = useState(false);
   const [skillInput, setSkillInput] = useState('');
 
+  if (!user) return null;
+
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',

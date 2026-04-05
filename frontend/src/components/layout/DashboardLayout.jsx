@@ -92,11 +92,19 @@ export default function DashboardLayout({ children }) {
     // Only show for students — never for admin or other roles
     if (!user || user.role !== 'student') return;
 
+    let timeoutId;
     const key = `profile_done_${user.id}`;
     const done = localStorage.getItem(key);
+    
     if (!done) {
-      setTimeout(() => setShowProfileModal(true), 1500);
+      timeoutId = setTimeout(() => {
+        setShowProfileModal(true);
+      }, 1500);
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [user]);
 
   const navItems = NAV_KEYS_ROLES[user?.role] || [];
@@ -245,16 +253,24 @@ export default function DashboardLayout({ children }) {
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button className="relative p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-border)]/50"
-                    onClick={() => navigate(`/${user?.role === 'super_admin' ? 'admin' : user?.role?.replace('_admin','')}/messages`)}>
+                    onClick={() => {
+                      const role = user?.role || 'student';
+                      const base = role === 'super_admin' ? 'admin' : role.replace('_admin', '');
+                      navigate(`/${base}/messages`);
+                    }}>
               <Bell size={18} />
-              {unreadCount > 0 && (
+              {(unreadCount || 0) > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--color-surface)]">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>
             <div className="w-9 h-9 ml-2 rounded-full bg-[var(--color-primary)] flex items-center justify-center cursor-pointer border-2 border-[var(--color-border)] shadow-sm"
-                 onClick={() => navigate(`/${user?.role === 'super_admin' ? 'admin' : user?.role?.replace('_admin','')}/profile`)}>
+                 onClick={() => {
+                    const role = user?.role || 'student';
+                    const base = role === 'super_admin' ? 'admin' : role.replace('_admin', '');
+                    navigate(`/${base}/profile`);
+                 }}>
               <span className="text-white text-xs font-bold">
                 {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
               </span>
