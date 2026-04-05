@@ -355,7 +355,7 @@ export default function LandingPage() {
             Smart Skill &amp; Live Learning Module v1.0.1
           </p>
           <p className="text-slate-500 text-xs">
-            Made by <a href="https://linkedin.com/in/gulamgous" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Gous Org</a>
+            Made by <a href="https://github.com/Khangulamgousamjat/Skill-Developer" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Gous Org</a>
           </p>
         </div>
       </footer>
