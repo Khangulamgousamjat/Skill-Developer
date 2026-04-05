@@ -330,6 +330,7 @@ const translations = {
     generateRoadmap: "Generate Roadmap",
     selectTopic: "Select a Topic",
     myRoadmaps: "My Roadmaps",
+    aiAssistant: "AI Assistant",
   },
 
   hi: {
@@ -472,6 +473,7 @@ const translations = {
     generateRoadmap: "रोडमैप तैयार करें",
     selectTopic: "एक विषय चुनें",
     myRoadmaps: "मेरे रोडमैप",
+    aiAssistant: "एआई सहायक",
   },
 
   mr: {
@@ -638,6 +640,7 @@ const translations = {
     generateRoadmap: "रोडमॅप तयार करा",
     selectTopic: "एक विषय निवडा",
     myRoadmaps: "माझे रोडमॅप",
+    aiAssistant: "एआय सहाय्यक",
   },
 
   fr: {
@@ -1096,6 +1099,7 @@ const translations = {
     generateRoadmap: "Создать дорожную карту",
     selectTopic: "Выберите тему",
     myRoadmaps: "Мои дорожные карты",
+    aiAssistant: "ИИ-помощник",
   },
 };
 

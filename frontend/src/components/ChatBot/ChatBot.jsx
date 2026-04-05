@@ -42,9 +42,12 @@ function MessageContent({ text }) {
   );
 }
 
-export default function ChatBot() {
+export default function ChatBot({ isOpen: externalOpen, onClose }) {
   const { user } = useSelector(s => s.auth);
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = externalOpen !== undefined ? onClose : setInternalOpen;
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -170,44 +173,15 @@ export default function ChatBot() {
     } catch {}
   };
 
-  const panelWidth = isExpanded ? 'w-[680px]' : 'w-[380px]';
-  const panelHeight = isExpanded ? 'h-[85vh]' : 'h-[580px]';
+  const panelWidth = isExpanded ? 'w-[680px]' : 'w-[400px]';
+  const panelHeight = isExpanded ? 'h-[85vh]' : 'h-[600px]';
 
   return (
     <>
-      {/* FLOATING BUTTON */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        {/* Tooltip on hover (hidden when open) */}
-        {!isOpen && (
-          <div className="bg-[#1E3A5F] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
-            AI Learning Assistant
-          </div>
-        )}
-
-        {/* Main button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative w-14 h-14 rounded-full bg-[#F4A100] text-white shadow-2xl hover:bg-[#FFB733] hover:scale-110 transition-all duration-300 flex items-center justify-center group"
-        >
-          {/* Pulsing ring animation */}
-          {!isOpen && (
-            <span className="absolute inline-flex w-full h-full rounded-full bg-[#F4A100] opacity-40 animate-ping"/>
-          )}
-          {isOpen ? <X size={22} /> : <MessageCircle size={22} />}
-
-          {/* "AI" badge */}
-          {!isOpen && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#1E3A5F] text-white text-[9px] font-bold flex items-center justify-center border-2 border-white">
-              AI
-            </span>
-          )}
-        </button>
-      </div>
-
       {/* CHAT PANEL */}
       {isOpen && (
         <div
-          className={`fixed bottom-24 right-6 z-40 ${panelWidth} ${panelHeight} bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}
+          className={`fixed bottom-6 right-6 z-50 ${panelWidth} ${panelHeight} bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}
           style={{ animation: 'slideUp 0.3s ease-out' }}
         >
           {/* HEADER */}
@@ -220,11 +194,11 @@ export default function ChatBot() {
                 </div>
                 <div>
                   <p className="text-white font-sora font-semibold text-sm leading-tight">
-                    AI Learning Assistant
+                    AI Assistant
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"/>
-                    <p className="text-white/60 text-xs">Online — Unlimited chats</p>
+                    <p className="text-white/60 text-xs text-left">Always active</p>
                   </div>
                 </div>
               </div>
@@ -271,7 +245,7 @@ export default function ChatBot() {
 
                 {/* Message bubble */}
                 <div className={`relative max-w-[80%] px-3.5 py-2.5 rounded-2xl ${msg.sender === 'user' ? 'bg-[#F4A100] text-white rounded-tr-sm' : msg.isError ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-[var(--color-text-primary)] rounded-tl-sm' : 'bg-[var(--color-surface-2)] text-[var(--color-text-primary)] rounded-tl-sm border border-[var(--color-border)]'}`}>
-                  {msg.sender === 'ai' ? <MessageContent text={msg.text}/> : <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>}
+                  {msg.sender === 'ai' ? <MessageContent text={msg.text}/> : <p className="text-sm leading-relaxed whitespace-pre-wrap text-left">{msg.text}</p>}
 
                   {/* Timestamp + copy button */}
                   <div className={`flex items-center gap-2 mt-1.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-between'}`}>
@@ -313,7 +287,7 @@ export default function ChatBot() {
           {/* SUGGESTED QUESTIONS (show when no messages) */}
           {messages.length <= 1 && !loading && (
             <div className="px-4 pb-3 flex-shrink-0">
-              <p className="text-[var(--color-text-muted)] text-xs mb-2 font-medium">Try asking:</p>
+              <p className="text-[var(--color-text-muted)] text-xs mb-2 font-medium text-left">Try asking:</p>
               <div className="flex flex-wrap gap-2">
                 {["Explain React hooks", "How to learn Python fast?", "What is DSA?", "Debug my code"].map((q) => (
                   <button key={q} onClick={() => setInputText(q)} className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#F4A100] hover:text-[#F4A100] hover:bg-[#F4A100]/5 transition-all">

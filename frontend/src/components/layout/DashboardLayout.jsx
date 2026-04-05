@@ -21,6 +21,7 @@ import ProfileCompletionModal from '../modals/ProfileCompletionModal';
 const NAV_KEYS_ROLES = {
   student: [
     { labelKey: 'dashboard',      icon: LayoutDashboard, path: '/student/dashboard' },
+    { labelKey: 'aiAssistant',   icon: Sparkles,        path: '#ai' },
     { labelKey: 'skillGap',       icon: Target,          path: '/student/skills' },
     { labelKey: 'myProjects',    icon: FolderOpen,      path: '/student/projects' },
     { labelKey: 'lectures',       icon: BookOpen,        path: '/student/lectures' },
@@ -87,6 +88,7 @@ export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isAiOpen, setIsAiOpen] = useState(false);
 
   useEffect(() => {
     // Only show for students — never for admin or other roles
@@ -157,7 +159,11 @@ export default function DashboardLayout({ children }) {
             <button
               key={item.path}
               onClick={() => {
-                navigate(item.path);
+                if (item.labelKey === 'aiAssistant') {
+                  setIsAiOpen(true);
+                } else {
+                  navigate(item.path);
+                }
                 setMobileOpen(false);
               }}
               className={`
@@ -286,7 +292,9 @@ export default function DashboardLayout({ children }) {
         </main>
 
         {/* AI Chatbot - Student Only */}
-        {user?.role === 'student' && <ChatBot />}
+        {user?.role === 'student' && (
+          <ChatBot isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+        )}
 
         {/* Global Profile Completion Check */}
         {showProfileModal && user?.role === 'student' && (
