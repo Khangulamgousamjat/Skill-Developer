@@ -101,10 +101,10 @@ export default function LandingPage() {
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4
             gap-6">
             {[
-              { num: '500+',  label: 'Learning Resources' },
-              { num: '50+',   label: 'Expert Teachers' },
+              { num: '500+', label: 'Learning Resources' },
+              { num: '50+', label: 'Expert Teachers' },
               { num: '1000+', label: 'Active Students' },
-              { num: '100%',  label: 'Free to Join' },
+              { num: '100%', label: 'Free to Join' },
             ].map(s => (
               <div key={s.label}>
                 <p className="font-sora font-bold text-3xl
@@ -198,13 +198,13 @@ export default function LandingPage() {
         <div className="flex flex-wrap justify-center gap-3
           mt-12 max-w-5xl mx-auto">
           {[
-            'HTML','CSS','JavaScript','TypeScript','React',
-            'Vue.js','Angular','Node.js','Python','Java',
-            'C++','C','C#','Ruby','PHP','Swift','Kotlin',
-            'Go','Rust','SQL','MongoDB','Docker','Git',
-            'DevOps','AWS','Machine Learning','Data Science',
-            'DSA','UI/UX Design','React Native','Flutter',
-            'GraphQL','REST APIs','Cybersecurity','Blockchain',
+            'HTML', 'CSS', 'JavaScript', 'TypeScript', 'React',
+            'Vue.js', 'Angular', 'Node.js', 'Python', 'Java',
+            'C++', 'C', 'C#', 'Ruby', 'PHP', 'Swift', 'Kotlin',
+            'Go', 'Rust', 'SQL', 'MongoDB', 'Docker', 'Git',
+            'DevOps', 'AWS', 'Machine Learning', 'Data Science',
+            'DSA', 'UI/UX Design', 'React Native', 'Flutter',
+            'GraphQL', 'REST APIs', 'Cybersecurity', 'Blockchain',
           ].map((lang, i) => {
             const colors = [
               'bg-blue-500/10 border-blue-500/30 text-blue-400',
@@ -321,12 +321,12 @@ export default function LandingPage() {
                   text-sm transition-colors">
                 📧 gousk2004@gmail.com
               </a>
-              <a href="https://linkedin.com/in/gousskhan"
+              <a href="https://linkedin.com/in/gulamgous"
                 target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2
                   text-slate-400 hover:text-white
                   text-sm transition-colors">
-                💼 linkedin.com/in/gousskhan
+                💼 linkedin.com/in/gulamgous
               </a>
               <a href="https://github.com/khangulamgousamjat"
                 target="_blank" rel="noopener noreferrer"
@@ -338,7 +338,7 @@ export default function LandingPage() {
             </div>
             <div className="mt-4 pt-4 border-t border-white/10">
               <p className="text-slate-300 text-sm font-semibold">
-                🏢 Gous org
+                🏢 Gous Org.
               </p>
             </div>
           </div>
@@ -352,10 +352,10 @@ export default function LandingPage() {
             © 2026 Gous org — All rights reserved
           </p>
           <p className="text-slate-500 text-xs">
-            Smart Skill &amp; Live Learning Module v1.0.0
+            Smart Skill &amp; Live Learning Module v1.0.1
           </p>
           <p className="text-slate-500 text-xs">
-            Made with ❤️ by Gous Khan
+            Made by <a href="https://linkedin.com/in/gulamgous" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Gous Org</a>
           </p>
         </div>
       </footer>
