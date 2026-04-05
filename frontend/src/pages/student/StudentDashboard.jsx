@@ -7,7 +7,7 @@ import {
   Target, FolderOpen, Video, Award, 
   PlayCircle, Bot, ArrowRight, BookOpen, 
   Flame, TrendingUp, ChevronRight, Zap,
-  CheckCircle2, Clock, Calendar, SearchX, Loader2
+  CheckCircle2, Clock, Calendar, SearchX, Loader2, User
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, 

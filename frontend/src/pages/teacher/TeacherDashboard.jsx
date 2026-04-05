@@ -6,8 +6,9 @@ import {
 } from 'recharts';
 import { 
   Plus, Video, Users, BookOpen, MessageSquare, 
-  Calendar, Clock, TrendingUp, ArrowUpRight 
+  Calendar, Clock, TrendingUp, ArrowUpRight, Award 
 } from 'lucide-react';
+import StatCard from '../../components/cards/StatCard';
 import { useLanguage } from '../../contexts/LanguageContext';
 import axiosInstance from '../../api/axios';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -130,7 +131,7 @@ export default function TeacherDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
             icon={Users} 
-            label="Active Interns" 
+            title="Active Interns" 
             value={stats.totalStudents} 
             trend="+12%" 
             color="blue" 
@@ -138,7 +139,7 @@ export default function TeacherDashboard() {
           />
           <StatCard 
             icon={BookOpen} 
-            label="Total Sessions" 
+            title="Total Sessions" 
             value={stats.totalLectures} 
             trend="100% Sync" 
             color="indigo" 
@@ -146,7 +147,7 @@ export default function TeacherDashboard() {
           />
           <StatCard 
             icon={Video} 
-            label="Cloud Assets" 
+            title="Cloud Assets" 
             value={stats.totalVideos} 
             trend="Active Modules" 
             color="amber" 
@@ -154,7 +155,7 @@ export default function TeacherDashboard() {
           />
           <StatCard 
             icon={MessageSquare} 
-            label="Pending Queries" 
+            title="Pending Queries" 
             value={stats.pendingQna} 
             trend="Critical Filter" 
             color="rose" 
