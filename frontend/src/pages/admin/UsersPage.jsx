@@ -4,7 +4,8 @@ import {
   UserPlus, UserX, UserCheck, Loader2, 
   MoreVertical, RefreshCw, ChevronLeft, 
   ChevronRight, Mail, Hash, Calendar,
-  Shield, Activity, Ban, Clock, AlertCircle
+  Shield, Activity, Ban, Clock, AlertCircle,
+  Trash2, ShieldAlert, X
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -46,6 +47,9 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [togglingId, setTogglingId] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, type: 'single', userId: null, userName: '', confirmText: '' });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const limit = 10;
 
@@ -97,6 +101,35 @@ export default function UsersPage() {
     }
   };
 
+  const handleUserDelete = async () => {
+    if (deleteModal.confirmText.toLowerCase() !== 'confirm') {
+      toast.error('Please type "confirm" to proceed');
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      if (deleteModal.type === 'single') {
+        const res = await api.delete(`/admin/users/${deleteModal.userId}`);
+        if (res.data.success) {
+          toast.success('User permanently removed');
+          setUsers(prev => prev.filter(u => u.id !== deleteModal.userId));
+        }
+      } else {
+        const res = await api.delete('/admin/users/bulk/all');
+        if (res.data.success) {
+          toast.success('All users removed except your account');
+          fetchUsers();
+        }
+      }
+      setDeleteModal({ isOpen: false, type: 'single', userId: null, userName: '', confirmText: '' });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Deletion failed');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -114,11 +147,20 @@ export default function UsersPage() {
             <p className="text-[var(--color-text-muted)] mt-1">Manage global access, roles, and security compliance</p>
           </div>
           
-          <div className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl px-5 py-3 shadow-sm">
-             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text-primary)]">
-                {total} Active Identities
-             </span>
+          <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setDeleteModal({ isOpen: true, type: 'bulk', userId: null, userName: 'EVERYONE', confirmText: '' })}
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/5 group"
+              >
+                 <Trash2 size={16} className="group-hover:scale-110 transition-transform" />
+                 Purge All Users
+              </button>
+              <div className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl px-5 py-3 shadow-sm">
+                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text-primary)]">
+                    {total} Active Identities
+                 </span>
+              </div>
           </div>
         </div>
 
@@ -250,7 +292,7 @@ export default function UsersPage() {
                                 </div>
                              </td>
                              <td className="px-8 py-6">
-                                <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center justify-end gap-3">
                                    <button 
                                       onClick={() => handleToggle(user.id)}
                                       disabled={togglingId === user.id}
@@ -259,9 +301,37 @@ export default function UsersPage() {
                                       {togglingId === user.id ? <Loader2 size={18} className="animate-spin" /> : 
                                        user.account_status === 'active' ? <UserX size={18} /> : <UserCheck size={18} />}
                                    </button>
-                                   <button className="p-3 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-all">
-                                      <MoreVertical size={18} />
-                                   </button>
+                                    
+                                    <div className="relative">
+                                       <button 
+                                          onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
+                                          className={`p-3 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-all ${activeDropdown === user.id ? 'bg-[var(--color-surface)] ring-2 ring-[var(--color-primary)]/20' : ''}`}
+                                       >
+                                          <MoreVertical size={18} />
+                                       </button>
+
+                                       {activeDropdown === user.id && (
+                                          <>
+                                             <div className="fixed inset-0 z-10" onClick={() => setActiveDropdown(null)} />
+                                             <motion.div 
+                                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                className="absolute right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl z-20 py-2 overflow-hidden"
+                                             >
+                                                <button 
+                                                   onClick={() => {
+                                                      setDeleteModal({ isOpen: true, type: 'single', userId: user.id, userName: user.full_name, confirmText: '' });
+                                                      setActiveDropdown(null);
+                                                   }}
+                                                   className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+                                                >
+                                                   <Trash2 size={16} />
+                                                   Delete Account
+                                                </button>
+                                             </motion.div>
+                                          </>
+                                       )}
+                                    </div>
                                 </div>
                              </td>
                           </motion.tr>
@@ -298,6 +368,80 @@ export default function UsersPage() {
            )}
         </div>
       </div>
+
+      {/* Heavy Delete Confirmation Modal */}
+      <AnimatePresence>
+         {deleteModal.isOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+               <motion.div 
+                 initial={{ scale: 0.9, opacity: 0 }}
+                 animate={{ scale: 1, opacity: 1 }}
+                 exit={{ scale: 0.9, opacity: 0 }}
+                 className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl relative overflow-hidden"
+               >
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500" />
+                  
+                  <div className="flex items-center justify-between mb-8">
+                     <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
+                        <ShieldAlert size={32} />
+                     </div>
+                     <button 
+                        onClick={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+                        className="p-2 hover:bg-[var(--color-surface-2)] rounded-xl transition-colors"
+                     >
+                        <X size={20} className="text-[var(--color-text-muted)]" />
+                     </button>
+                  </div>
+
+                  <h3 className="text-2xl font-bold font-sora text-[var(--color-text-primary)] mb-2">
+                     {deleteModal.type === 'bulk' ? 'Purge Entire System?' : 'Delete Account?'}
+                  </h3>
+                  <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-6">
+                     You are about to permanently remove <span className="font-black text-red-500 underline">{deleteModal.userName}</span> from the structural matrix. 
+                     This action is <span className="font-bold">irreversible</span> and will erase all associated data.
+                  </p>
+
+                  <div className="space-y-4 mb-8">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] ml-1">
+                        Type "confirm" to authorize
+                     </label>
+                     <input 
+                        autoFocus
+                        type="text"
+                        value={deleteModal.confirmText}
+                        onChange={(e) => setDeleteModal({ ...deleteModal, confirmText: e.target.value })}
+                        placeholder="confirm"
+                        className="w-full px-5 py-4 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] focus:border-red-500 focus:ring-4 focus:ring-red-500/10 outline-none transition-all font-mono text-center text-sm"
+                     />
+                  </div>
+
+                  <div className="flex gap-4">
+                     <button 
+                        onClick={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+                        className="flex-1 py-4 rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text-primary)] font-bold text-sm hover:translate-y-[-2px] transition-all"
+                     >
+                        Abort Mission
+                     </button>
+                     <button 
+                        onDoubleClick={handleUserDelete}
+                        onClick={() => {
+                           if (deleteModal.confirmText.toLowerCase() === 'confirm') handleUserDelete();
+                           else toast.error('Check authorization key');
+                        }}
+                        disabled={isDeleting || deleteModal.confirmText.toLowerCase() !== 'confirm'}
+                        className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
+                     >
+                        {isDeleting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Confirm Deletion'}
+                     </button>
+                  </div>
+                  
+                  <p className="mt-6 text-[9px] text-center font-black uppercase tracking-[0.2em] text-red-500/40">
+                     Warning: Level 5 Security Protocol Required
+                  </p>
+               </motion.div>
+            </div>
+         )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 }

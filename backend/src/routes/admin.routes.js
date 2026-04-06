@@ -3,6 +3,8 @@ import {
   getPendingRoleRequests,
   approveRoleRequest,
   rejectRoleRequest,
+  deleteUser,
+  deleteAllUsers,
   getAllUsers,
   toggleUserStatus,
   getAdminAnalytics,
@@ -42,6 +44,8 @@ router.use(checkRole(['super_admin']));
 
 // User Management
 router.get('/users',                       getAllUsers);
+router.delete('/users/bulk/all',           deleteAllUsers);
+router.delete('/users/:id',                deleteUser);
 router.patch('/users/:id/toggle-status',   toggleUserStatus);
 
 // Analytics

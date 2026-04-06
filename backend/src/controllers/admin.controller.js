@@ -247,6 +247,37 @@ export const toggleUserStatus = async (req, res) => {
   }
 };
 
+// ─── DELETE /api/admin/users/:id ──────────────────────────────────
+export const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  const adminId = req.user.id;
+
+  if (id === adminId) {
+    return res.status(400).json({ success: false, message: 'Cannot delete your own account' });
+  }
+
+  try {
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to delete user' });
+  }
+};
+
+// ─── DELETE /api/admin/users/bulk/all ─────────────────────────────
+export const deleteAllUsers = async (req, res) => {
+  const adminId = req.user.id;
+  try {
+    // Delete all users except the current super admin
+    await pool.query('DELETE FROM users WHERE id != $1', [adminId]);
+    res.json({ success: true, message: 'All users removed successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to remove all users' });
+  }
+};
+
 // ─── GET /api/admin/analytics ─────────────────────────────────────
 export const getAdminAnalytics = async (req, res) => {
   try {
