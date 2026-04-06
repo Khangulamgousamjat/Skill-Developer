@@ -97,7 +97,7 @@ const LoginPage = () => {
             <div className="space-y-2">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)] ml-2">{t('emailAddress')}</label>
               <div className="relative group/input">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[var(--color-text-secondary)] group-focus-within/input:text-[var(--color-primary)] transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-500 dark:text-slate-400 group-focus-within/input:text-[var(--color-primary)] transition-colors">
                   <Mail className="h-5 w-5" />
                 </div>
                 <input
@@ -114,7 +114,7 @@ const LoginPage = () => {
             <div className="space-y-2">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)] ml-2">{t('password')}</label>
               <div className="relative group/input">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[var(--color-text-secondary)] group-focus-within/input:text-[var(--color-primary)] transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-500 dark:text-slate-400 group-focus-within/input:text-[var(--color-primary)] transition-colors">
                   <Lock className="h-5 w-5" />
                 </div>
                 <input
@@ -128,7 +128,7 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-all p-1"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-[var(--color-primary)] transition-all p-1"
                   tabIndex="-1"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
