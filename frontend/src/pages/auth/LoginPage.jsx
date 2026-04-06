@@ -164,7 +164,7 @@ const LoginPage = () => {
             <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide leading-relaxed">
               New to the ecosystem?{' '}
               <Link to="/auth/register/student" className="text-[var(--color-primary)] font-bold hover:underline">
-                Provision Intern ID
+                New Registration
               </Link>
               <span className="mx-3 opacity-40">|</span>
               <Link to="/auth/register/staff" className="text-[var(--color-primary)] font-bold hover:underline">
