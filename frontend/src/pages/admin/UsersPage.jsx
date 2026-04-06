@@ -122,7 +122,7 @@ export default function UsersPage() {
           fetchUsers();
         }
       }
-      setDeleteModal({ isOpen: false, type: 'single', userId: null, userName: '', confirmText: '' });
+      setDeleteModal({ isOpen: false, type: 'single', userId: null, userName: '' });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Deletion failed');
     } finally {
@@ -320,7 +320,7 @@ export default function UsersPage() {
                                              >
                                                 <button 
                                                    onClick={() => {
-                                                      setDeleteModal({ isOpen: true, type: 'single', userId: user.id, userName: user.full_name, confirmText: '' });
+                                                      setDeleteModal({ isOpen: true, type: 'single', userId: user.id, userName: user.full_name });
                                                       setActiveDropdown(null);
                                                    }}
                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
@@ -396,24 +396,10 @@ export default function UsersPage() {
                   <h3 className="text-2xl font-bold font-sora text-[var(--color-text-primary)] mb-2">
                      {deleteModal.type === 'bulk' ? 'Purge Entire System?' : 'Delete Account?'}
                   </h3>
-                  <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-6">
+                  <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-8">
                      You are about to permanently remove <span className="font-black text-red-500 underline">{deleteModal.userName}</span> from the structural matrix. 
                      This action is <span className="font-bold">irreversible</span> and will erase all associated data.
                   </p>
-
-                  <div className="space-y-4 mb-8">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] ml-1">
-                        Type "confirm" to authorize
-                     </label>
-                     <input 
-                        autoFocus
-                        type="text"
-                        value={deleteModal.confirmText}
-                        onChange={(e) => setDeleteModal({ ...deleteModal, confirmText: e.target.value })}
-                        placeholder="confirm"
-                        className="w-full px-5 py-4 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] focus:border-red-500 focus:ring-4 focus:ring-red-500/10 outline-none transition-all font-mono text-center text-sm"
-                     />
-                  </div>
 
                   <div className="flex gap-4">
                      <button 
@@ -423,12 +409,8 @@ export default function UsersPage() {
                         Abort Mission
                      </button>
                      <button 
-                        onDoubleClick={handleUserDelete}
-                        onClick={() => {
-                           if (deleteModal.confirmText.toLowerCase() === 'confirm') handleUserDelete();
-                           else toast.error('Check authorization key');
-                        }}
-                        disabled={isDeleting || deleteModal.confirmText.toLowerCase() !== 'confirm'}
+                        onClick={handleUserDelete}
+                        disabled={isDeleting}
                         className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-red-500/30 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
                      >
                         {isDeleting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Confirm Deletion'}
