@@ -6,6 +6,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    esbuildOptions: {
+      drop: ['console', 'debugger'],
+    },
     rollupOptions: {
       output: {
         manualChunks: {

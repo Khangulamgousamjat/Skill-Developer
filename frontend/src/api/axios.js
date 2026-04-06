@@ -3,7 +3,11 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
   withCredentials: true,
+  timeout: 30000, // 30 seconds max
 });
+
+// Simple in-memory cache
+const cache = new Map();
 
 console.log('API URL:', api.defaults.baseURL);
 
@@ -12,6 +16,16 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  if (config.method === 'get' && config.cache) {
+    const key = config.url + JSON.stringify(config.params);
+    const cached = cache.get(key);
+    if (cached && Date.now() - cached.time < 30000) {
+      // Return cached response for 30 seconds
+      config.adapter = () => Promise.resolve(cached.data);
+    }
+  }
+  
   return config;
 });
 

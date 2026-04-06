@@ -15,13 +15,12 @@ import {
 import { setTheme } from '../../store/slices/uiSlice';
 import { applyTheme } from '../../utils/applyTheme';
 import { useLanguage } from '../../contexts/LanguageContext';
-import ChatBot from '../ChatBot/ChatBot';
 import ProfileCompletionModal from '../modals/ProfileCompletionModal';
 
 const NAV_KEYS_ROLES = {
   student: [
     { labelKey: 'dashboard',      icon: LayoutDashboard, path: '/student/dashboard' },
-    { labelKey: 'aiAssistant',   icon: Sparkles,        path: '#ai' },
+    { labelKey: 'AI Assistant',   icon: Sparkles,        path: '/student/chat' },
     { labelKey: 'skillGap',       icon: Target,          path: '/student/skills' },
     { labelKey: 'myProjects',    icon: FolderOpen,      path: '/student/projects' },
     { labelKey: 'lectures',       icon: BookOpen,        path: '/student/lectures' },
@@ -88,7 +87,6 @@ export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [isAiOpen, setIsAiOpen] = useState(false);
 
   useEffect(() => {
     // Only show for students — never for admin or other roles
@@ -159,25 +157,30 @@ export default function DashboardLayout({ children }) {
             <button
               key={item.path}
               onClick={() => {
-                if (item.labelKey === 'aiAssistant') {
-                  setIsAiOpen(true);
-                } else {
-                  navigate(item.path);
-                }
+                navigate(item.path);
                 setMobileOpen(false);
               }}
               className={`
                 w-full flex items-center gap-3 px-3 py-2.5
                 rounded-lg transition-all duration-200 text-sm font-medium
                 ${active
-                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold border border-[var(--color-accent)]/20'
-                  : 'text-[var(--color-sidebar-text)] hover:bg-black/5 dark:hover:bg-white/5'
+                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold border-l-4 border-[var(--color-accent)]'
+                  : item.path === '/student/chat' || item.labelKey === 'AI Assistant'
+                    ? 'text-[var(--color-accent)] font-semibold bg-[var(--color-accent)]/5 hover:bg-[var(--color-accent)]/10 border-l-2 border-[var(--color-accent)]'
+                    : 'text-[var(--color-sidebar-text)] hover:bg-black/5 dark:hover:bg-white/5 border-l-4 border-transparent'
                 }
               `}
             >
               <Icon size={18} className="shrink-0" />
               {!collapsed && (
-                <span className="truncate">{t(item.labelKey)}</span>
+                <span className="truncate flex-1 text-left">
+                  {item.labelKey === 'AI Assistant' ? 'AI Assistant' : t(item.labelKey)}
+                </span>
+              )}
+              {!collapsed && (item.path === '/student/chat' || item.labelKey === 'AI Assistant') && (
+                <span className="ml-auto px-1.5 py-0.5 rounded bg-[var(--color-accent)] text-white text-[9px] font-bold">
+                  AI
+                </span>
               )}
             </button>
           );
@@ -291,10 +294,7 @@ export default function DashboardLayout({ children }) {
           </div>
         </main>
 
-        {/* AI Chatbot - Student Only */}
-        {user?.role === 'student' && (
-          <ChatBot isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
-        )}
+
 
         {/* Global Profile Completion Check */}
         {showProfileModal && user?.role === 'student' && (

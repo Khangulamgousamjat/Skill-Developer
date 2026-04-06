@@ -14,6 +14,7 @@ const localStorageEngine = {
 const authPersistConfig = {
   key: 'auth',
   storage: localStorageEngine,
+  timeout: 2000, // 2 second max rehydration
 };
 
 const rootReducer = {

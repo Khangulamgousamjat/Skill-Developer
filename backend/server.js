@@ -3,8 +3,23 @@ import app from './src/app.js';
 import { db } from './src/config/db.js';
 import { initializeSocket } from './src/config/socket.js';
 import dotenv from 'dotenv';
+import https from 'https';
 
 dotenv.config();
+
+function keepAlive() {
+  const url = process.env.RENDER_EXTERNAL_URL
+    || process.env.BACKEND_URL
+    || `https://skill-developer-backend.onrender.com`;
+
+  setInterval(() => {
+    https.get(`${url}/api/health`, (res) => {
+      console.log(`Keep-alive: ${res.statusCode}`);
+    }).on('error', (e) => {
+      console.log('Keep-alive error:', e.message);
+    });
+  }, 14 * 60 * 1000); // every 14 minutes
+}
 
 /**
  * Skill Developer Backend Entry Point
@@ -29,4 +44,8 @@ server.listen(port, () => {
   console.log(`📡 WebSocket Gateway Pulse: Active`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log('---------------------------------------------------------');
+  
+  if (process.env.NODE_ENV === 'production') {
+    keepAlive();
+  }
 });

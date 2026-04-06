@@ -33,112 +33,83 @@ router.post('/review-project', generateProjectFeedback);
 router.post('/ask', generateGenericResponse);
 router.post('/search', searchUniversally);
 
-router.post('/chat', async (req, res) => {
+router.post('/chat', verifyToken, async (req, res) => {
   try {
     const { message, history = [] } = req.body;
 
-    if (!message || message.trim().length === 0) {
+    if (!message?.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Message cannot be empty'
+        message: 'Message is required'
       });
     }
 
-    // Get student profile for context
-    const userRes = await db.query(
-      `SELECT u.full_name, u.department_id,
-              d.name as dept_name
-       FROM users u
-       LEFT JOIN departments d ON u.department_id = d.id
-       WHERE u.id = $1`,
-      [req.user.id]
-    );
-    const userData = userRes.rows[0] || {};
-
-    // Get student's skill gaps for context
-    let skillContext = '';
-    if (userData.department_id) {
-      const skillsRes = await db.query(
-        `SELECT s.name,
-          COALESCE(ist.current_level, 'none') as current_level,
-          ds.required_level
-         FROM department_skills ds
-         JOIN skills s ON ds.skill_id = s.id
-         LEFT JOIN intern_skills ist
-           ON ist.skill_id = s.id AND ist.intern_id = $1
-         WHERE ds.department_id = $2
-         LIMIT 10`,
-        [req.user.id, userData.department_id]
-      );
-      if (skillsRes.rows.length > 0) {
-        const gaps = skillsRes.rows
-          .filter(s => s.current_level === 'none')
-          .map(s => s.name);
-        if (gaps.length > 0) {
-          skillContext = `Missing skills: ${gaps.join(', ')}.`;
-        }
-      }
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(503).json({
+        success: false,
+        message: 'AI service not configured. Please contact admin.'
+      });
     }
 
-    // Build system prompt with student context
-    const systemPrompt = `You are an intelligent AI learning assistant for ${userData.full_name || 'a student'} on the Skill Developer Platform by Gous org.
+    // Get student context
+    let studentContext = 'a student';
+    let deptName = 'General';
+    try {
+      const userRes = await db.query(
+        `SELECT u.full_name, d.name as dept_name
+         FROM users u
+         LEFT JOIN departments d ON u.department_id = d.id
+         WHERE u.id = $1`,
+        [req.user.id]
+      );
+      if (userRes.rows[0]) {
+        studentContext = userRes.rows[0].full_name || 'a student';
+        deptName = userRes.rows[0].dept_name || 'General';
+      }
+    } catch (dbErr) {
+      console.warn('Could not get user context:', dbErr.message);
+    }
 
-Student Context:
-- Name: ${userData.full_name || 'Student'}
-- Department: ${userData.dept_name || 'General'}
-${skillContext ? `- ${skillContext}` : ''}
-
-Your role:
-- Help with programming doubts and technical questions
-- Explain concepts clearly with examples and code snippets
-- Guide learning paths and what to study next
-- Answer questions about any technology, framework, or topic
-- Provide career advice for tech students
-- Be encouraging, patient, and supportive
-- Keep responses clear and well-structured
-- Use code blocks for code examples
-- Break down complex topics into simple steps
-
-You have unlimited knowledge of programming, technology, mathematics, and learning strategies. The student can ask you ANYTHING related to their studies.
-
-IMPORTANT: Never say you cannot help. Always provide a useful answer. If unsure, give your best guidance.`;
-
+    const { default: OpenAI } = await import('openai');
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+      apiKey: process.env.OPENAI_API_KEY,
+      timeout: 25000, // 25 second timeout
     });
 
-    // Build messages array with history (max last 20 messages)
-    const recentHistory = history.slice(-20);
+    const systemPrompt = `You are an AI learning assistant for ${studentContext}, a student in the ${deptName} department on the Smart Skill & Live Learning Module platform by Gous org. Help with programming doubts, concept explanations, learning guidance, and career advice. Be friendly, concise, and educational. Use code examples when helpful.`;
+
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...recentHistory,
+      ...history.slice(-15),
       { role: 'user', content: message.trim() }
     ];
 
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4-turbo',
-      messages: messages,
-      max_tokens: 1000,
+      model: 'gpt-4o-mini', // faster and cheaper than gpt-4-turbo
+      messages,
+      max_tokens: 600,
       temperature: 0.7,
-      stream: false
     });
 
     const reply = completion.choices[0]?.message?.content
-      || 'Sorry, I could not generate a response. Please try again.';
+      || 'Sorry, I could not generate a response.';
 
-    return res.json({
-      success: true,
-      data: { reply }
-    });
+    return res.json({ success: true, data: { reply } });
 
   } catch (error) {
-    console.error('Chat API error:', error);
+    console.error('Chat error:', error.message);
 
-    // Handle OpenAI specific errors
     if (error.code === 'insufficient_quota') {
       return res.status(503).json({
         success: false,
-        message: 'AI service temporarily unavailable. Please try again later.'
+        message: 'AI quota exceeded. Please try again later.'
+      });
+    }
+
+    if (error.code === 'ETIMEDOUT' || error.type === 'request-timeout') {
+      return res.status(504).json({
+        success: false,
+        message: 'AI response timed out. Please try again.'
       });
     }
 
