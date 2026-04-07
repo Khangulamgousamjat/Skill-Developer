@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { 
   Calendar, Clock, Video, Play, 
   User, CheckCircle2, AlertCircle, 
@@ -8,13 +9,14 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
-import axiosInstance from '../../api/axios';
+import { supabase } from '../../api/supabase';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, isAfter, isBefore, addDays } from 'date-fns';
+import { format, isAfter } from 'date-fns';
 
 export default function StudentLectures() {
   const { t } = useLanguage();
+  const { user } = useSelector(state => state.auth);
   const [lectures, setLectures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -26,12 +28,16 @@ export default function StudentLectures() {
   const fetchLectures = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get('/student/lectures');
-      if (res.data.success) {
-        setLectures(res.data.data);
-      }
+      const { data, error } = await supabase
+        .from('lectures')
+        .select('*')
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      setLectures(data || []);
     } catch (err) {
-      toast.error('Failed to load classes');
+      toast.error('Failed to load classes from Supabase');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -51,24 +57,24 @@ export default function StudentLectures() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold font-sora text-[var(--color-text-primary)] tracking-tight">Interactive Live Classes</h1>
-            <p className="text-[var(--color-text-muted)] mt-1.5 text-sm">Join real-time sessions with experts and clarify your doubts</p>
+            <p className="text-[var(--color-text-muted)] mt-1.5 text-sm font-medium">Join real-time sessions with experts and clarify your doubts</p>
           </div>
-          <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] p-1.5 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] p-1.5 rounded-2x shadow-sm">
              <button 
                onClick={() => setFilter('all')}
-               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filter === 'all' ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]'}`}
+               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]'}`}
              >
                Every Session
              </button>
              <button 
                onClick={() => setFilter('upcoming')}
-               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filter === 'upcoming' ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]'}`}
+               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'upcoming' ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]'}`}
              >
                Upcoming
              </button>
              <button 
                onClick={() => setFilter('past')}
-               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filter === 'past' ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]'}`}
+               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'past' ? 'bg-[var(--color-primary)] text-white shadow-lg' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]'}`}
              >
                Past Sessions
              </button>
@@ -85,28 +91,28 @@ export default function StudentLectures() {
                     <span className="text-[9px] font-black uppercase tracking-widest">Real-Time Learning</span>
                  </div>
                  <h2 className="text-4xl font-bold font-sora leading-tight mb-4">Never Miss a Session</h2>
-                 <p className="text-white/80 text-lg leading-relaxed max-w-lg mb-8">
+                 <p className="text-white/80 text-lg leading-relaxed max-w-lg mb-8 font-medium">
                     Stay on top of your growth by attending live masterclasses. All sessions are recorded and available within 24 hours.
                  </p>
                  <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-3 bg-black/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10">
-                       <Calendar size={20} />
+                       <Calendar size={20} className="text-indigo-200" />
                        <span className="font-bold text-sm">Monthly Schedule Enabled</span>
                     </div>
                     <div className="flex items-center gap-3 bg-black/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10">
-                       <Bell size={20} className="animate-swing" />
+                       <Bell size={20} className="text-amber-300 animate-swing" />
                        <span className="font-bold text-sm">Notifications Active</span>
                     </div>
                  </div>
               </div>
-              <div className="hidden lg:flex justify-end">
+              <div className="hidden lg:flex justify-end pr-4">
                  <div className="grid grid-cols-2 gap-4">
                     {[1, 2, 3, 4].map(i => (
-                       <div key={i} className={`w-28 h-28 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col items-center justify-center gap-2 ${i % 2 === 0 ? 'translate-y-8' : ''}`}>
-                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                             <Video size={18} />
+                       <div key={i} className={`w-32 h-32 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col items-center justify-center gap-3 shadow-inner ${i % 2 === 0 ? 'translate-y-8' : ''}`}>
+                          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
+                             <Video size={20} />
                           </div>
-                          <span className="text-[8px] font-black tracking-widest uppercase opacity-60">Module {i}</span>
+                          <span className="text-[9px] font-black tracking-[0.2em] uppercase opacity-60">Module 0{i}</span>
                        </div>
                     ))}
                  </div>
@@ -121,12 +127,12 @@ export default function StudentLectures() {
             <p className="text-[10px] font-black uppercase tracking-[4px] text-[var(--color-text-muted)] animate-pulse">Syncing Calendar...</p>
           </div>
         ) : filteredLectures.length === 0 ? (
-          <div className="py-24 text-center bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[40px] shadow-sm">
-            <div className="w-20 h-20 bg-[var(--color-surface-2)] rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <div className="py-24 text-center bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[40px] shadow-sm flex flex-col items-center justify-center">
+            <div className="w-20 h-20 bg-[var(--color-surface-2)] rounded-3xl flex items-center justify-center mb-6">
               <Calendar size={32} className="text-[var(--color-text-muted)] opacity-30" />
             </div>
             <h3 className="text-xl font-bold text-[var(--color-text-primary)]">No sessions scheduled</h3>
-            <p className="text-[var(--color-text-muted)] mt-2 italic text-sm">Check back later or explore the video library.</p>
+            <p className="text-[var(--color-text-muted)] mt-2 italic text-sm px-8">Check back later or explore the video library.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -139,22 +145,22 @@ export default function StudentLectures() {
                   <motion.div 
                     key={lecture.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[32px] overflow-hidden shadow-sm hover:shadow-2xl hover:translate-y-[-8px] transition-all duration-500 group relative text-left"
                   >
                     <div className="h-2 bg-gradient-to-r from-[var(--color-primary)] to-amber-500 opacity-50" />
                     <div className="p-8">
                        <div className="flex items-center justify-between mb-6">
-                          <div className={`p-2.5 rounded-xl ${isUpcoming ? 'bg-indigo-500/10 text-indigo-500' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'}`}>
+                          <div className={`p-2.5 rounded-xl ${isUpcoming ? 'bg-indigo-500/10 text-indigo-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                              <Calendar size={20} />
                           </div>
-                          <span className={`text-[8px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full border ${isUpcoming ? 'border-indigo-500/20 text-indigo-500' : 'border-[var(--color-success)]/20 text-[var(--color-success)] animate-pulse'}`}>
+                          <span className={`text-[9px] font-black tracking-[0.1em] uppercase px-3 py-1 rounded-full border ${isUpcoming ? 'border-indigo-500/20 text-indigo-500' : 'border-emerald-500/20 text-emerald-500 animate-pulse'}`}>
                              {isUpcoming ? 'upcoming' : 'recorded'}
                           </span>
                        </div>
 
-                       <h3 className="text-lg font-bold font-sora text-[var(--color-text-primary)] mb-3 h-14 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors leading-relaxed">
+                       <h3 className="text-xl font-bold font-sora text-[var(--color-text-primary)] mb-3 h-14 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors leading-tight">
                          {lecture.title}
                        </h3>
                        
@@ -165,13 +171,16 @@ export default function StudentLectures() {
                        <div className="flex flex-col gap-4 pt-6 border-t border-[var(--color-border)]">
                           <div className="flex items-center justify-between">
                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center border border-[var(--color-border)] overflow-hidden">
-                                   {lecture.teacher_photo ? <img src={lecture.teacher_photo} className="w-full h-full object-cover" /> : <User size={14} className="text-[var(--color-text-muted)]" />}
+                                <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center border border-[var(--color-border)] overflow-hidden shadow-inner">
+                                   {lecture.teacher_photo ? <img src={lecture.teacher_photo} className="w-full h-full object-cover" /> : <User size={16} className="text-[var(--color-text-muted)]" />}
                                 </div>
-                                <span className="text-xs font-bold text-[var(--color-text-primary)]">{lecture.teacher_name}</span>
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-tight text-[var(--color-text-muted)] leading-none mb-1">Mentor</p>
+                                    <p className="text-xs font-bold text-[var(--color-text-primary)]">{lecture.teacher_name || 'Protocol Trainer'}</p>
+                                </div>
                              </div>
                              <div className="flex items-center gap-1.5 text-[var(--color-text-muted)]">
-                                <Clock size={12} />
+                                <Clock size={12} className="text-[var(--color-primary)]" />
                                 <span className="text-[10px] font-bold">{lecture.duration}m</span>
                              </div>
                           </div>
@@ -188,13 +197,13 @@ export default function StudentLectures() {
                                  href={lecture.meeting_link} 
                                  target="_blank" 
                                  rel="noreferrer"
-                                 className="w-10 h-10 rounded-xl bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/20 hover:scale-110 transition-transform"
+                                 className="w-12 h-12 rounded-2xl bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/20 hover:scale-110 transition-transform active:scale-95"
                                >
-                                  <ExternalLink size={18} />
+                                  <ExternalLink size={20} />
                                </a>
                              ) : (
-                               <button className="w-10 h-10 rounded-xl bg-[var(--color-success)] text-white flex items-center justify-center shadow-lg shadow-[var(--color-success)]/10 hover:scale-110 transition-transform">
-                                  <Play size={18} />
+                               <button className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/10 hover:scale-110 transition-transform">
+                                  <Play size={20} fill="white" />
                                </button>
                              )}
                           </div>

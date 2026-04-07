@@ -1,10 +1,11 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import translations from '../utils/translations';
 
 const LanguageContext = createContext();
 
 const LANGUAGES = [
   { code: 'en', name: 'English',  flag: '🇬🇧', native: 'English' },
+  { code: 'ar', name: 'Arabic',   flag: '🇸🇦', native: 'العربية' },
   { code: 'hi', name: 'Hindi',    flag: '🇮🇳', native: 'हिंदी' },
   { code: 'mr', name: 'Marathi',  flag: '🇮🇳', native: 'मराठी' },
   { code: 'fr', name: 'French',   flag: '🇫🇷', native: 'Français' },
@@ -16,6 +17,13 @@ export function LanguageProvider({ children }) {
     localStorage.getItem('skill_developer_language') || 'en'
   );
 
+  useEffect(() => {
+    // Handle RTL for Arabic
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+    localStorage.setItem('skill_developer_language', language);
+  }, [language]);
+
   const t = useCallback((key) => {
     return translations[language]?.[key]
       || translations['en']?.[key]
@@ -24,7 +32,6 @@ export function LanguageProvider({ children }) {
 
   const changeLanguage = useCallback((langCode) => {
     setLanguage(langCode);
-    localStorage.setItem('skill_developer_language', langCode);
   }, []);
 
   return (

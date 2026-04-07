@@ -40,7 +40,8 @@ export const SocketProvider = ({ children }) => {
          });
       });
 
-      setSocket(newSocket);
+      // Use a microtask to avoid synchronous setState inside effect
+      Promise.resolve().then(() => setSocket(newSocket));
 
       return () => {
         newSocket.disconnect();

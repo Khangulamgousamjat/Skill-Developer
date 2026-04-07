@@ -29,6 +29,7 @@ const StudentMessages = lazy(() => import('./pages/student/StudentMessages'));
 const StudentProfile = lazy(() => import('./pages/student/StudentProfile'));
 const LanguageSection = lazy(() => import('./pages/student/LanguageSection'));
 const StudentVideosPage = lazy(() => import('./pages/student/StudentVideosPage'));
+const StudyPlanner = lazy(() => import('./pages/student/StudyPlanner'));
 const ChatPage = lazy(() => import('./pages/student/ChatPage'));
 
 // -- MANAGER --
@@ -133,6 +134,7 @@ export default function App() {
           <Route path="/student/profile" element={<ProtectedRoute allowedRoles={['student']}><StudentProfile /></ProtectedRoute>} />
           <Route path="/student/languages" element={<ProtectedRoute allowedRoles={['student']}><LanguageSection /></ProtectedRoute>} />
           <Route path="/student/videos" element={<ProtectedRoute allowedRoles={['student']}><StudentVideosPage /></ProtectedRoute>} />
+          <Route path="/student/planner" element={<ProtectedRoute allowedRoles={['student']}><StudyPlanner /></ProtectedRoute>} />
           <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><SettingsPage /></ProtectedRoute>} />
 
           {/* Manager */}

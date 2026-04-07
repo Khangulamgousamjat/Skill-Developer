@@ -59,6 +59,7 @@ const NAV_KEYS = {
     { id: 'projects',      key: 'myProjects',       icon: Briefcase,       path: '/student/projects' },
     { id: 'lectures',      key: 'lectures',     icon: Video,           path: '/student/lectures' },
     { id: 'path',          key: 'learningPath',     icon: Target,          path: '/student/learning-path' },
+    { id: 'planner',       key: 'studyPlanner',     icon: CalendarCheck,   path: '/student/planner' },
     { id: 'videos',        key: 'videos',           icon: PlayCircle,      path: '/student/videos' },
     { id: 'certificates',  key: 'certificates',      icon: Award,           path: '/student/certificates' },
     { id: 'messages',      key: 'messages',          icon: MessageSquare,   path: '/student/messages' },

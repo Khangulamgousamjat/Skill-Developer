@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { 
   Calendar, Clock, Video, Plus, 
   Users, CheckCircle2, AlertCircle, 
   MoreVertical, Search, Filter, Loader2,
-  X, MapPin, Link as LinkIcon, Camera
+  X, MapPin, Link as LinkIcon, Camera, ArrowRight, LayoutGrid
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
-import axiosInstance from '../../api/axios';
+import { supabase } from '../../api/supabase';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, isAfter, isBefore } from 'date-fns';
+import { format, isAfter } from 'date-fns';
 
 export default function TeacherLectures() {
   const { t } = useLanguage();
+  const { user } = useSelector(state => state.auth);
   const [lectures, setLectures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,18 +29,23 @@ export default function TeacherLectures() {
   });
 
   useEffect(() => {
-    fetchLectures();
-  }, []);
+    if (user) fetchLectures();
+  }, [user]);
 
   const fetchLectures = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get('/teacher/lectures');
-      if (res.data.success) {
-        setLectures(res.data.data);
-      }
+      const { data, error } = await supabase
+        .from('lectures')
+        .select('*')
+        .eq('teacher_id', user.id)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      setLectures(data || []);
     } catch (err) {
-      toast.error('Failed to load lectures');
+      toast.error('Failed to load lectures from Supabase');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -46,16 +53,46 @@ export default function TeacherLectures() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    const tid = toast.loading('Scheduling session...');
     try {
-      const res = await axiosInstance.post('/teacher/lectures', newLecture);
-      if (res.data.success) {
-        toast.success('Lecture scheduled successfully');
-        setIsModalOpen(false);
-        setNewLecture({ title: '', description: '', date: '', time: '', duration: 60, meeting_link: '' });
-        fetchLectures();
-      }
+      const payload = {
+        ...newLecture,
+        teacher_id: user.id,
+        teacher_name: user.full_name,
+        created_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('lectures')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Lecture scheduled successfully!', { id: tid });
+      setIsModalOpen(false);
+      setNewLecture({ title: '', description: '', date: '', time: '', duration: 60, meeting_link: '' });
+      fetchLectures();
     } catch (err) {
-      toast.error('Failed to schedule lecture');
+      toast.error('Failed to schedule lecture', { id: tid });
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Cancel this session?')) return;
+    const tid = toast.loading('Removing session...');
+    try {
+      const { error } = await supabase
+        .from('lectures')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Session removed', { id: tid });
+      fetchLectures();
+    } catch (err) {
+      toast.error('Failed to remove session', { id: tid });
     }
   };
 
@@ -65,11 +102,11 @@ export default function TeacherLectures() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold font-sora text-[var(--color-text-primary)]">Live Class Scheduling</h1>
-            <p className="text-[var(--color-text-muted)] text-sm mt-1">Manage your upcoming lectures and interactive sessions</p>
+            <p className="text-[var(--color-text-muted)] text-sm mt-1">Manage your upcoming lectures and interactive sessions via Supabase</p>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[var(--color-primary)] text-white rounded-xl hover:opacity-90 transition-all font-semibold text-sm shadow-lg shadow-[var(--color-primary)]/20"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[var(--color-primary)] text-white rounded-xl hover:opacity-90 transition-all font-semibold text-sm shadow-lg shadow-[var(--color-primary)]/20 active:scale-95"
           >
             <Plus size={18} />
             Schedule Session
@@ -79,8 +116,8 @@ export default function TeacherLectures() {
         {/* Categories / Filter Bar */}
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
            <button className="px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-xl text-xs font-bold shadow-lg">All Sessions</button>
-           <button className="px-5 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] rounded-xl text-xs font-bold hover:bg-[var(--color-surface-2)]">Today</button>
-           <button className="px-5 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] rounded-xl text-xs font-bold hover:bg-[var(--color-surface-2)]">Recorded</button>
+           <button className="px-5 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] rounded-xl text-xs font-bold hover:bg-[var(--color-surface-2)] transition-colors">Today</button>
+           <button className="px-5 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] rounded-xl text-xs font-bold hover:bg-[var(--color-surface-2)] transition-colors">Recorded</button>
         </div>
 
         {/* Lectures List */}
@@ -90,8 +127,10 @@ export default function TeacherLectures() {
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">fetching your schedule...</p>
           </div>
         ) : lectures.length === 0 ? (
-          <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[40px] p-24 text-center">
-            <Calendar size={64} className="mx-auto mb-4 text-[var(--color-text-muted)] opacity-20" />
+          <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[40px] p-24 text-center flex flex-col items-center justify-center">
+            <div className="w-20 h-20 rounded-3xl bg-[var(--color-surface-2)] flex items-center justify-center mb-6">
+                <Calendar size={40} className="text-[var(--color-text-muted)] opacity-20" />
+            </div>
             <h3 className="text-xl font-bold text-[var(--color-text-primary)]">No lectures found</h3>
             <p className="text-[var(--color-text-muted)] mt-2 italic max-w-xs mx-auto text-sm leading-relaxed">
               Start by scheduling your first interactive session with your students.
@@ -115,33 +154,39 @@ export default function TeacherLectures() {
                     <div className="p-8">
                       <div className="flex items-start justify-between gap-4 mb-6">
                         <div className="flex items-center gap-3">
-                           <div className={`p-3 rounded-2xl ${isUpcoming ? 'bg-indigo-500/10 text-indigo-500' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'}`}>
+                           <div className={`p-3 rounded-2xl ${isUpcoming ? 'bg-indigo-500/10 text-indigo-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                               <Video size={24}/>
                            </div>
                            <div>
-                              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${isUpcoming ? 'border-indigo-500/20 text-indigo-500' : 'border-[var(--color-success)]/20 text-[var(--color-success)]'}`}>
+                              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${isUpcoming ? 'border-indigo-500/20 text-indigo-500' : 'border-emerald-500/20 text-emerald-500'}`}>
                                 {isUpcoming ? 'upcoming' : 'completed'}
                               </span>
-                              <h3 className="font-bold text-[var(--color-text-primary)] text-lg h-7 mt-1.5 line-clamp-1">{lecture.title}</h3>
+                              <h3 className="font-bold text-[var(--color-text-primary)] text-lg h-7 mt-1.5 line-clamp-1 font-sora">{lecture.title}</h3>
                            </div>
                         </div>
-                        <button className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] rounded-xl transition-all"><MoreVertical size={20}/></button>
+                        <div className="flex gap-2">
+                            <button onClick={() => handleDelete(lecture.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"><X size={18}/></button>
+                        </div>
                       </div>
 
-                      <p className="text-xs text-[var(--color-text-muted)] mb-8 leading-relaxed line-clamp-2 h-10">
+                      <p className="text-xs text-[var(--color-text-muted)] mb-8 leading-relaxed line-clamp-2 h-10 italic">
                         {lecture.description || 'Dynamic interactive session covering relevant curriculum modules and technical deep-dives.'}
                       </p>
 
                       <div className="grid grid-cols-2 gap-6 pt-8 border-t border-[var(--color-border)]">
                          <div className="flex items-center gap-3">
-                            <Calendar size={18} className="text-[var(--color-primary)]" />
+                            <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-primary)]">
+                                <Calendar size={18} />
+                            </div>
                             <div>
                                <p className="text-[9px] font-black uppercase tracking-tight text-[var(--color-text-muted)]">Session Date</p>
                                <p className="text-xs font-bold text-[var(--color-text-primary)]">{format(new Date(lecture.date), 'MMM dd, yyyy')}</p>
                             </div>
                          </div>
                          <div className="flex items-center gap-3">
-                            <Clock size={18} className="text-[var(--color-primary)]" />
+                            <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-primary)]">
+                                <Clock size={18} />
+                            </div>
                             <div>
                                <p className="text-[9px] font-black uppercase tracking-tight text-[var(--color-text-muted)]">Time & Duration</p>
                                <p className="text-xs font-bold text-[var(--color-text-primary)]">{lecture.time} • {lecture.duration}m</p>
@@ -150,9 +195,14 @@ export default function TeacherLectures() {
                       </div>
 
                       <div className="mt-8 flex gap-3">
-                         <button className="flex-1 py-3 bg-[var(--color-primary)] text-white text-xs font-bold rounded-xl shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-95 transition-all flex items-center justify-center gap-2">
+                         <a 
+                           href={lecture.meeting_link} 
+                           target="_blank" 
+                           rel="noreferrer"
+                           className="flex-1 py-3 bg-[var(--color-primary)] text-white text-xs font-bold rounded-xl shadow-lg shadow-[var(--color-primary)]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                         >
                            <Camera size={14}/> Start Session
-                         </button>
+                         </a>
                          <button className="flex-1 py-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-xs font-bold rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2">
                            <Users size={14}/> {lecture.students_enrolled || 0} Joined
                          </button>
@@ -168,21 +218,21 @@ export default function TeacherLectures() {
         {/* Schedule Modal */}
         <AnimatePresence>
           {isModalOpen && (
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm text-left">
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all text-left">
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 className="w-full max-w-lg bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[40px] p-10 shadow-2xl overflow-y-auto max-h-[90vh]"
               >
                 <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shadow-inner">
                         <Plus size={32} />
                       </div>
                       <h2 className="text-2xl font-bold font-sora text-[var(--color-text-primary)] leading-tight">Schedule New Lecture</h2>
                    </div>
-                   <button onClick={() => setIsModalOpen(false)} className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] rounded-xl transition-all">
+                   <button onClick={() => setIsModalOpen(false)} className="p-3 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] rounded-2xl transition-all">
                       <X size={24}/>
                    </button>
                 </div>
@@ -205,7 +255,6 @@ export default function TeacherLectures() {
                         <input 
                           required
                           type="date" 
-                          min={format(new Date(), 'yyyy-MM-dd')}
                           value={newLecture.date}
                           onChange={(e) => setNewLecture({...newLecture, date: e.target.value})}
                           className="w-full px-5 py-4 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl text-sm outline-none cursor-pointer"
@@ -260,7 +309,7 @@ export default function TeacherLectures() {
                   </div>
                   <div className="flex gap-4 pt-6">
                     <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-5 py-4 border border-[var(--color-border)] text-sm font-bold text-[var(--color-text-primary)] rounded-2xl hover:bg-[var(--color-surface-2)] transition-all">Cancel</button>
-                    <button type="submit" className="flex-1 px-5 py-4 bg-[var(--color-primary)] text-white text-sm font-bold rounded-2xl hover:opacity-90 shadow-xl shadow-[var(--color-primary)]/20 transition-all flex items-center justify-center gap-2">
+                    <button type="submit" className="flex-1 px-5 py-4 bg-[var(--color-primary)] text-white text-sm font-bold rounded-2xl hover:brightness-110 active:scale-95 shadow-xl shadow-[var(--color-primary)]/20 transition-all flex items-center justify-center gap-2">
                        Establish Class <ArrowRight size={18}/>
                     </button>
                   </div>

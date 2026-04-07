@@ -1,361 +1,346 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Target, Video, FolderGit2, Lightbulb, 
+  BarChart3, Award, ArrowRight, CheckCircle2,
+  Users, GraduationCap, Globe, Zap, ChevronDown
+} from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { t, language, changeLanguage, LANGUAGES } = useLanguage();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { duration: 0.6 }
+  };
+
+  const features = [
+    {
+      icon: <Target className="w-6 h-6" />, 
+      color: "text-blue-400 bg-blue-500/10",
+      title: t('feature1Title'),
+      desc: t('feature1Desc')
+    },
+    {
+      icon: <Video className="w-6 h-6" />, 
+      color: "text-purple-400 bg-purple-500/10",
+      title: t('feature2Title'),
+      desc: t('feature2Desc')
+    },
+    {
+      icon: <FolderGit2 className="w-6 h-6" />, 
+      color: "text-green-400 bg-green-500/10",
+      title: t('feature3Title'),
+      desc: t('feature3Desc')
+    },
+    {
+      icon: <Lightbulb className="w-6 h-6" />, 
+      color: "text-amber-400 bg-amber-500/10",
+      title: t('feature4Title'),
+      desc: t('feature4Desc')
+    },
+    {
+      icon: <BarChart3 className="w-6 h-6" />, 
+      color: "text-red-400 bg-red-500/10",
+      title: t('skillHeatMap'),
+      desc: t('feature4Desc')
+    },
+    {
+      icon: <Award className="w-6 h-6" />, 
+      color: "text-yellow-400 bg-yellow-500/10",
+      title: t('certificates'),
+      desc: t('feature3Desc')
+    },
+  ];
+
+  const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
 
   return (
-    <div className="min-h-screen bg-[#0A1628]">
-
+    <div className="min-h-screen bg-[#070D1A] text-white selection:bg-[#F4A100]/30">
+      
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 h-16
-        bg-[#0A1628]/95 backdrop-blur-md
-        border-b border-white/10
-        flex items-center justify-between px-6 md:px-12">
-
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 cursor-pointer"
-          onClick={() => navigate('/')}>
-          <div className="w-9 h-9 rounded-lg bg-[#1E3A5F]
-            flex items-center justify-center">
-            <span className="text-[#F4A100] font-bold
-              text-base font-sora">SD</span>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+        isScrolled ? 'bg-[#070D1A]/80 backdrop-blur-xl border-white/10 py-3' : 'bg-transparent border-transparent py-5'
+      }`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+            <div className="w-10 h-10 rounded-xl bg-premium-gradient border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <span className="text-[#F4A100] font-sora font-extrabold">SD</span>
+            </div>
+            <div>
+              <p className="text-white font-sora font-bold text-base leading-tight">Skill Developer</p>
+              <p className="text-[#F4A100] text-[10px] font-bold tracking-widest uppercase">{t('orgName')}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-white font-sora font-bold
-              text-sm leading-tight">
-              Skill Developer
-            </p>
-            <p className="text-[#F4A100] text-xs font-bold">
-              Platform — Gous org
-            </p>
-          </div>
-        </div>
 
-        {/* Right buttons */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/login')}
-            className="border border-white/30 text-white
-              px-5 py-2 rounded-lg text-sm font-semibold
-              hover:bg-white/10 transition-all">
-            Login
-          </button>
-          <button
-            onClick={() => navigate('/auth/register/student')}
-            className="bg-[#F4A100] text-white
-              px-5 py-2 rounded-lg text-sm font-bold
-              hover:bg-[#FFB733] transition-all">
-            Register Free
-          </button>
+          <div className="hidden md:flex items-center gap-8">
+            <a href="#features" className="text-sm font-medium text-slate-300 hover:text-[#F4A100] transition-colors">
+              {t('navFeatures')}
+            </a>
+            <a href="#howitworks" className="text-sm font-medium text-slate-300 hover:text-[#F4A100] transition-colors">
+              {t('navHowItWorks')}
+            </a>
+            <a href="#reviews" className="text-sm font-medium text-slate-300 hover:text-[#F4A100] transition-colors">
+              {t('navReviews')}
+            </a>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Language Switcher */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-[#F4A100]/50 transition-all text-xs font-bold"
+              >
+                <span>{currentLang.flag}</span>
+                <span className="hidden sm:inline uppercase">{currentLang.code}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <AnimatePresence>
+                {isLangOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-40 rounded-2xl bg-[#0A1628] border border-white/10 shadow-2xl p-2 z-[60]"
+                  >
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          changeLanguage(lang.code);
+                          setIsLangOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                          language === lang.code ? 'bg-[#F4A100] text-white' : 'hover:bg-white/5 text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>{lang.flag}</span>
+                          <span>{lang.native}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <button onClick={() => navigate('/login')} className="text-sm font-semibold hover:text-[#F4A100] transition-colors">
+              {t('login')}
+            </button>
+            <button 
+              onClick={() => navigate('/auth/register/student')}
+              className="bg-[#F4A100] text-white px-5 py-2.5 rounded-full text-sm font-bold hover:shadow-[0_0_20px_rgba(244,161,0,0.4)] transition-all active:scale-95"
+            >
+              {t('getStartedFree')}
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* HERO */}
-      <div className="min-h-[90vh] flex items-center
-        px-6 md:px-12 py-20">
-        <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2
-            bg-[#F4A100]/10 border border-[#F4A100]/30
-            text-[#F4A100] text-xs px-4 py-1.5 rounded-full">
-            🎓 Complete ERP Learning Platform by Gous org
-          </span>
-
-          <h1 className="mt-6 font-sora font-extrabold
-            text-white text-5xl md:text-7xl leading-tight">
-            Skill Developer<br />
-            <span className="bg-gradient-to-r from-[#F4A100]
-              to-[#FFD166] bg-clip-text text-transparent">
-              Platform
-            </span>
-          </h1>
-
-          <p className="mt-6 text-slate-300 text-lg
-            leading-relaxed max-w-lg">
-            The complete platform to manage your learning
-            journey — master real skills, attend live lectures,
-            work on real-world projects, and earn verified
-            certificates. Built by Gous org.
-          </p>
-
-          <div className="mt-10 flex flex-wrap gap-4">
-            <button
-              onClick={() => navigate('/auth/register/student')}
-              className="bg-[#F4A100] text-white px-8 py-4
-                rounded-xl font-bold text-lg
-                hover:bg-[#FFB733] hover:scale-105
-                transition-all duration-200 shadow-lg">
-              Start Learning Free →
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="border-2 border-white/30 text-white
-                px-8 py-4 rounded-xl font-semibold text-lg
-                hover:bg-white/10 transition-all">
-              Login to Platform
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4
-            gap-6">
-            {[
-              { num: '500+', label: 'Learning Resources' },
-              { num: '50+', label: 'Expert Teachers' },
-              { num: '1000+', label: 'Active Students' },
-              { num: '100%', label: 'Free to Join' },
-            ].map(s => (
-              <div key={s.label}>
-                <p className="font-sora font-bold text-3xl
-                  text-[#F4A100]">{s.num}</p>
-                <p className="text-slate-400 text-sm mt-1">
-                  {s.label}
-                </p>
-              </div>
-            ))}
-          </div>
+      {/* HERO SECTION */}
+      <section className="relative pt-32 pb-20 overflow-hidden">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
+          <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#F4A100]/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]" />
         </div>
-      </div>
+
+        <div className="max-w-7xl mx-auto px-6 text-center lg:text-left flex flex-col lg:flex-row items-center gap-16">
+          <div className="flex-1">
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#F4A100] text-xs font-bold tracking-wide mb-8"
+            >
+              <Zap className="w-3 h-3" /> {t('navHowItWorks')}
+            </motion.span>
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.8 }}
+              className="text-5xl md:text-7xl lg:text-8xl font-sora font-extrabold leading-[1.1] mb-8"
+            >
+              <span dangerouslySetInnerHTML={{ __html: t('heroTitle').replace(': ', ':<br/>') }} />
+            </motion.h1>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="text-slate-400 text-lg md:text-xl leading-relaxed max-w-2xl mb-12"
+            >
+              {t('heroSubtitle')}
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5"
+            >
+              <button 
+                onClick={() => navigate('/auth/register/student')}
+                className="group w-full sm:w-auto flex items-center justify-center gap-2 bg-[#F4A100] text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(244,161,0,0.5)] transition-all active:scale-95"
+              >
+                {t('getStartedFree')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button 
+                onClick={() => navigate('/login')}
+                className="w-full sm:w-auto px-8 py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-semibold text-lg"
+              >
+                {t('launchPlatform')}
+              </button>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-16 flex items-center justify-center lg:justify-start gap-8"
+            >
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#070D1A] bg-slate-800" />
+                ))}
+              </div>
+              <p className="text-sm text-slate-400"><span className="text-white font-bold">12k+</span> {t('activeStudents').toLowerCase()}</p>
+            </motion.div>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="flex-1 relative w-full max-w-xl"
+          >
+            <div className="aspect-square rounded-3xl bg-premium-gradient border border-white/10 overflow-hidden p-8 flex items-center justify-center">
+              <div className="w-full h-full border border-white/5 rounded-2xl bg-[#0A1628] glass flex items-center justify-center group">
+                 <GraduationCap className="w-32 h-32 text-[#F4A100]/30 group-hover:scale-110 transition-transform duration-500" />
+                 <div className="absolute top-10 left-10 p-4 rounded-2xl glass-premium shadow-2xl">
+                    <CheckCircle2 className="text-[#F4A100] w-6 h-6 mb-2" />
+                    <p className="text-[10px] uppercase font-bold text-white/40 mb-1">Weekly Goal</p>
+                    <p className="text-sm font-bold">Advanced React</p>
+                 </div>
+                 <div className="absolute bottom-10 right-10 p-4 rounded-2xl glass-premium shadow-2xl">
+                    <Users className="text-blue-400 w-6 h-6 mb-2" />
+                    <p className="text-[10px] uppercase font-bold text-white/40 mb-1">Live Study</p>
+                    <p className="text-sm font-bold">1.2k active now</p>
+                 </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* FEATURES SECTION */}
-      <div className="bg-white py-20 px-6 md:px-12"
-        id="features">
-        <p className="text-[#F4A100] text-xs font-semibold
-          uppercase tracking-widest text-center">
-          PLATFORM FEATURES
-        </p>
-        <h2 className="font-sora font-bold text-3xl
-          text-gray-900 text-center mt-2">
-          Everything in One Platform
-        </h2>
-        <p className="text-gray-500 text-center mt-3">
-          One powerful platform for complete skill development
-        </p>
+      <section id="features" className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl md:text-5xl font-sora font-bold mb-6">{t('featuresTitle')}</h2>
+            <p className="text-slate-400 text-lg">{t('featuresSub')}</p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6
-          mt-14 max-w-6xl mx-auto">
-          {[
-            {
-              icon: '🎯', color: 'bg-blue-50 text-blue-600',
-              title: 'Skill Gap Dashboard',
-              desc: 'See exactly which skills your department needs. Track personal skill gap with visual charts.'
-            },
-            {
-              icon: '🎥', color: 'bg-purple-50 text-purple-600',
-              title: 'Live Lectures',
-              desc: 'Weekly live sessions by expert teachers. Watch recordings anytime. Ask questions live.'
-            },
-            {
-              icon: '📁', color: 'bg-green-50 text-green-600',
-              title: 'Real Projects',
-              desc: 'Work on actual company-like projects with milestones, deadlines, and reviewed scoring.'
-            },
-            {
-              icon: '💡', color: 'bg-amber-50 text-amber-600',
-              title: 'AI Recommendations',
-              desc: 'Personalized course and video suggestions based on your skill gaps every week.'
-            },
-            {
-              icon: '📊', color: 'bg-red-50 text-red-600',
-              title: 'Progress Tracking',
-              desc: 'Visual weekly growth charts. Skill scores, project results, attendance in one dashboard.'
-            },
-            {
-              icon: '🏆', color: 'bg-yellow-50 text-yellow-600',
-              title: 'Verified Certificates',
-              desc: 'Earn QR-verified certificates after completing skills and projects. Share on LinkedIn.'
-            },
-          ].map(f => (
-            <div key={f.title}
-              className="bg-white border border-gray-100
-                rounded-2xl p-6 shadow-sm hover:shadow-lg
-                hover:-translate-y-1 transition-all duration-300">
-              <div className={`w-12 h-12 rounded-xl ${f.color}
-                flex items-center justify-center text-2xl mb-4`}>
-                {f.icon}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, idx) => (
+              <motion.div 
+                key={idx}
+                {...fadeIn}
+                transition={{ delay: idx * 0.1 }}
+                className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-[#F4A100]/30 transition-all duration-300"
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${feature.color}`}>
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-sora font-bold mb-4">{feature.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CALL TO ACTION */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative rounded-[40px] bg-premium-gradient border border-white/10 p-12 md:p-20 overflow-hidden text-center">
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+            
+            <motion.div {...fadeIn}>
+              <h2 className="text-4xl md:text-6xl font-sora font-bold mb-8 italic">{t('ctaTitle')}</h2>
+              <p className="text-slate-300 text-xl max-w-2xl mx-auto mb-10">{t('ctaSubtitle')}</p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button 
+                  onClick={() => navigate('/auth/register/student')}
+                  className="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-[#F4A100] hover:text-white transition-all active:scale-95"
+                >
+                  {t('ctaButton')}
+                </button>
+                <p className="text-slate-400 text-sm">No credit card required. Cancel anytime.</p>
               </div>
-              <h3 className="font-sora font-semibold text-gray-900
-                text-lg">{f.title}</h3>
-              <p className="text-gray-500 text-sm mt-2
-                leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
+            </motion.div>
+          </div>
         </div>
-      </div>
-
-      {/* WHAT YOU LEARN */}
-      <div className="bg-[#060D1A] py-20 px-6 md:px-12"
-        id="teach">
-        <h2 className="font-sora font-bold text-3xl md:text-5xl
-          text-white text-center">
-          What You Will Learn
-        </h2>
-        <p className="text-slate-400 text-center mt-3">
-          Choose from 30+ programming languages and technologies
-        </p>
-
-        <div className="flex flex-wrap justify-center gap-3
-          mt-12 max-w-5xl mx-auto">
-          {[
-            'HTML', 'CSS', 'JavaScript', 'TypeScript', 'React',
-            'Vue.js', 'Angular', 'Node.js', 'Python', 'Java',
-            'C++', 'C', 'C#', 'Ruby', 'PHP', 'Swift', 'Kotlin',
-            'Go', 'Rust', 'SQL', 'MongoDB', 'Docker', 'Git',
-            'DevOps', 'AWS', 'Machine Learning', 'Data Science',
-            'DSA', 'UI/UX Design', 'React Native', 'Flutter',
-            'GraphQL', 'REST APIs', 'Cybersecurity', 'Blockchain',
-          ].map((lang, i) => {
-            const colors = [
-              'bg-blue-500/10 border-blue-500/30 text-blue-400',
-              'bg-green-500/10 border-green-500/30 text-green-400',
-              'bg-amber-500/10 border-amber-500/30 text-amber-400',
-              'bg-purple-500/10 border-purple-500/30 text-purple-400',
-              'bg-red-500/10 border-red-500/30 text-red-400',
-              'bg-teal-500/10 border-teal-500/30 text-teal-400',
-            ];
-            return (
-              <span key={lang}
-                className={`px-4 py-2 rounded-full text-sm
-                  font-medium border
-                  hover:scale-110 transition-transform cursor-default
-                  ${colors[i % colors.length]}`}>
-                {lang}
-              </span>
-            );
-          })}
-        </div>
-
-        <div className="text-center mt-12">
-          <p className="text-slate-400 text-sm mb-6">
-            And many more — your path is personalized for your goals
-          </p>
-          <button
-            onClick={() => navigate('/auth/register/student')}
-            className="bg-[#F4A100] text-white px-8 py-3.5
-              rounded-xl font-bold hover:bg-[#FFB733]
-              transition-all">
-            Start Learning Free →
-          </button>
-        </div>
-      </div>
+      </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#030810] py-16 px-6 md:px-12
-        border-t border-white/5">
-        <div className="grid grid-cols-1 md:grid-cols-4
-          gap-10 max-w-6xl mx-auto">
-
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-[#1E3A5F]
-                flex items-center justify-center">
-                <span className="text-[#F4A100] font-bold
-                  font-sora">SD</span>
+      <footer className="footer-gradient pt-20 pb-10 border-t border-white/5 mt-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            <div className="col-span-1 md:col-span-1">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-[#F4A100] flex items-center justify-center">
+                  <span className="text-white font-bold text-xs uppercase">SD</span>
+                </div>
+                <span className="font-sora font-bold text-xl tracking-tight">Skill Developer</span>
               </div>
-              <div>
-                <p className="text-white font-sora font-bold
-                  text-sm uppercase tracking-wider">Skill Developer</p>
-                <p className="text-[#F4A100] font-sora font-bold
-                  text-xs">Platform</p>
-              </div>
-            </div>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              A complete ERP learning platform for skill
-              development, live lectures, real projects,
-              and certified growth.
-            </p>
-          </div>
-
-          {/* Platform */}
-          <div>
-            <p className="text-slate-300 text-sm font-semibold
-              mb-4 uppercase tracking-wide">Platform</p>
-            {[
-              ['Features', '#features'],
-              ['How It Works', '#how'],
-              ['For Students', '/auth/register/student'],
-              ['Login', '/login'],
-              ['Settings', '/settings'],
-            ].map(([label, href]) => (
-              <div key={label} className="mb-2">
-                <a href={href}
-                  className="text-slate-400 hover:text-white
-                    text-sm transition-colors">
-                  {label}
-                </a>
-              </div>
-            ))}
-          </div>
-
-          {/* Get Started */}
-          <div>
-            <p className="text-slate-300 text-sm font-semibold
-              mb-4 uppercase tracking-wide">Get Started</p>
-            {[
-              ['Register as Student', '/auth/register/student'],
-              ['Request Staff Access', '/auth/register/staff'],
-              ['Login to Platform', '/login'],
-            ].map(([label, href]) => (
-              <div key={label} className="mb-2">
-                <a href={href}
-                  className="text-slate-400 hover:text-white
-                    text-sm transition-colors">
-                  {label}
-                </a>
-              </div>
-            ))}
-          </div>
-
-          {/* Creator */}
-          <div>
-            <p className="text-slate-300 text-sm font-semibold
-              mb-4 uppercase tracking-wide">Created By</p>
-            <p className="text-white font-sora font-bold
-              text-lg mb-3">Gous Khan</p>
-            <div className="space-y-2">
-              <a href="mailto:gousk2004@gmail.com"
-                className="flex items-center gap-2
-                  text-slate-400 hover:text-white
-                  text-sm transition-colors">
-                📧 gousk2004@gmail.com
-              </a>
-              <a href="https://linkedin.com/in/gulamgous"
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2
-                  text-slate-400 hover:text-white
-                  text-sm transition-colors">
-                💼 linkedin.com/in/gulamgous
-              </a>
-              <a href="https://github.com/khangulamgousamjat"
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2
-                  text-slate-400 hover:text-white
-                  text-sm transition-colors">
-                🐙 github.com/khangulamgousamjat
-              </a>
-            </div>
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <p className="text-slate-300 text-sm font-semibold">
-                🏢 Gous Org.
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Empowering the next generation of creators through accessible, high-quality technical education and ERP systems.
               </p>
             </div>
-          </div>
-        </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-white/5 mt-12 pt-6
-          flex flex-col md:flex-row items-center
-          justify-between gap-2 max-w-6xl mx-auto">
-          <p className="text-slate-500 text-xs">
-            © 2026 Gous org — All rights reserved
-          </p>
-          <p className="text-slate-500 text-xs">
-            Skill Developer Platform v2.4.0
-          </p>
-          <p className="text-slate-500 text-xs">
-            Made by <a href="https://github.com/Khangulamgousamjat/Skill-Developer" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Gous Org</a>
-          </p>
+            {[
+              { title: t('platform'), links: [t('navFeatures'), t('lectures'), t('projects'), t('dashboard')] },
+              { title: 'Community', links: ['Success Stories', 'Expert Teachers', 'GitHub Connect', 'Mentorship'] },
+              { title: 'Organization', links: ['About Gous Org', 'Contact', 'Privacy Policy', 'Terms of Service'] }
+            ].map((section, idx) => (
+              <div key={idx}>
+                <h4 className="font-sora font-bold text-white mb-6 uppercase tracking-widest text-xs">{section.title}</h4>
+                <ul className="space-y-4">
+                  {section.links.map(link => (
+                    <li key={link}>
+                      <a href="#" className="text-slate-400 hover:text-[#F4A100] text-sm transition-colors">{link}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+            <p className="text-slate-500 text-[10px] uppercase font-bold tracking-[0.2em]">© 2026 GOUS ORG. ALL RIGHTS RESERVED.</p>
+            <div className="flex items-center gap-6">
+               <Globe className="w-4 h-4 text-slate-500 hover:text-white cursor-pointer transition-colors" />
+               <p className="text-slate-500 text-xs">Built with precision in India</p>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

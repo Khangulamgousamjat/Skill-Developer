@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
   { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
   { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
   { code: 'fr', name: 'Français', flag: '🇫🇷' },

@@ -124,7 +124,7 @@ export default function DashboardLayout({ children }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className="flex flex-col h-full bg-[var(--color-sidebar-bg)] border-r border-[var(--color-border)]">
       {/* Logo */}
       <div className={`px-4 py-8 border-b ${theme === 'dark' ? 'border-white/10' : 'border-gray-100'}`}>
@@ -224,7 +224,7 @@ export default function DashboardLayout({ children }) {
       <aside
         className={`hidden md:flex flex-col shrink-0 transition-all duration-300 z-20 shadow-lg ${collapsed ? 'w-[72px]' : 'w-[260px]'}`}
       >
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -232,7 +232,7 @@ export default function DashboardLayout({ children }) {
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-64 shadow-xl z-10 transition-transform bg-[var(--color-surface)] border-r border-[var(--color-border)]">
-            <SidebarContent />
+            {sidebarContent}
           </aside>
         </div>
       )}

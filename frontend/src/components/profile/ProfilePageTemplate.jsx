@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  User, Mail, Building2, Shield, Briefcase, MapPin, 
+  User as UserIcon, Mail, Building2, Shield, Briefcase, MapPin, 
   Phone, Globe, Edit, Save, X, Loader2, Link, 
-  Award, CheckCircle2, CloudUpload
+  Award, CheckCircle2, CloudUpload, Camera
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { updateUser } from '../../store/slices/authSlice';
-import axiosInstance from '../../api/axios';
+import { supabase } from '../../api/supabase';
 import toast from 'react-hot-toast';
 
 export default function ProfilePageTemplate({ children }) {
@@ -17,12 +17,14 @@ export default function ProfilePageTemplate({ children }) {
   
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({ ...user });
   const [skillInput, setSkillInput] = useState('');
 
   useEffect(() => {
     if (user) {
-      setFormData({ ...user, 
+      setFormData({ 
+        ...user, 
         skills: Array.isArray(user.skills) ? user.skills : [],
         social_links: user.social_links || { github: '', linkedin: '' }
       });
@@ -44,11 +46,66 @@ export default function ProfilePageTemplate({ children }) {
     setFormData({ ...formData, skills: formData.skills.filter(s => s !== skill) });
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be less than 2MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload to 'profiles' bucket
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, profile_photo_url: publicUrl }));
+      toast.success('Photo uploaded! (Save changes to persist)');
+    } catch (err) {
+      toast.error('Failed to upload image. Ensure "profiles" bucket exists.');
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.put('/users/profile', formData);
-      dispatch(updateUser(res.data.data));
+      // Sync with Supabase 'profiles' table
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: formData.full_name,
+          position: formData.position,
+          bio: formData.bio,
+          phone: formData.phone,
+          location: formData.location,
+          skills: formData.skills,
+          social_links: formData.social_links,
+          profile_photo_url: formData.profile_photo_url,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      dispatch(updateUser(data));
       setIsEditing(false);
       toast.success(t('profileUpdated') || 'Profile Updated!');
     } catch (err) {
@@ -72,8 +129,13 @@ export default function ProfilePageTemplate({ children }) {
           <div className="flex flex-col md:flex-row md:items-end gap-6 -mt-16 mb-6">
             <div className="relative group">
               <div className="w-32 h-32 rounded-3xl bg-[var(--color-surface)] border-4 border-[var(--color-surface)] overflow-hidden shadow-2xl relative">
-                {user.profile_photo_url ? (
-                  <img src={user.profile_photo_url} alt={user.full_name} className="w-full h-full object-cover" />
+                {uploading ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--color-surface-2)]">
+                    <Loader2 className="animate-spin text-[var(--color-primary)]" />
+                    <span className="text-[10px] mt-2 font-bold uppercase tracking-tighter">Uploading...</span>
+                  </div>
+                ) : formData.profile_photo_url ? (
+                  <img src={formData.profile_photo_url} alt={user.full_name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl font-bold bg-[var(--color-surface-2)] text-[var(--color-primary)]">
                     {user.full_name?.charAt(0)}
@@ -81,9 +143,9 @@ export default function ProfilePageTemplate({ children }) {
                 )}
                 {isEditing && (
                   <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <CloudUpload size={24} />
-                    <span className="text-[10px] font-bold mt-1">UPDATE</span>
-                    <input type="file" className="hidden" accept="image/*" />
+                    <Camera size={24} />
+                    <span className="text-[10px] font-bold mt-1 uppercase">Choose File</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                   </label>
                 )}
               </div>
@@ -91,11 +153,20 @@ export default function ProfilePageTemplate({ children }) {
 
             <div className="flex-1 pb-2">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold font-sora text-[var(--color-text-primary)]">
-                  {user.full_name}
-                </h1>
+                {isEditing ? (
+                  <input 
+                    type="text" 
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                    className="text-3xl font-bold font-sora bg-transparent border-b border-[var(--color-border)] outline-none focus:border-[var(--color-primary)] w-full max-w-md"
+                  />
+                ) : (
+                  <h1 className="text-3xl font-bold font-sora text-[var(--color-text-primary)]">
+                    {user.full_name}
+                  </h1>
+                )}
                 {user.is_email_verified && (
-                  <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center gap-1">
+                  <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center gap-1 shrink-0">
                     <CheckCircle2 size={12} />
                     <span className="text-[10px] font-bold">VERIFIED</span>
                   </div>
@@ -124,9 +195,9 @@ export default function ProfilePageTemplate({ children }) {
                     <X size={16} /> {t('cancel')}
                   </button>
                   <button 
-                    disabled={loading}
+                    disabled={loading || uploading}
                     onClick={handleSave}
-                    className="px-6 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white rounded-xl text-sm font-bold shadow-lg hover:scale-[1.02] transition-all flex items-center gap-2"
+                    className="px-6 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white rounded-xl text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
                   >
                     {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                     {t('save')}
@@ -154,21 +225,23 @@ export default function ProfilePageTemplate({ children }) {
                 {isEditing ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-bold text-[var(--color-text-muted)]">{t('position')}</label>
+                       <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tighter">{t('position')}</label>
                        <input 
                          type="text" 
                          value={formData.position || ''} 
                          onChange={(e) => setFormData({...formData, position: e.target.value})}
                          className="w-full px-4 py-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl text-sm outline-none focus:border-[var(--color-primary)] transition-all"
+                         placeholder="e.g. Senior Full Stack Developer"
                        />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[10px] font-bold text-[var(--color-text-muted)]">{t('bio')}</label>
+                       <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tighter">{t('bio')}</label>
                        <textarea 
                          rows={4}
                          value={formData.bio || ''} 
                          onChange={(e) => setFormData({...formData, bio: e.target.value})}
                          className="w-full px-4 py-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl text-sm outline-none focus:border-[var(--color-primary)] transition-all resize-none"
+                         placeholder="Write something professional about yourself..."
                        />
                     </div>
                   </div>
@@ -179,8 +252,10 @@ export default function ProfilePageTemplate({ children }) {
                          <Briefcase size={20} /> {user.position}
                        </p>
                     )}
-                    <p className="text-sm text-[var(--color-text-secondary)] leading-loose p-6 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)] italic">
-                      " {user.bio || "No bio added yet. Tell us about yourself!"} "
+                    <p className="text-sm text-[var(--color-text-secondary)] leading-loose p-6 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)] italic relative">
+                       <span className="absolute top-2 left-2 text-4xl text-[var(--color-primary)] opacity-10 font-serif">"</span>
+                       {user.bio || "No bio added yet. Tell us about yourself!"}
+                       <span className="absolute bottom-1 right-2 text-4xl text-[var(--color-primary)] opacity-10 font-serif">"</span>
                     </p>
                   </div>
                 )}
@@ -234,7 +309,7 @@ export default function ProfilePageTemplate({ children }) {
                 </h3>
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white dark:bg-black/20 rounded-xl flex items-center justify-center text-[var(--color-primary)] border border-[var(--color-border)]">
+                    <div className="w-10 h-10 bg-white dark:bg-black/20 rounded-xl flex items-center justify-center text-[var(--color-primary)] border border-[var(--color-border)] shadow-sm">
                       <Mail size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -244,7 +319,7 @@ export default function ProfilePageTemplate({ children }) {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white dark:bg-black/20 rounded-xl flex items-center justify-center text-[var(--color-primary)] border border-[var(--color-border)]">
+                    <div className="w-10 h-10 bg-white dark:bg-black/20 rounded-xl flex items-center justify-center text-[var(--color-primary)] border border-[var(--color-border)] shadow-sm">
                       <Phone size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -255,6 +330,7 @@ export default function ProfilePageTemplate({ children }) {
                           value={formData.phone || ''} 
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
                           className="w-full bg-transparent border-b border-[var(--color-border)] outline-none text-xs font-semibold text-[var(--color-primary)]"
+                          placeholder="+1 234 567 890"
                         />
                       ) : (
                         <p className="text-xs font-semibold text-[var(--color-text-primary)]">{user.phone || 'N/A'}</p>
@@ -263,7 +339,7 @@ export default function ProfilePageTemplate({ children }) {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white dark:bg-black/20 rounded-xl flex items-center justify-center text-[var(--color-primary)] border border-[var(--color-border)]">
+                    <div className="w-10 h-10 bg-white dark:bg-black/20 rounded-xl flex items-center justify-center text-[var(--color-primary)] border border-[var(--color-border)] shadow-sm">
                       <MapPin size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -274,6 +350,7 @@ export default function ProfilePageTemplate({ children }) {
                           value={formData.location || ''} 
                           onChange={(e) => setFormData({...formData, location: e.target.value})}
                           className="w-full bg-transparent border-b border-[var(--color-border)] outline-none text-xs font-semibold text-[var(--color-primary)]"
+                          placeholder="City, Country"
                         />
                       ) : (
                         <p className="text-xs font-semibold text-[var(--color-text-primary)]">{user.location || 'Remote'}</p>
@@ -304,7 +381,7 @@ export default function ProfilePageTemplate({ children }) {
                         className="bg-transparent border-b border-[var(--color-border)] outline-none text-xs font-semibold text-[var(--color-primary)] text-right"
                       />
                     ) : (
-                      <a href={user.social_links?.github ? `https://github.com/${user.social_links.github}` : '#'} target="_blank" className="text-[var(--color-primary)] hover:underline text-[10px] font-bold uppercase italic">{user.social_links?.github || 'Connect'}</a>
+                      <a href={user.social_links?.github ? `https://github.com/${user.social_links.github}` : '#'} target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline text-[10px] font-bold uppercase italic">{user.social_links?.github || 'Connect'}</a>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
@@ -321,7 +398,7 @@ export default function ProfilePageTemplate({ children }) {
                         className="bg-transparent border-b border-[var(--color-border)] outline-none text-xs font-semibold text-[var(--color-primary)] text-right"
                       />
                     ) : (
-                      <a href={user.social_links?.linkedin ? `https://linkedin.com/in/${user.social_links.linkedin}` : '#'} target="_blank" className="text-[var(--color-primary)] hover:underline text-[10px] font-bold uppercase italic">{user.social_links?.linkedin || 'Connect'}</a>
+                      <a href={user.social_links?.linkedin ? `https://linkedin.com/in/${user.social_links.linkedin}` : '#'} target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline text-[10px] font-bold uppercase italic">{user.social_links?.linkedin || 'Connect'}</a>
                     )}
                   </div>
                 </div>

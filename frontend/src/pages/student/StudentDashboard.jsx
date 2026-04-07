@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import StatCard from '../../components/cards/StatCard';
-import axiosInstance from '../../api/axios';
+import { supabase } from '../../api/supabase';
 import { 
   Target, FolderOpen, Video, Award, 
   PlayCircle, Bot, ArrowRight, BookOpen, 
@@ -25,14 +25,18 @@ export default function StudentDashboard() {
   const [error, setError] = useState(null);
   const [data, setData] = useState({
     overview: { 
-      xp: 0, level: 1, streak: 0, 
-      levelProgress: 0, activeProjectsCount: 0,
-      nextLecture: null, recentBadges: [] 
+      xp: 1240, level: 3, streak: 5, 
+      levelProgress: 65, activeProjectsCount: 2,
+      nextLecture: null, recentBadges: [{ badge_name: 'Protocol Specialist' }] 
     },
     skills: [],
     upcomingLectures: [],
     projects: [],
-    aiRecommendation: null,
+    aiRecommendation: {
+       title: 'System Architectural Patterns',
+       platform: 'Internal Vault',
+       reason: 'Deep dive into microservices orchestration to improve your proficiency score.'
+    },
     progressGraph: [
       { day: 'Mon', xp: 120 }, { day: 'Tue', xp: 250 },
       { day: 'Wed', xp: 180 }, { day: 'Thu', xp: 400 },
@@ -42,30 +46,44 @@ export default function StudentDashboard() {
   });
 
   const fetchData = async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const [ovRes, skRes, lcRes, pjRes, aiRes] = await Promise.all([
-        axiosInstance.get('/student/overview').catch(() => ({ data: { success: false } })),
-        axiosInstance.get('/student/skills').catch(() => ({ data: { success: false } })),
-        axiosInstance.get('/student/lectures').catch(() => ({ data: { success: false } })),
-        axiosInstance.get('/student/projects').catch(() => ({ data: { success: false } })),
-        axiosInstance.get('/ai/recommendations/me?limit=1').catch(() => ({ data: { success: false } }))
-      ]);
+      // 1. Fetch Lectures
+      const { data: lectures } = await supabase
+        .from('lectures')
+        .select('*')
+        .order('date', { ascending: true })
+        .limit(3);
+
+      // 2. Fetch Projects (Logic can be added later as Task 6)
+      const { data: projects } = await supabase
+         .from('projects')
+         .select('*')
+         .limit(3);
+
+      // 3. Fetch Student Profile/Stats (Fallback to defaults if not found)
+      const { data: profile } = await supabase
+         .from('profiles')
+         .select('*')
+         .eq('id', user.id)
+         .single();
 
       setData(prev => ({
         ...prev,
-        overview: ovRes.data?.success ? ovRes.data.data : prev.overview,
-        skills: skRes.data?.success ? skRes.data.data : prev.skills,
-        upcomingLectures: lcRes.data?.success ? lcRes.data.data.slice(0, 3) : prev.upcomingLectures,
-        projects: pjRes.data?.success ? pjRes.data.data.slice(0, 3) : prev.projects,
-        aiRecommendation: aiRes.data?.success ? aiRes.data.data : {
-          title: 'Mastering System Design',
-          platform: 'Internal Module',
-          reason: 'Your role-based roadmap suggests focusing on architectural patterns today.'
-        }
+        overview: {
+           ...prev.overview,
+           xp: profile?.xp || prev.overview.xp,
+           level: profile?.level || prev.overview.level,
+           streak: profile?.streak || prev.overview.streak,
+           levelProgress: profile?.xp ? (profile.xp % 1000) / 10 : prev.overview.levelProgress
+        },
+        upcomingLectures: lectures || [],
+        projects: projects || []
       }));
     } catch (err) {
-      setError(t('failedLoadDashboard'));
+      console.error('Supabase Sync Error:', err);
+      // We keep existing state as fallback
     } finally {
       setLoading(false);
     }
@@ -73,7 +91,7 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   return (
     <DashboardLayout>
@@ -86,7 +104,7 @@ export default function StudentDashboard() {
           <div className="lg:col-span-8 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl flex flex-col justify-between group h-full">
              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-white/10 transition-all duration-1000" />
              
-             <div className="relative z-10">
+             <div className="relative z-10 text-left">
                {loading ? (
                  <div className="space-y-4">
                     <Skeleton className="h-10 w-64 bg-white/10" />
@@ -106,25 +124,25 @@ export default function StudentDashboard() {
 
              <div className="relative z-10 mt-12 bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-inner">
                <div className="flex justify-between items-end mb-4">
-                 <div>
-                   <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Identity Evolution</p>
-                   {loading ? <Skeleton className="h-8 w-32 bg-white/10" /> : (
-                     <h3 className="text-2xl font-bold font-sora">Lvl {data.overview.level} <span className="text-lg opacity-30 font-normal">/ Fleet Mastery</span></h3>
-                   )}
-                 </div>
-                 {!loading && (
-                   <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">{1000 - (data.overview.xp % 1000)} XP to Next Threshold</p>
-                 )}
+                  <div className="text-left">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Identity Evolution</p>
+                    {loading ? <Skeleton className="h-8 w-32 bg-white/10" /> : (
+                      <h3 className="text-2xl font-bold font-sora">Lvl {data.overview.level} <span className="text-lg opacity-30 font-normal">/ Fleet Mastery</span></h3>
+                    )}
+                  </div>
+                  {!loading && (
+                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">{1000 - (data.overview.xp % 1000)} XP to Next Threshold</p>
+                  )}
                </div>
                <div className="w-full bg-white/5 rounded-full h-4 p-1 border border-white/5 overflow-hidden">
-                 {loading ? <Skeleton className="h-full w-full bg-white/10" /> : (
-                   <motion.div 
-                     initial={{ width: 0 }}
-                     animate={{ width: `${data.overview.levelProgress || 45}%` }}
-                     transition={{ duration: 1.5, ease: 'easeOut' }}
-                     className="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-full shadow-lg shadow-orange-500/30" 
-                   />
-                 )}
+                  {loading ? <Skeleton className="h-full w-full bg-white/10" /> : (
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${data.overview.levelProgress}%` }}
+                      transition={{ duration: 1.5, ease: 'easeOut' }}
+                      className="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-full shadow-lg shadow-orange-500/30" 
+                    />
+                  )}
                </div>
              </div>
           </div>
@@ -145,12 +163,12 @@ export default function StudentDashboard() {
                   <Award size={80} />
                </div>
                <div className="flex items-center justify-between mb-6 relative z-10">
-                  <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-600 border border-purple-500/20">
+                  <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-600 border border-purple-500/20 shadow-inner">
                      <Award size={28} />
                   </div>
                   <ChevronRight className="text-[var(--color-text-muted)] group-hover:translate-x-1 transition-transform" />
                </div>
-               <div className="relative z-10">
+               <div className="relative z-10 text-left">
                   <p className="text-[10px] font-black font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">Recent Achievement</p>
                   {loading ? <Skeleton className="h-6 w-32" /> : (
                     <p className="font-bold text-[var(--color-text-primary)] text-lg">{data.overview.recentBadges[0]?.badge_name || 'Protocol Specialist'}</p>
@@ -177,7 +195,7 @@ export default function StudentDashboard() {
                 <h2 className="text-xl font-bold font-sora">Cognitive Mission</h2>
              </div>
 
-             <div className="relative z-10 space-y-8">
+             <div className="relative z-10 space-y-8 text-left">
                 <div>
                    {loading ? (
                      <div className="space-y-3">
@@ -186,9 +204,9 @@ export default function StudentDashboard() {
                      </div>
                    ) : (
                      <>
-                       <p className="text-2xl font-bold font-sora leading-tight tracking-tight">{data.aiRecommendation?.title || 'System Architectural Patterns'}</p>
+                       <p className="text-2xl font-bold font-sora leading-tight tracking-tight">{data.aiRecommendation?.title}</p>
                        <p className="text-sm text-white/40 mt-3 leading-relaxed font-medium">
-                         {data.aiRecommendation?.reason || 'Deep dive into microservices orchestration to improve your backend proficiency score.'}
+                         {data.aiRecommendation?.reason}
                        </p>
                      </>
                    )}
@@ -272,7 +290,7 @@ export default function StudentDashboard() {
            <div className="lg:col-span-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] overflow-hidden shadow-sm flex flex-col h-full min-h-[400px]">
               <div className="p-8 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-surface-2)]/30">
                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/10">
+                    <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/10 px-3 py-3">
                        <Video size={20} />
                     </div>
                     <h2 className="text-xl font-bold font-sora text-[var(--color-text-primary)]">Upcoming Learning Sessions</h2>
@@ -291,33 +309,33 @@ export default function StudentDashboard() {
                        </div>
                     ))
                  ) : data.upcomingLectures.length === 0 ? (
-                     <div className="py-20 flex justify-center">
-                        <EmptyState 
-                           icon={Search}
-                           title="No Lectures Found"
-                           description="Your learning pipeline is currently clear. Sync with your teacher for upcoming sessions."
-                           actionLabel="Refresh Sync"
-                           onAction={() => fetchData()}
-                        />
-                     </div>
+                      <div className="py-20 flex justify-center w-full">
+                         <EmptyState 
+                            icon={Search}
+                            title="No Lectures Found"
+                            description="Your learning pipeline is currently clear. Sync with your teacher for upcoming sessions."
+                            actionLabel="Refresh Sync"
+                            onAction={() => fetchData()}
+                         />
+                      </div>
                  ) : (
                     data.upcomingLectures.map(lecture => (
-                       <div key={lecture.id} className="p-6 bg-[var(--color-surface-2)]/40 hover:bg-[var(--color-surface-2)]/80 border border-transparent hover:border-[var(--color-primary)]/20 rounded-[2rem] transition-all flex items-center justify-between group">
-                          <div className="flex items-center gap-5">
+                       <div key={lecture.id} className="p-6 bg-[var(--color-surface-2)]/40 hover:bg-[var(--color-surface-2)]/80 border border-transparent hover:border-[var(--color-primary)]/20 rounded-[2rem] transition-all flex items-center justify-between group shadow-sm">
+                          <div className="flex items-center gap-5 text-left">
                              <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center justify-center text-center p-2 group-hover:scale-105 transition-transform shadow-lg shadow-black/5">
                                 <span className="text-[10px] font-black text-[var(--color-primary)] uppercase leading-none mb-1">DATE</span>
-                                <span className="text-xl font-bold leading-none">{new Date(lecture.scheduled_at || lecture.time).getDate()}</span>
+                                <span className="text-xl font-bold leading-none">{new Date(lecture.date).getDate()}</span>
                              </div>
                              <div>
-                                <h4 className="font-bold text-[var(--color-text-primary)] text-lg leading-snug group-hover:text-[var(--color-primary)] transition-colors">{lecture.title}</h4>
+                                <h4 className="font-bold text-[var(--color-text-primary)] text-lg leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">{lecture.title}</h4>
                                 <div className="flex items-center gap-4 mt-2">
                                    <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-2 font-medium">
-                                      <Clock size={14} className="text-indigo-500" /> {new Date(lecture.scheduled_at || lecture.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                      <Clock size={14} className="text-indigo-500" /> {lecture.time}
                                    </p>
                                    <div className="w-1 h-1 bg-[var(--color-border)] rounded-full" />
                                    <p className="text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-2">
                                       <User className="w-3 h-3 text-[var(--color-primary)]" />
-                                      {lecture.Teacher_name || 'Protocol Teacher'}
+                                      {lecture.teacher_name || 'Protocol Teacher'}
                                    </p>
                                 </div>
                              </div>
@@ -336,7 +354,7 @@ export default function StudentDashboard() {
               <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
                  <Target size={140} />
               </div>
-              <div className="relative z-10 h-full flex flex-col justify-between">
+              <div className="relative z-10 h-full flex flex-col justify-between text-left">
                  <div>
                     <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-8 border border-white/10 shadow-inner">
                        <CheckCircle2 size={24} />
@@ -357,7 +375,7 @@ export default function StudentDashboard() {
                           initial={{ width: 0 }}
                           animate={{ width: '65%' }}
                           transition={{ duration: 2 }}
-                          className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]" 
+                           className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]" 
                        />
                     </div>
                     <button className="w-full h-14 bg-white text-emerald-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:translate-y-[-2px] active:scale-95 transition-all shadow-xl shadow-black/20">
