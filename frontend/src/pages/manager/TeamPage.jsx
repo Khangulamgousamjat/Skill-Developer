@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
-import api from '../../api/axios';
+import { supabase } from '../../api/supabase';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 export default function TeamPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const isDarkMode = useSelector((s) => s.ui.theme === 'dark');
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,17 +22,29 @@ export default function TeamPage() {
 
   useEffect(() => {
     fetchTeam();
-  }, []);
+  }, [user]);
 
   const fetchTeam = async () => {
+    if (!user) return;
     try {
       setLoading(true);
-      const res = await api.get('/manager/team');
-      if (res.data.success) {
-        setTeam(res.data.data);
+      // Fetch team members (students) in the manager's department
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'student');
+      
+      if (user.department_name) {
+          query = query.eq('department_name', user.department_name);
       }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTeam(data || []);
     } catch (err) {
       toast.error('Failed to load team roster');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -97,11 +110,13 @@ export default function TeamPage() {
                  <div className="flex justify-between items-start mb-8">
                     <div className="relative">
                        <div className="w-16 h-16 rounded-[1.5rem] overflow-hidden bg-[var(--color-surface-2)] shadow-xl relative z-10">
-                          <img 
-                            src={member.profile_photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.email}`} 
-                            alt={member.full_name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
+                          {member.avatar_url ? (
+                            <img src={member.avatar_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          ) : (
+                             <div className="w-full h-full flex items-center justify-center text-2xl font-black text-[var(--color-primary)] group-hover:scale-110 transition-transform duration-500">
+                                {member.full_name?.charAt(0)}
+                             </div>
+                          )}
                        </div>
                        <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-amber-500 shadow-lg z-20">
                           <Star size={14} className="fill-current" />

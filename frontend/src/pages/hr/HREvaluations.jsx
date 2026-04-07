@@ -6,6 +6,7 @@ import {
   CheckCircle, Star, FileText, Download 
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { supabase } from '../../api/supabase';
 import axiosInstance from '../../api/axios';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,14 +38,14 @@ export default function HREvaluations() {
     setLoading(true);
     try {
       const [internsRes, skillsRes, projectsRes] = await Promise.all([
-        axiosInstance.get('/hr/interns'),
-        axiosInstance.get('/admin/skills'),
-        axiosInstance.get('/manager/projects') // Using manager projects list for now
+         supabase.from('profiles').select('*').eq('role', 'student'),
+         supabase.from('skills').select('*').catch(() => ({ data: [] })),
+         supabase.from('projects').select('*').catch(() => ({ data: [] }))
       ]);
 
-      if (internsRes.data.success) setInterns(internsRes.data.data);
-      if (skillsRes.data.success) setSkills(skillsRes.data.data);
-      if (projectsRes.data.success) setProjects(projectsRes.data.data);
+      setInterns(internsRes.data || []);
+      setSkills(skillsRes.data || []);
+      setProjects(projectsRes.data || []);
 
     } catch (err) {
       toast.error('Failed to load evaluation data');
@@ -66,6 +67,7 @@ export default function HREvaluations() {
         skillsCovered: [] // Can be extended later
       };
 
+      // Temporarily keeping Axios for the issue action as it might require backend logic (like sending emails)
       const res = await axiosInstance.post('/certificates/issue', payload);
       if (res.data.success) {
         toast.success(`Certificate issued successfully to ${certModal.internName}!`);
@@ -88,7 +90,7 @@ export default function HREvaluations() {
       <div className="space-y-8 pb-12 animate-in fade-in duration-700">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
+           <div>
             <h1 className="text-3xl font-bold font-sora text-[var(--color-text-primary)]">HR Evaluation Console</h1>
             <p className="text-[var(--color-text-muted)] mt-1">Review student achievements and issue professional certificates</p>
           </div>
@@ -131,8 +133,12 @@ export default function HREvaluations() {
                     <tr key={intern.id} className="hover:bg-[var(--color-surface-2)]/30 transition-colors group">
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0">
-                            {intern.full_name?.charAt(0)}
+                          <div className="w-10 h-10 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0 overflow-hidden">
+                            {intern.avatar_url ? (
+                              <img src={intern.avatar_url} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <span>{intern.full_name?.charAt(0)}</span>
+                            )}
                           </div>
                           <div>
                             <p className="font-bold text-[var(--color-text-primary)] text-sm">{intern.full_name}</p>

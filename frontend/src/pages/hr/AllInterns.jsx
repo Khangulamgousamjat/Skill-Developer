@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useLanguage } from '../../contexts/LanguageContext';
-import axiosInstance from '../../api/axios';
+import { supabase } from '../../api/supabase';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,10 +25,14 @@ export default function AllInterns() {
   const fetchInterns = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get('/hr/interns');
-      if (res.data.success) {
-        setInterns(res.data.data);
-      }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'student')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setInterns(data || []);
     } catch (err) {
       toast.error('Failed to load intern directory');
     } finally {
@@ -40,7 +44,7 @@ export default function AllInterns() {
     const matchesSearch = 
       intern.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       intern.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDept = deptFilter === 'all' || intern.department === deptFilter;
+    const matchesDept = deptFilter === 'all' || intern.department_name === deptFilter || intern.department === deptFilter;
     return matchesSearch && matchesDept;
   });
 
@@ -123,7 +127,7 @@ export default function AllInterns() {
                   
                   <div className="flex items-center gap-5 mb-8">
                      <div className="w-16 h-16 rounded-[24px] bg-[var(--color-surface-2)] border-2 border-[var(--color-border)] flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
-                        {intern.profile_photo_url ? <img src={intern.profile_photo_url} className="w-full h-full object-cover" /> : <div className="text-2xl font-bold font-sora text-[var(--color-primary)]">{intern.full_name?.charAt(0)}</div>}
+                        {intern.avatar_url ? <img src={intern.avatar_url} className="w-full h-full object-cover" /> : <div className="text-2xl font-bold font-sora text-[var(--color-primary)]">{intern.full_name?.charAt(0)}</div>}
                      </div>
                      <div>
                         <h3 className="text-lg font-bold font-sora text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors">{intern.full_name}</h3>
@@ -136,11 +140,11 @@ export default function AllInterns() {
                   <div className="grid grid-cols-2 gap-4 py-6 border-y border-[var(--color-border)] mb-8">
                      <div className="space-y-1">
                         <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Department</p>
-                        <p className="text-xs font-bold text-[var(--color-text-primary)] flex items-center gap-1.5"><Building2 size={12} className="text-[var(--color-primary)]" /> {intern.department || 'General'}</p>
+                        <p className="text-xs font-bold text-[var(--color-text-primary)] flex items-center gap-1.5"><Building2 size={12} className="text-[var(--color-primary)]" /> {intern.department_name || intern.department || 'General'}</p>
                      </div>
                      <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Core Level</p>
-                        <p className="text-xs font-bold text-[var(--color-text-primary)] flex items-center gap-1.5"><Briefcase size={12} className="text-amber-500" /> {intern.skill_level || 'Junior'}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Current Level</p>
+                        <p className="text-xs font-bold text-[var(--color-text-primary)] flex items-center gap-1.5"><Briefcase size={12} className="text-amber-500" /> Level {intern.current_level || 1}</p>
                      </div>
                   </div>
 
@@ -153,12 +157,6 @@ export default function AllInterns() {
                         View Profile <UserCheck size={12}/>
                      </button>
                   </div>
-
-                  {intern.is_top_performer && (
-                    <div className="absolute top-0 left-8 px-3 py-1 bg-amber-500 text-white rounded-b-xl text-[8px] font-black uppercase tracking-tighter shadow-lg">
-                       ★ Top Performer
-                    </div>
-                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
