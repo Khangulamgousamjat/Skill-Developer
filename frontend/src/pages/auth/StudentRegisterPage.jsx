@@ -7,49 +7,8 @@ import { Home, Eye, EyeOff } from 'lucide-react';
 
 export default function StudentRegisterPage() {
   const { theme } = useSelector((state) => state.ui);
-  const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    password: '',
-    confirm_password: '',
-    department_id: '',
-    phone: '',
-  });
-  const [departments, setDepartments] = useState([]);
-  const [deptLoading, setDeptLoading] = useState(true);
-  const [deptError, setDeptError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
-
-  const fetchDepartments = async () => {
-    setDeptLoading(true);
-    setDeptError(false);
-    try {
-      const res = await axiosInstance.get('/departments');
-      if (res.data.success && res.data.data.length > 0) {
-        setDepartments(res.data.data);
-      } else {
-        // If API returns empty, use hardcoded fallback
-        setDepartments(FALLBACK_DEPARTMENTS);
-      }
-    } catch (error) {
-      console.error('Failed to load departments:', error.message);
-      // Use fallback so form still works
-      setDepartments(FALLBACK_DEPARTMENTS);
-      setDeptError(true);
-    } finally {
-      setDeptLoading(false);
-    }
-  };
-
-  // Hardcoded fallback — always works even if API fails
-  const FALLBACK_DEPARTMENTS = [
+  // Hardcoded departments - instantly available
+  const DEPARTMENTS = [
     { id: 'cs',   name: 'Computer Science' },
     { id: 'it',   name: 'Information Technology' },
     { id: 'hr',   name: 'Human Resources' },
@@ -61,6 +20,19 @@ export default function StudentRegisterPage() {
     { id: 'ds',   name: 'Data Science' },
     { id: 'sec',  name: 'Cybersecurity' },
   ];
+
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    password: '',
+    confirm_password: '',
+    department_id: '',
+    phone: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -175,26 +147,14 @@ export default function StudentRegisterPage() {
                            transition-all text-sm"
               >
                 <option value="" className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">
-                  {deptLoading ? 'Loading...' : 'Select Department'}
+                  Select Department
                 </option>
-                {departments.map((dept) => (
+                {DEPARTMENTS.map((dept) => (
                   <option key={dept.id} value={dept.id} className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">
                     {dept.name}
                   </option>
                 ))}
               </select>
-              {deptError && (
-                <p className="text-xs text-amber-500 mt-1">
-                  Using offline list —
-                  <button
-                    type="button"
-                    onClick={fetchDepartments}
-                    className="underline ml-1"
-                  >
-                    retry
-                  </button>
-                </p>
-              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1.5">Phone (Optional)</label>

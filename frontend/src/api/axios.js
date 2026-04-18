@@ -3,8 +3,15 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
   withCredentials: true,
-  timeout: 30000, // 30 seconds max
+  timeout: 60000, // 60 seconds max to account for backend cold-starts
 });
+
+// Utility to pre-warm the server
+export const pingServer = () => {
+  api.get('/health').catch(() => {
+    // Silently fail if health endpoint isn't set up yet, the goal is just to wake the server
+  });
+};
 
 // Simple in-memory cache
 const cache = new Map();

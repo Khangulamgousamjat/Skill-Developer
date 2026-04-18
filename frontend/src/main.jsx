@@ -7,8 +7,11 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './store/store.js';
 
 import { SocketProvider } from './context/SocketContext.jsx';
-
 import { LanguageProvider } from './contexts/LanguageContext';
+import { pingServer } from './api/axios.js';
+
+// Pre-warm the backend server on initial app load
+pingServer();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
