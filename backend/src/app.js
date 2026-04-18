@@ -30,16 +30,26 @@ import teacherRoutes from './routes/teacher.routes.js';
 
 const app = express();
 
-// CORS — MUST come before routes
+// CORS — Robust production & dev handling
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  'https://skill-developer.vercel.app',
   'https://smart-skill-live-learning-module.vercel.app',
 ].filter(Boolean);
 
 app.use(cors({
-  origin: true, // allow all origins in dev
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

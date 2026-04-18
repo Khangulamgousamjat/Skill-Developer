@@ -6,7 +6,11 @@ const userSockets = new Map(); // Maps user ID to socket ID
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      origin: [
+        process.env.FRONTEND_URL || 'http://localhost:5173',
+        'https://skill-developer.vercel.app',
+        'https://smart-skill-live-learning-module.vercel.app'
+      ],
       methods: ['GET', 'POST'],
       credentials: true,
     },

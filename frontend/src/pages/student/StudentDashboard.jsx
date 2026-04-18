@@ -23,6 +23,7 @@ export default function StudentDashboard() {
   const { user } = useSelector((s) => s.auth);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [configMissing, setConfigMissing] = useState(!supabase.isConfigured);
   const [data, setData] = useState({
     overview: { 
       xp: 1240, level: 3, streak: 5, 
@@ -47,6 +48,12 @@ export default function StudentDashboard() {
 
   const fetchData = async () => {
     if (!user) return;
+    if (!supabase.isConfigured) {
+      setLoading(false);
+      setConfigMissing(true);
+      return;
+    }
+    
     setLoading(true);
     try {
       // 1. Fetch Lectures
@@ -56,13 +63,13 @@ export default function StudentDashboard() {
         .order('date', { ascending: true })
         .limit(3);
 
-      // 2. Fetch Projects (Logic can be added later as Task 6)
+      // 2. Fetch Projects
       const { data: projects } = await supabase
          .from('projects')
          .select('*')
          .limit(3);
 
-      // 3. Fetch Student Profile/Stats (Fallback to defaults if not found)
+      // 3. Fetch Student Profile
       const { data: profile } = await supabase
          .from('profiles')
          .select('*')
@@ -83,7 +90,6 @@ export default function StudentDashboard() {
       }));
     } catch (err) {
       console.error('Supabase Sync Error:', err);
-      // We keep existing state as fallback
     } finally {
       setLoading(false);
     }
@@ -96,6 +102,18 @@ export default function StudentDashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        
+        {configMissing && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 text-amber-500 flex items-center justify-between">
+            <div className="flex items-center gap-4 text-left">
+              <Zap className="shrink-0" />
+              <div>
+                <p className="font-bold text-sm uppercase tracking-widest">Configuration Required</p>
+                <p className="text-xs opacity-80">Supabase API keys are not set. The dashboard is running in Offline Mode with dummy data.</p>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* SECTION 1: HERO & GAMIFICATION */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
