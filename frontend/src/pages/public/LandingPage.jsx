@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, Video, FolderGit2, Lightbulb, 
   BarChart3, Award, ArrowRight, CheckCircle2,
-  Users, GraduationCap, Globe, Zap, ChevronDown
+  Users, GraduationCap, Globe, Zap, ChevronDown,
+  Sun, Moon
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { setTheme } from '../../store/slices/uiSlice';
+import { applyTheme } from '../../utils/applyTheme';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { t, language, changeLanguage, LANGUAGES } = useLanguage();
+  const { theme } = useSelector((s) => s.ui);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
 
@@ -68,42 +74,59 @@ export default function LandingPage() {
 
   const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
 
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    dispatch(setTheme(next));
+    applyTheme(next);
+    localStorage.setItem('skill_developer_theme', next);
+  };
+
   return (
-    <div className="min-h-screen bg-[#070D1A] text-white selection:bg-[#F4A100]/30">
+    <div className={`min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] selection:bg-[#F4A100]/30 transition-colors duration-500`}>
       
       {/* NAVBAR */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
-        isScrolled ? 'bg-[#070D1A]/80 backdrop-blur-xl border-white/10 py-3' : 'bg-transparent border-transparent py-5'
+        isScrolled 
+          ? 'bg-[var(--color-surface)]/80 backdrop-blur-xl border-[var(--color-border)] py-3 shadow-lg shadow-black/5' 
+          : 'bg-transparent border-transparent py-5'
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 rounded-xl bg-premium-gradient border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-xl bg-premium-gradient border border-[var(--color-border)] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <span className="text-[#F4A100] font-sora font-extrabold">SD</span>
             </div>
             <div>
-              <p className="text-white font-sora font-bold text-base leading-tight">Skill Developer</p>
+              <p className="font-sora font-bold text-base leading-tight">Skill Developer</p>
               <p className="text-[#F4A100] text-[10px] font-bold tracking-widest uppercase">{t('orgName')}</p>
             </div>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-slate-300 hover:text-[#F4A100] transition-colors">
+            <a href="#features" className="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[#F4A100] transition-colors">
               {t('navFeatures')}
             </a>
-            <a href="#howitworks" className="text-sm font-medium text-slate-300 hover:text-[#F4A100] transition-colors">
+            <a href="#howitworks" className="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[#F4A100] transition-colors">
               {t('navHowItWorks')}
             </a>
-            <a href="#reviews" className="text-sm font-medium text-slate-300 hover:text-[#F4A100] transition-colors">
+            <a href="#reviews" className="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[#F4A100] transition-colors">
               {t('navReviews')}
             </a>
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-[#F4A100]/50 transition-all"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-[#F4A100]" /> : <Moon className="w-4 h-4 text-[var(--color-primary)]" />}
+            </button>
+
             {/* Language Switcher */}
             <div className="relative">
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-[#F4A100]/50 transition-all text-xs font-bold"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-[#F4A100]/50 transition-all text-xs font-bold"
               >
                 <span>{currentLang.flag}</span>
                 <span className="hidden sm:inline uppercase">{currentLang.code}</span>
@@ -116,7 +139,7 @@ export default function LandingPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-40 rounded-2xl bg-[#0A1628] border border-white/10 shadow-2xl p-2 z-[60]"
+                    className="absolute right-0 mt-2 w-40 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-2xl p-2 z-[60]"
                   >
                     {LANGUAGES.map((lang) => (
                       <button
@@ -126,7 +149,7 @@ export default function LandingPage() {
                           setIsLangOpen(false);
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                          language === lang.code ? 'bg-[#F4A100] text-white' : 'hover:bg-white/5 text-slate-300'
+                          language === lang.code ? 'bg-[#F4A100] text-white' : 'hover:bg-black/5 dark:hover:bg-white/5 text-[var(--color-text-secondary)]'
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -166,7 +189,7 @@ export default function LandingPage() {
             <motion.span 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#F4A100] text-xs font-bold tracking-wide mb-8"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[#F4A100] text-xs font-bold tracking-wide mb-8"
             >
               <Zap className="w-3 h-3" /> {t('navHowItWorks')}
             </motion.span>
@@ -184,7 +207,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
-              className="text-slate-400 text-lg md:text-xl leading-relaxed max-w-2xl mb-12"
+              className="text-[var(--color-text-secondary)] text-lg md:text-xl leading-relaxed max-w-2xl mb-12"
             >
               {t('heroSubtitle')}
             </motion.p>
@@ -203,7 +226,7 @@ export default function LandingPage() {
               </button>
               <button 
                 onClick={() => navigate('/login')}
-                className="w-full sm:w-auto px-8 py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-semibold text-lg"
+                className="w-full sm:w-auto px-8 py-4 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-all font-semibold text-lg"
               >
                 {t('launchPlatform')}
               </button>
@@ -217,10 +240,10 @@ export default function LandingPage() {
             >
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#070D1A] bg-slate-800" />
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-surface-2)]" />
                 ))}
               </div>
-              <p className="text-sm text-slate-400"><span className="text-white font-bold">12k+</span> {t('activeStudents').toLowerCase()}</p>
+              <p className="text-sm text-[var(--color-text-muted)]"><span className="text-[var(--color-text-primary)] font-bold">12k+</span> {t('activeStudents').toLowerCase()}</p>
             </motion.div>
           </div>
 
@@ -230,18 +253,18 @@ export default function LandingPage() {
             transition={{ duration: 1, ease: "easeOut" }}
             className="flex-1 relative w-full max-w-xl"
           >
-            <div className="aspect-square rounded-3xl bg-premium-gradient border border-white/10 overflow-hidden p-8 flex items-center justify-center">
+            <div className="aspect-square rounded-3xl bg-premium-gradient border border-[var(--color-border)] overflow-hidden p-8 flex items-center justify-center">
               <div className="w-full h-full border border-white/5 rounded-2xl bg-[#0A1628] glass flex items-center justify-center group">
                  <GraduationCap className="w-32 h-32 text-[#F4A100]/30 group-hover:scale-110 transition-transform duration-500" />
                  <div className="absolute top-10 left-10 p-4 rounded-2xl glass-premium shadow-2xl">
                     <CheckCircle2 className="text-[#F4A100] w-6 h-6 mb-2" />
                     <p className="text-[10px] uppercase font-bold text-white/40 mb-1">Weekly Goal</p>
-                    <p className="text-sm font-bold">Advanced React</p>
+                    <p className="text-sm font-bold text-white">Advanced React</p>
                  </div>
                  <div className="absolute bottom-10 right-10 p-4 rounded-2xl glass-premium shadow-2xl">
                     <Users className="text-blue-400 w-6 h-6 mb-2" />
                     <p className="text-[10px] uppercase font-bold text-white/40 mb-1">Live Study</p>
-                    <p className="text-sm font-bold">1.2k active now</p>
+                    <p className="text-sm font-bold text-white">1.2k active now</p>
                  </div>
               </div>
             </div>
@@ -254,7 +277,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-4xl md:text-5xl font-sora font-bold mb-6">{t('featuresTitle')}</h2>
-            <p className="text-slate-400 text-lg">{t('featuresSub')}</p>
+            <p className="text-[var(--color-text-secondary)] text-lg">{t('featuresSub')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -263,13 +286,13 @@ export default function LandingPage() {
                 key={idx}
                 {...fadeIn}
                 transition={{ delay: idx * 0.1 }}
-                className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-[#F4A100]/30 transition-all duration-300"
+                className="group p-8 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[#F4A100]/30 hover:shadow-xl transition-all duration-300"
               >
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${feature.color}`}>
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-sora font-bold mb-4">{feature.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
+                <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -283,17 +306,17 @@ export default function LandingPage() {
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
             
             <motion.div {...fadeIn}>
-              <h2 className="text-4xl md:text-6xl font-sora font-bold mb-8 italic">{t('ctaTitle')}</h2>
-              <p className="text-slate-300 text-xl max-w-2xl mx-auto mb-10">{t('ctaSubtitle')}</p>
+              <h2 className="text-4xl md:text-6xl font-sora font-bold mb-8 italic text-white">{t('ctaTitle')}</h2>
+              <p className="text-white/80 text-xl max-w-2xl mx-auto mb-10">{t('ctaSubtitle')}</p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
                   onClick={() => navigate('/auth/register/student')}
-                  className="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-[#F4A100] hover:text-white transition-all active:scale-95"
+                  className="w-full sm:w-auto !bg-white !text-black px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all active:scale-95 border-2 border-transparent hover:border-white/20"
                 >
                   {t('ctaButton')}
                 </button>
-                <p className="text-slate-400 text-sm">No credit card required. Cancel anytime.</p>
+                <p className="text-white/40 text-sm">No credit card required. Cancel anytime.</p>
               </div>
             </motion.div>
           </div>
@@ -311,7 +334,7 @@ export default function LandingPage() {
                 </div>
                 <span className="font-sora font-bold text-xl tracking-tight">Skill Developer</span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">
                 Empowering the next generation of creators through accessible, high-quality technical education and ERP systems.
               </p>
             </div>
@@ -322,11 +345,11 @@ export default function LandingPage() {
               { title: 'Organization', links: ['About Gous Org', 'Contact', 'Privacy Policy', 'Terms of Service'] }
             ].map((section, idx) => (
               <div key={idx}>
-                <h4 className="font-sora font-bold text-white mb-6 uppercase tracking-widest text-xs">{section.title}</h4>
+                <h4 className="font-sora font-bold mb-6 uppercase tracking-widest text-xs">{section.title}</h4>
                 <ul className="space-y-4">
                   {section.links.map(link => (
                     <li key={link}>
-                      <a href="#" className="text-slate-400 hover:text-[#F4A100] text-sm transition-colors">{link}</a>
+                      <a href="#" className="text-[var(--color-text-secondary)] hover:text-[#F4A100] text-sm transition-colors">{link}</a>
                     </li>
                   ))}
                 </ul>
@@ -334,11 +357,11 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-slate-500 text-[10px] uppercase font-bold tracking-[0.2em]">© 2026 GOUS ORG. ALL RIGHTS RESERVED.</p>
+          <div className="pt-8 border-t border-[var(--color-border)] flex flex-col md:flex-row items-center justify-between gap-6">
+            <p className="text-[var(--color-text-muted)] text-[10px] uppercase font-bold tracking-[0.2em]">© 2026 GOUS ORG. ALL RIGHTS RESERVED.</p>
             <div className="flex items-center gap-6">
-               <Globe className="w-4 h-4 text-slate-500 hover:text-white cursor-pointer transition-colors" />
-               <p className="text-slate-500 text-xs">Built with precision in India</p>
+               <Globe className="w-4 h-4 text-[var(--color-text-muted)] hover:text-[#F4A100] cursor-pointer transition-colors" />
+               <p className="text-[var(--color-text-muted)] text-xs">Built with precision in India</p>
             </div>
           </div>
         </div>

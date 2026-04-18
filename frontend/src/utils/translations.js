@@ -285,7 +285,7 @@ const translations = {
     feature4Desc: "Get daily focus recommendations powered by AI tailored to your skills.",
     ctaTitle: "Ready to Start?",
     ctaSubtitle: "Join thousands of developers leveling up their tech skills today.",
-    ctaButton: "Sign Up Free",
+    ctaButton: "Sign Up",
   },
 
   hi: {
@@ -441,7 +441,7 @@ const translations = {
     feature4Desc: "Get daily focus recommendations powered by AI tailored to your skills.",
     ctaTitle: "Ready to Start?",
     ctaSubtitle: "Join thousands of developers leveling up their tech skills today.",
-    ctaButton: "Sign Up Free",
+    ctaButton: "साइन अप करें",
   },
 
   mr: {
@@ -619,7 +619,7 @@ const translations = {
     feature4Desc: "Get daily focus recommendations powered by AI tailored to your skills.",
     ctaTitle: "Ready to Start?",
     ctaSubtitle: "Join thousands of developers leveling up their tech skills today.",
-    ctaButton: "Sign Up Free",
+    ctaButton: "नोंदणी करा",
   },
 
   fr: {
@@ -832,7 +832,7 @@ const translations = {
     feature4Desc: "Get daily focus recommendations powered by AI tailored to your skills.",
     ctaTitle: "Ready to Start?",
     ctaSubtitle: "Join thousands of developers leveling up their tech skills today.",
-    ctaButton: "Sign Up Free",
+    ctaButton: "S'inscrire",
   },
 
   ru: {
@@ -1050,7 +1050,7 @@ const translations = {
     feature4Desc: "Get daily focus recommendations powered by AI tailored to your skills.",
     ctaTitle: "Ready to Start?",
     ctaSubtitle: "Join thousands of developers leveling up their tech skills today.",
-    ctaButton: "Sign Up Free",
+    ctaButton: "Зарегистрироваться",
   },
 
   ar: {
@@ -1162,7 +1162,7 @@ const translations = {
     feature4Desc: "Get daily focus recommendations powered by AI tailored to your skills.",
     ctaTitle: "Ready to Start?",
     ctaSubtitle: "Join thousands of developers leveling up their tech skills today.",
-    ctaButton: "Sign Up Free",
+    ctaButton: "سجل الآن",
     appTitle: "منصة مطور المهارات",
     orgName: "مؤسسة غوس",
     preferencesUpdated: "تم تحديث التفضيلات بنجاح",
